@@ -1,0 +1,1213 @@
+
+##### --- HiSSE functions ------------------------- #####
+
+#' Prepare HiSSE marginal reconstruction for plotting
+#'
+#'@description A function to process the output from \code{hisse::MarginRecon}. First we get model averaged rates for tips and nodes of the phylogeny. Then convert the tree from \code{phylo} format into a \code{treedata} class and assign the data.frame of mode-averaged rates to the \code{@data} slot. We output the node and tip rates tables and the reformated tree object for downstream plotting with \code{ggtree} and \code{ggplot}.
+#'
+#'@param hisse_recon An object produced by \code{hisse::MarginRecon}, or a list of such objects over which we can model-average using \code{hisse::GetModelAveRates}
+#'
+#'@return A list with three components: \itemize{
+#'  \item \code{tree_data} the phylogeny with associated data object with reconstructed ancestral, model-averaged node and tip states and rates
+#'  \item \code{tip_rates/node_rates} a tibble of reconstructed ancestral, model-averaged tip/node states and rates.
+#'  }
+#'
+#'
+#'@examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(treeio)
+#'
+#'asr <- get(load("data/hab.cid4.recon.Rsave"))
+#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'processed_hisse$tip_rates
+#'processed_hisse$node_rates
+#'processed_hisse$tree_data
+#'
+
+
+h_process_recon <- function(hisse_recon) {
+  tip.rates <-
+    GetModelAveRates(x = hisse_recon, type = "tips") %>%
+    as_tibble()
+  colnames(tip.rates)[1] <- "id"
+  tip.rates$id <- as.character(tip.rates$id)
+
+  nod.rates <-
+    GetModelAveRates(x = hisse_recon, type = "nodes") %>%
+    as_tibble()
+  nod.rates$id <- as.character(nod.rates$id)
+  both.rates <- bind_rows(tip.rates, nod.rates)
+
+  if (class(hisse_recon) == "list") {
+    tree <- as.treedata(hisse_recon[[1]]$phy)
+  }
+
+  if (class(hisse_recon) == "hisse.states") {
+    tree <- as.treedata(hisse_recon$phy)
+  }
+
+  tree@data <- both.rates
+
+  return(list(
+    "tree_data" = tree,
+    "tip_rates" = tip.rates,
+    "node_rates" = nod.rates
+  ))
+}
+
+#' Plot diversification rates estimated by a HiSSE model
+#'
+#' @description A function to plot a boxplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait). Further modifications are straightforward with ggplot (see examples).
+#'
+#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param parameter parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param x_label Label for the x axis. This is usually the binary trait whose assosiation with diversification is being tested.
+#'
+#' @return A boxplot. Tip-associated rates (possibly model averaged) are plotted as points.
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(treeio)
+#'
+#'asr <- get(load("data/hab.cid4.recon.Rsave"))
+#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'hisse_rates_plot <- h_plot_states_rates(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
+#'
+#'# change x axis tick labels
+#'hisse_rates_plot +
+#'  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos"))
+#'
+#'# change the position of the legend
+#'hisse_rates_plot +
+#'  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
+#'  theme(legend.position="top")
+#'
+#'# use expressions (for greek letters) in the axis labels
+#'hisse_rates_plot +
+#'  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
+#'  theme(legend.position="top") +
+#'  labs(y=expression(paste(tau, "=", lambda, "+", mu))) +
+#'  theme(axis.text.y=element_text(size=15)) +
+#'  theme_grey()
+#'
+
+h_boxplot <-
+  function(processed_hisse_recon,
+           parameter = "turnover",
+           x_label) {
+    tip.rates <- processed_hisse_recon$tip_rates
+    tip.rates$f_state <- as.factor(tip.rates$state)
+    result <-
+      ggplot(data = tip.rates,
+             aes(
+               x = f_state,
+               y = !!as.name(parameter),
+               color = f_state
+             )) +
+      geom_boxplot(notch = TRUE, width = 0.6) +
+      geom_point(alpha = .7,
+                 size = 0.75,
+                 position = position_jitter(width = .25)) +
+      scale_color_viridis(name = x_label,
+                          end = 0.6,
+                          discrete = TRUE) +
+      theme_classic() +
+      theme(legend.position = "right",
+            legend.key.size = unit(x = .6, units = "cm")) +
+      labs(x = x_label, y = parameter)
+    return(result)
+  }
+
+#' Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips
+#'
+#' @description A function to plot a dotplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait). Further modifications are straightforward with ggplot (see examples).
+#'
+#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param x_labels A character vector of length two giving the labels for the x axis tick marks. This is usually the binary trait whose assosiation with diversification is being tested. The replacement for `0` should be first, e.g., `c("0"="Plankton", "1"="Benthos").
+#' @param bind_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
+#' @param paint_colors Colors for the points in the two alternate states
+#' @param plot_as_waiting_time Whether to plot the rates or their inverse (waiting times)
+#'
+#' @return A dotplot of tip-associated rates (possibly model averaged).
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(treeio)
+#'
+#'asr <- get(load("data/hab.cid4.recon.Rsave"))
+#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'paint_cols <- c("orange", "violet")
+#'
+#' h_dotplot(
+#'   processed_hisse_recon = processed_hisse,
+#'   parameter = "turnover",
+#'   x_labels = c("Plankton", "Benthos"),
+#'   bin_width = 0.3,
+#'   paint_colors=paint_cols[1:2],
+#'   plot_as_waiting_time = TRUE
+#' ) + labs(x = "", y = "waiting time (My)", title = "Turnover")
+#'
+#'# see ?h_plot_rates_states for examples for modifying the graph using ggplot2
+
+h_dotplot <-
+  function(processed_hisse_recon,
+           parameter = "turnover",
+           x_labels = c("Marine", "Freshwater"),
+           bin_width = 0.1,
+           paint_colors,
+           plot_as_waiting_time=TRUE) {
+    tip.rates <- processed_hisse_recon$tip_rates
+    tip.rates$f_state <-
+      factor(ifelse(tip.rates$state == 0, x_labels[1], x_labels[2]), levels = x_labels)
+    wanted <- as.name(parameter)
+
+    if (plot_as_waiting_time) {
+      tip.rates <- tip.rates %>% mutate(var_to_plot= 1 / !!wanted)
+    } else {
+      tip.rates <- tip.rates %>% mutate(var_to_plot= !!wanted)
+    }
+
+    tip.rates.sum <- tip.rates %>%
+      group_by(f_state) %>%
+      summarise_at(.vars = vars(var_to_plot),
+                   .funs = funs(mean, sd, median, min, max)) %>%
+      rename(
+        Mean = mean,
+        SD = sd,
+        Median = median,
+        Min = min,
+        Max = max
+      )
+    print(tip.rates.sum)
+
+    sss <-
+      ggplot(data = tip.rates,
+             aes(
+               x = f_state,
+               y = var_to_plot,
+               fill = f_state
+             )) +
+      geom_dotplot(
+        alpha = .75,
+        colour = "white",
+        binwidth = bin_width,
+        dotsize = 1.2,
+        stackratio = 0.5,
+        binpositions = "all",
+        binaxis = "y",
+        stackdir = "up"
+      ) +
+      geom_errorbar(
+        data = tip.rates.sum,
+        width = .05,
+        aes(
+          x = f_state,
+          ymax = Mean + SD,
+          ymin = Mean - SD,
+          y = Mean
+        ),
+        position = position_nudge(x = -0.1, y = 0)
+      ) +
+      geom_point(
+        data = tip.rates.sum,
+        size = 2.5,
+        position = position_nudge(x = -0.1, y = 0),
+        aes(x = f_state, y = Mean),
+        pch = 21
+      ) +
+      scale_color_manual(values = paint_colors, name = "") +
+      scale_fill_manual(values = paint_colors, name = "") +
+      scale_x_discrete(breaks = x_labels, labels = x_labels) +
+      theme_classic() +
+      theme(
+        legend.position = "none",
+        legend.background = element_blank(),
+        legend.key.size = unit(x = .6, units = "cm")
+      )
+    return(sss)
+  }
+
+#' Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips
+#'
+#' @description A function to plot a ridgeline of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait). Further modifications are straightforward with ggplot (see examples).
+#'
+#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param state_names The names for character states
+#' @param paint_colors Colors for the points in the two alternate states
+#' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
+#'
+#' @return A ridgeline plot of tip-associated rates (possibly model averaged).
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(ggridges)
+#'library(treeio)
+#'
+#'asr <- get(load("data/hab.cid4.recon.Rsave"))
+#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'paint_cols <- c("orange", "violet")
+#'
+#'h_ridgelines(
+#'  processed_hisse_recon = processed_hisse,
+#'  state_names = c("Plankton", "Benthos"),
+#'  parameter = "extinction",
+#'  paint_colors = c("yellow", "red"))
+
+h_ridgelines <- function(processed_hisse_recon,
+                         parameter = "turnover",
+                         state_names = c("Marine", "Freshwater"),
+                         paint_colors = c("yellow", "red"),
+                         plot_as_waiting_time = FALSE) {
+  tip.rates <- processed_hisse_recon$tip_rates
+  tip.rates$f_state <-
+    factor(
+      ifelse(
+        tip.rates$state == 0,
+        state_names[1],
+        state_names[2]
+      ),
+      levels = state_names
+    )
+  wanted <- as.name(parameter)
+
+  if (plot_as_waiting_time) {
+    tip.rates <- mutate(tip.rates, wt_wanted = 1/ !!wanted)
+  } else {
+    tip.rates <- mutate(tip.rates, wt_wanted = !!wanted)
+  }
+
+  tip.rates.sum <- tip.rates %>%
+    group_by(f_state) %>%
+    select(f_state, wt_wanted) %>%
+    summarise_at(
+      .vars = vars(wt_wanted),
+      .funs = funs(
+        Mean = mean,
+        SD = sd,
+        Median = median,
+        q95 = quantile(., 0.95),
+        q05 = quantile(., 0.05),
+        Min = min,
+        Max = max
+      )
+    )
+  print(tip.rates.sum)
+
+  ggplot(data = tip.rates, aes(
+    x = wt_wanted,
+    y = f_state,
+    fill = f_state
+  )) +
+    geom_density_ridges(alpha = 0.75) +
+    geom_point(
+      data = tip.rates.sum,
+      pch = 21,
+      aes(y = c(1.2, 2.2), x = Mean),
+      size = 3,
+      inherit.aes = FALSE
+    ) +
+    geom_errorbarh(
+      data = tip.rates.sum,
+      aes(
+        xmin = Mean - SD,
+        xmax = Mean + SD,
+        y = c(1.2, 2.2)
+      ),
+      height = 0.05,
+      inherit.aes = FALSE
+    ) +
+    scale_fill_manual(values = paint_colors) +
+    labs(y = "", x=parameter) +
+    theme(legend.position = "none")
+}
+
+
+#' Plot HiSSE model-averaged marginal ancestral state reconstruction for the trait
+#'
+#' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the trait data.
+#'
+#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param x_label The name of the trait to be used for guide title
+#' @param discrete Logical. Whether to discretize the probabilities of ancestral states into binary (0/1)
+#' @param cutoff A decimal to be used as a threshold for discretizing
+#' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
+#' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
+#' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10)
+#' @param open_angle The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.
+#'
+#' @return A plot of the phylogeny with branches colored by hisse-inferred marginal ancestral states.
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(ggtree)
+#'library(treeio)
+#'
+#'asr <- get(load("data/hab.cid4.recon.Rsave"))
+#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'
+#'map_continuous <-
+#'  h_trait_recon(
+#'    processed_hisse_recon = processed_hisse,
+#'    x_lab = "", discrete=FALSE, cutoff=.5)
+#'
+#'# change colors, your can pass the trait name to `name=` to title the colorbar
+#'map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
+#'
+#'map_discrete <-
+#'  h_trait_recon(
+#'    processed_hisse_recon = processed_hisse,
+#'    x_lab = "", discrete=TRUE, cutoff=.5)
+#'
+#'# change colors
+#'map_discrete + scale_color_manual(name="", values = c("red", "blue"))
+
+h_trait_recon <-
+  function(processed_hisse_recon,
+           x_label,
+           discrete = FALSE,
+           cutoff = .5,
+           tree_layout = "rectangular",
+           tree_direction = "right",
+           time_axis_ticks = 10,
+           open_angle=10) {
+
+    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+      stop("The selected tree layout is not supported.")
+    }
+
+    tree <- processed_hisse_recon$tree_data@phylo
+    state <- processed_hisse_recon$tree_data@data$state
+    agemax <- tree %>% ape::branching.times() %>% max()
+
+    ggg <-
+      ggtree(
+        tr = tree,
+        layout = tree_layout,
+        size = .26,
+        open.angle = open_angle
+      ) +
+      theme(
+        legend.direction = "horizontal",
+        legend.position = "bottom",
+        legend.key.size = unit(x = .5, units = "cm"),
+        legend.margin = margin(0, 0, 0, 0),
+        legend.background = element_blank(),
+        plot.background = element_blank()
+      )
+
+    if (discrete) {
+      d_state <- ifelse(state > cutoff, 1, 0) %>% as.factor()
+      ggg <- ggg + aes(color = d_state) + scale_color_viridis_d(name = x_label, end = 0.6)
+    } else {
+      d_state <- state
+      ggg <- ggg + aes(color = d_state) + scale_color_viridis_c(name = x_label, end = 0.6)
+    }
+
+    if (tree_layout %in% c("rectangular", "slanted")) {
+      if (tree_direction == "up") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+      if (tree_direction == "down") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "left") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "right") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+    }
+
+    if (tree_layout %in% c("circular", "fan", "radial")) {
+      maxx <- ggg$data %>%
+        top_n(n = 1, wt = x) %>%
+        select(x) %>%
+        unlist %>%
+        unname %>%
+        unique %>%
+        round(., 1)
+      ntip <- Ntip(tree) +10
+      pretty_points <- maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+
+      pp <- tibble(x = rev(pretty_points), y = 0) %>%
+        filter(x <= maxx, x > 0) %>%
+        mutate(label = rev(x) - min(x))
+
+      ggg <- ggg +
+        geom_vline(data = pp,
+                   aes(xintercept = x),
+                   size = .2,
+                   color = "darkgrey",
+                   inherit.aes=FALSE) +
+        geom_text(data = pp,
+                  aes(x = x + 0.1, y = ntip+2, label = label),
+                  size = 2,
+                  inherit.aes=FALSE)
+    }
+
+    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+  }
+
+#' Plot HiSSE model-averaged marginal ancestral state reconstruction for diversification rates
+#'
+#' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
+#'
+#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
+#' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}
+#' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
+#' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
+#' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10)
+#' @param open_angle The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.
+#'
+#' @return A plot of the phylogeny with branches colored by hisse-inferred marginal ancestral states.
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(ggtree)
+#'library(treeio)
+#'
+#'asr <- get(load("data/hab.cid4.recon.Rsave"))
+#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'
+#'map_continuous <-
+#'  h_rate_recon(
+#'    processed_hisse_recon = processed_hisse,
+#'    parameter = "extinction", discrete=FALSE)
+#'
+#'# change colors, your can pass the trait name to `name=` to title the colorbar
+#'map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
+#'
+#'map_discrete <-
+#'  h_rate_recon(
+#'    processed_hisse_recon = processed_hisse,
+#'    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
+#'
+#'# change colors
+#'map_discrete + scale_color_manual(name="", values = c("red", "blue", "orange", "green"))
+
+h_rate_recon <-
+  function(processed_hisse_recon,
+           parameter = "turnover",
+           discrete = FALSE,
+           breaks = seq(0, 1, 0.2),
+           tree_layout="rectangular",
+           tree_direction = "right",
+           time_axis_ticks = 10,
+           open_angle = 10) {
+
+    tree <- processed_hisse_recon$tree_data@phylo
+    datas <- processed_hisse_recon$tree_data@data
+    agemax <- tree %>% ape::branching.times() %>% max()
+    wanted <- as.name(parameter)
+
+    ggg <-
+      ggtree(tr = tree,
+             layout = tree_layout,
+             size = .26,
+             open.angle = 10) +
+      theme(
+        legend.direction = "horizontal",
+        legend.position = "bottom",
+        legend.key.size = unit(x = .5, units = "cm"),
+        legend.margin = margin(0, 0, 0, 0),
+        legend.background = element_blank()
+      )
+
+    if (discrete) {
+      param <-
+        datas %>% select(!!wanted) %>% unlist %>% unname %>% cut(., breaks = breaks)
+      ggg <-
+        ggg + aes(color = param) + scale_color_viridis_d(
+          option = "B",
+          begin = 0.25,
+          end = 0.8,
+          name = parameter
+        ) + guides(color = guide_legend(override.aes = list(size = 2)))
+    } else {
+      param <- datas %>% select(!!wanted) %>% unlist %>% unname
+      ggg <-
+        ggg + aes(color = param) + scale_color_viridis_c(
+          option = "B",
+          begin = 0.25,
+          end = 0.8,
+          name = parameter
+        )
+    }
+    if (tree_layout %in% c("rectangular", "slanted")) {
+      if (tree_direction == "up") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+      if (tree_direction == "down") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "left") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "right") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+    }
+
+    if (tree_layout %in% c("circular", "fan", "radial")) {
+      maxx <- ggg$data %>%
+        top_n(n = 1, wt = x) %>%
+        select(x) %>%
+        unlist %>%
+        unname %>%
+        unique %>%
+        round(., 1)
+      ntip <- Ntip(tree) +10
+      pretty_points <- maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+
+      pp <- tibble(x = rev(pretty_points), y = 0) %>%
+        filter(x <= maxx, x > 0) %>%
+        mutate(label = rev(x) - min(x))
+
+      ggg <- ggg +
+        geom_vline(data = pp,
+                   aes(xintercept = x),
+                   size = .2,
+                   color = "darkgrey",
+                   inherit.aes=FALSE) +
+        geom_text(data = pp,
+                  aes(x = x + 0.1, y = ntip+2, label = label),
+                  size = 2,
+                  inherit.aes=FALSE)
+    }
+
+    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+  }
+
+##### --- MuHiSSE functions ------------------------- #####
+
+#' Extract estimated transition rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)
+#'
+#'@description A helper function that formats \code{hisse::MuHiSSE}'s output into a matrix so transition rates between states can be easier to visualize.
+#'
+#'@param model_fit A muhisse fit object
+#'@param hidden_states Logical whether the model contains hidden states
+#'@param states A vector of state labels to replace hisse's 0/1 notation (see examples)
+#'
+#'@return The estimated transition rates formatted in a matrix
+#'
+#'@examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'
+#'# The translation should follow the order of states in model_fit$solution.
+#'# In this example, hisse's 00, 01, 10, and 11 states correspond to
+#'# marine-plankton, marine-benthos, freshwater-plankton, and freshwater-benthos
+#'
+#'States <-
+#'    expand.grid(observed=c("marine-plankton",
+#'                           "marine-benthos",
+#'                           "freshwater-plankton",
+#'                           "freshwater-benthos"),
+#'               hidden=LETTERS[1:2]) %>%
+#'    mutate(Name=paste(observed, hidden, sep="_")) %>%
+#'    select(Name) %>% unlist %>% unname
+#'
+#'# muhisse model
+#'MH <- get(load("data/final.MuHiSSE2.Rsave"))
+#'get_transitions_matrix_muhisse(model_fit = MH, hidden_states = TRUE, states = States)
+#'
+#'# CID8 model
+#'C8 <- get(load("data/final.CID8relax.Rsave"))
+#'# we have 8 hidden states, so the transition matrix is cumbersome
+#'get_transitions_matrix_muhisse(model_fit = C8, hidden_states = TRUE, states = States)
+#'
+#'# musse model, no hidden states
+#'MU <- get(load("data/MuSSE.Rsave"))
+#'get_transitions_matrix_muhisse(model_fit = MU, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
+#'
+
+get_transitions_matrix_muhisse <-
+  function(model_fit,
+           hidden_states = TRUE,
+           states) {
+    Dim <- dim(model_fit$trans.matrix)[1]
+
+    if (!hidden_states) {
+      wanted <- c(
+        "q00A_00A",
+        "q01A_00A",
+        "q10A_00A",
+        "q11A_00A",
+        "q00A_01A",
+        "q01A_01A",
+        "q10A_01A",
+        "q11A_01A",
+        "q00A_10A",
+        "q01A_10A",
+        "q10A_10A",
+        "q11A_10A",
+        "q00A_11A",
+        "q01A_11A",
+        "q10A_11A",
+        "q11A_11A"
+      )
+    } else {
+      wanted <-
+        colnames(model_fit$trans.matrix) %>%
+        str_replace(regex("\\("), "") %>%
+        str_replace(regex("\\)"), "") %>%
+        expand.grid(., .) %>%
+        mutate(Names = paste("q", Var1, "_", Var2, sep = "")) %>%
+        select(Names) %>% unlist %>% unname
+    }
+
+    Rates <- numeric(length = length(wanted))
+    names(Rates) <- wanted
+
+    get_rate <- function(name, named_rates) {
+      xx <- named_rates[which(names(named_rates) == name)]
+      yy <- length(xx)
+      if (yy > 0) {
+        res <- xx
+      } else {
+        res <- NA
+      }
+      return(res)
+    }
+
+    # map(1:length(Rates), function(x) print(names(Rates)[x]))
+    Rate_matrix <-
+      map(1:length(Rates), function(x)
+        get_rate(name = names(Rates)[x], named_rates = model_fit$solution)) %>%
+      unlist %>% zapsmall(x = ., digits = 8) %>% matrix(ncol = Dim)
+
+    Col_names <-
+      colnames(model_fit$trans.matrix) %>% str_replace(regex("\\("), "") %>% str_replace(regex("\\)"), "")
+    translation <- data.frame(Col_names, State_names = states)
+    colnames(Rate_matrix) <-
+      rownames(Rate_matrix) <- translation$State_names
+    knitr::kable(Rate_matrix)
+    return(Rate_matrix)
+  }
+
+#' Extract estimated diversification rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)
+#'
+#'@description A helper function that formats \code{hisse::MuHiSSE}'s diversification parameter estimates into a data frame
+#'
+#'@param model_fit A muhisse fit object
+#'@param states A vector of observed character states
+#'
+#'@return The estimated diversification rates formatted in a data.frame
+#'
+#'@examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'
+#'States <- c("mp", "mb", "fp", "fb")
+#'
+#'# muhisse model
+#'MH <- get(load("data/final.MuHiSSE2.Rsave"))
+#'get_diversification_rates_muhisse(model_fit = MH, states=States)
+#'
+#'# CID8 model
+#'C8 <- get(load("data/final.CID8relax.Rsave"))
+#'get_diversification_rates_muhisse(model_fit = C8, states=States)
+#'
+#'# musse model, no hidden states
+#'MU <- get(load("data/MuSSE.Rsave"))
+#'get_diversification_rates_muhisse(model_fit = MU, states = States)
+
+get_diversification_rates_muhisse <- function(model_fit, states) {
+  hidden_traits <-
+    str_extract(string = colnames(model_fit$trans.matrix),
+                pattern = regex("[A-Z]")) %>% unique
+  hidden_traits <- ifelse(hidden_traits == "A", 1, 2)
+  num_hidden_traits <- length(hidden_traits)
+  num_hidden_traits <- num_hidden_traits * 4
+  tur <-model_fit$solution %>%
+    t %>%
+    data.frame %>%
+    select(starts_with("turnover")) %>%
+    .[, 1:num_hidden_traits] %>%
+    unname %>%
+    zapsmall
+  eps <- model_fit$solution %>%
+    t %>%
+    data.frame %>%
+    select(starts_with("eps")) %>%
+    .[, 1:num_hidden_traits] %>%
+    unname %>%
+    zapsmall
+  States <- expand.grid(states, hidden_traits) %>%
+    mutate(Name = paste(Var1, Var2, sep = "")) %>%
+    select(Name)
+
+  # if (transform) {
+  #   spec_ext <- hisse:::ParameterTransform(x = tur, y = eps)
+  #   res <- data.frame(State=States, Speciation=t(spec_ext[1:length(tur)]), Extinction=t(spec_ext[(length(tur)+1):length(spec_ext)]))
+  # } else {
+  #   res <- data.frame(State=States, Turnover=t(tur), Extinction_fraction=t(eps))
+  # }
+
+  res <-
+    data.frame(
+      State = States,
+      Turnover = t(tur),
+      Extinction_fraction = t(eps)
+    )
+  return(res)
+}
+
+#' Extract estimated transition and diversification rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)
+#'
+#'@description This is a function that wraps \code{get_transition_matrix_muhisse} and \code{get_diversification_rates_muhisse}
+#' so rates can be extracted in one step
+#'
+#'@return A list with two components, the transition rates formatted as a rate matrix and a data frame of diversification rates
+#'
+#'@examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'
+#'States <- c("mp", "mb", "fp", "fb")
+#'
+#'# muhisse model
+#'MH <- get(load("data/final.MuHiSSE2.Rsave"))
+#'get_muhisse_rates(model_fit = MH, hidden_traits=TRUE, character_states=States)
+
+
+get_muhisse_rates <-
+  function(model_fit,
+           hidden_traits,
+           character_states) {
+    mat_size <- model_fit$trans.matrix %>% ncol
+    states <-
+      expand.grid(character_states, 1:(mat_size / 4)) %>%
+      mutate(Name = paste(Var1, Var2, sep ="")) %>%
+      select(Name) %>% unlist %>% unname
+
+    trans_rates <-
+      get_transitions_matrix_muhisse(model_fit = model_fit,
+                                     hidden_states = hidden_traits,
+                                     states = states)
+    div_rates <-
+      get_diversification_rates_muhisse(model_fit = model_fit, states = character_states)
+
+    return(list(
+      Transition_rates = trans_rates,
+      Diversification_rates = div_rates
+    ))
+  }
+
+#' Prepare MuHiSSE marginal reconstruction for plotting
+#'
+#'@description A function to process the output from \code{hisse::MarginReconMuHiSSE}. First we get model averaged rates for tips and nodes of the phylogeny and probabilities from the ancestral reconstruction of character states. Then convert the tree from \code{phylo} format into a \code{treedata} class and assign the data.frame of mode-averaged rates to the \code{@data} slot. We output the node and tip rates tables and the reformated tree object for downstream plotting with \code{ggtree} and \code{ggplot}.
+#'
+#'@param muhisse_recon An object produced by \code{hisse::MarginReconMuHiSSE}, or a list of such objects over which we can model-average using \code{hisse::GetModelAveRates}
+#'
+#'@details Internally, the probabilities for individual states (00, 01, 10, 11) are converted into \code{prob_0x} giving the probability for the first character being 0, and \code{prob_x0} giving the probability of the second character being 0. This way we can plot in terms of a 'focal character', i.e., we can plot the rate on the y axis and the probability of being 0 for the 'focal character' on the x axis while color-coding by the states of both characters.
+#'
+#'#'@return A list with three components: \itemize{
+#'  \item \code{tree_data} the phylogeny with associated data object with reconstructed ancestral, model-averaged node and tip states and rates
+#'  \item \code{tip_rates/node_rates} a tibble of reconstructed ancestral, model-averaged tip/node states and rates.
+#'  }
+#'
+#'
+#'@examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(treeio)
+#'
+#'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
+#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'processed_muhisse$tip_rates
+#'processed_muhisse$node_rates
+#'processed_muhisse$tree_data
+#'
+
+m_process_recon <- function(muhisse_recon) {
+  tip.rates <-
+    GetModelAveRates(x = muhisse_recon, type = "tips") %>%
+    as_tibble() %>%
+    mutate(prob_0x = state.00 + state.01,
+           prob_x0 = state.00 + state.10)
+  colnames(tip.rates)[1] <- "id"
+
+  nod.rates <-
+    GetModelAveRates(x = muhisse_recon, type = "nodes") %>%
+    as_tibble() %>%
+    mutate(prob_0x = state.00 + state.01,
+           prob_x0 = state.00 + state.10)
+
+  nod.rates$id <- as.character(nod.rates$id)
+  both.rates <- bind_rows(tip.rates, nod.rates)
+
+  if (class(muhisse_recon)=="list") {
+    tree <- as.treedata(muhisse_recon[[1]]$phy)
+  }
+
+  if (class(muhisse_recon)=="muhisse.states") {
+    tree <- as.treedata(muhisse_recon$phy)
+  }
+
+  tree@data <- both.rates
+
+  return(list(
+    "tree_data" = tree,
+    "tip_rates" = tip.rates,
+    "node_rates" = nod.rates
+  ))
+}
+
+#' Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips
+#'
+#' @description  A function to plot a jittered scatterplot of (model-averaged) diversification rates in the alternative states.
+#'
+#' @param processed_muhisse_recon An object produced with \code{m_process_recon}
+#' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param focal_probability Specifies the x axis. Either \code{prob_0x} to plot the probability of state 0 for the first character, or \code{prob_x0} to plot the probability for state 0 for the second character.
+#' @param focal_character_label Label for the x axis of the scatterplot and two-dimensional color gradient. This should match the focal probability.
+#' @param second_character_label Label for the y axis of the scatterplot and two-dimensional color gradient.
+#' @param colors A vector of three colors in the order: (1) zero color (color when the two traits are in state 0), (2) horizontal_color (color to interpolate towards state 1 of the focal character) and (2) vertical_color (color to interpolate towards state 1 of the second character). See \code{?colorplaner::color_projections} for details.
+#' @param plot_as_waiting_time Logical, whether to convert the rate to waiting time (1/rate)
+#'
+#' @return A scatterplot with focal probability (0 or 1) on the x axis and the chosen diversification parameter on the y axis with means and error bars (mean +/- SD) for each state color coded with in two-dimensional colorplane.
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(tidyverse)
+#'library(treeio)
+#'library(colorplaner)
+#'library(viridis)
+#'
+#'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
+#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'m_scatterplot(
+#'  processed_muhisse_recon = processed_muhisse,
+#'  parameter = "turnover",
+#'  focal_probability = "prob_0x",
+#'  focal_character_label = "p(mar)",
+#'  second_character_label = "p(pla)",
+#'  colors = viridis(n = 9)[c(5, 1, 9)],
+#'  plot_as_waiting_time = TRUE) +
+#'  labs(y="Net turnover\n(waiting time in millions of years)")
+
+m_scatterplot <-
+  function(processed_muhisse_recon,
+           parameter = "turnover",
+           focal_probability = c("prob_0x", "prob_x0"),
+           focal_character_label,
+           second_character_label,
+           colors,
+           plot_as_waiting_time=FALSE) {
+
+    if (plot_as_waiting_time) {
+      tip_rates <- processed_muhisse_recon$tip_rates %>%
+        mutate(wanted=1/!!as.name(parameter))
+    } else (
+      tip_rates <- processed_muhisse_recon$tip_rates %>%
+        mutate(wanted=!!as.name(parameter))
+    )
+
+    max_rate <- tip_rates %>% select(wanted) %>% unlist %>% max
+
+    sum_tip_rates <- tip_rates %>%
+      mutate(both_prob=interaction(prob_0x, prob_x0)) %>%
+      group_by(both_prob) %>%
+      select(both_prob, wanted) %>%
+      summarise_if(is_numeric, .funs = list(MN=mean, SD=sd)) %>%
+      mutate(LB=MN-SD, UB=MN+SD) %>%
+      mutate(prob_0x=str_extract(both_prob, regex("^\\d+")) %>% as.numeric()) %>%
+      mutate(prob_x0=str_extract(both_prob, regex("\\d+$")) %>% as.numeric())
+
+    if (focal_probability == "prob_0x") {
+      sum_tip_rates <- mutate(sum_tip_rates, focal_probability = factor(prob_0x))
+      print(sum_tip_rates)
+    }
+
+    if (focal_probability == "prob_x0") {
+      sum_tip_rates <- mutate(sum_tip_rates, focal_probability = factor(prob_0x))
+      print(sum_tip_rates)
+    }
+
+    sss <-
+      ggplot(tip_rates,
+             aes(
+               x = factor(!!as.name(focal_probability)),
+               y = wanted,
+               color = prob_0x,
+               color2 = prob_x0
+             )) +
+      geom_point(alpha = .7,
+                 size = 1.25,
+                 position = position_jitter(width = .15)) +
+      geom_errorbar(data=sum_tip_rates,
+                    aes(x=focal_probability, y=MN, ymin=LB, ymax=UB),
+                    position = position_nudge(x=c(-0.3, -0.3, 0.3, 0.3), y=0),
+                    inherit.aes = TRUE,
+                    width=.04
+      ) +
+      geom_point(data=sum_tip_rates,
+                 aes(x=focal_probability, y=MN),
+                 position = position_nudge(c(-0.3, -0.3, 0.3, 0.3)),
+                 inherit.aes = TRUE,
+                 pch=21,
+                 stroke=1,
+                 size=2
+      ) +
+      scale_color_colorplane(
+        color_projection = interpolate_projection,
+        zero_color = colors[1],
+        horizontal_color = colors[2],
+        vertical_color = colors[3],
+        axis_title = focal_character_label,
+        axis_title_y = second_character_label
+      ) +
+      scale_y_continuous(breaks = pretty(x=c(0,max_rate), n = 10)) +
+      theme_classic() +
+      theme(legend.position = "right",
+            legend.key.size = unit(x = .6, units = "cm")) +
+      labs(x = focal_character_label, y = parameter)
+    return(sss)
+  }
+
+
+#' Plot diversification rates estimated by a MuHiSSE model with means and standard deviations across tips
+#'
+#' @description A function to plot a ridgeline of (model-averaged) diversification rates in the alternative states.
+#'
+#' @param processed_muhisse_recon An object produced by \code{h_process_recon}
+#' @param state_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
+#' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param fill_colors Colors for the density polygons
+#' @param line_colors Colors for the lines and points
+#' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
+#'
+#' @return A ridgeline plot of tip-associated rates (possibly model averaged), with carpet with the individual points and summary statistics (mean +/- sd)
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(ggridges)
+#'library(treeio)
+#'
+#'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
+#'processed_muhisse <- m_process_recon(hisse_recon=asr)
+#'
+#'m_ridgelines(
+#'  processed_muhisse_recon = processed_muhisse,
+#'  parameter = "extinction",
+#'  line_colors = viridis(n = 4, option=1))
+
+
+m_ridgelines <- function(processed_muhisse_recon,
+                         states_names =c("00","01","10","11"),
+                         parameter = "turnover",
+                         plot_as_waiting_time = FALSE,
+                         fill_colors = rep(NA, 4),
+                         line_colors = viridis(n = 4)) {
+  message(
+    "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n\n"
+  )
+
+  ss <- processed_muhisse_recon$tip_rates %>%
+    mutate(what_state = paste(state.00, state.01, state.10, state.11, sep = "")) %>%
+    mutate(four_state = factor(
+      case_when(
+        what_state == "1000" ~ states_names[1],
+        what_state == "0100" ~ states_names[2],
+        what_state == "0010" ~ states_names[3],
+        what_state == "0001" ~ states_names[4]
+      ),
+      levels = states_names
+    )) %>%
+    mutate(wanted = !!as.name(parameter))
+  print(ss %>% head)
+
+  message("Summarising grouped by character state\n\n")
+  wanted <- as.name(parameter)
+
+  summ <- . %>% summarise_at(.vars = vars(wanted),
+                             .funs = list(
+                               Mean = mean,
+                               Median = median,
+                               SD = sd
+                             ))
+
+  if (plot_as_waiting_time) {
+    ss <- mutate(ss, wanted = 1 / !!wanted)
+    ss.sum <- ss %>% group_by(four_state) %>%
+      summ(.)
+  } else {
+    ss <- mutate(ss, wanted = !!wanted)
+    ss.sum <- ss %>% group_by(four_state) %>%
+      summ(.)
+  }
+  max_rate <- ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
+  print(ss.sum)
+
+  message("\nPlotting\n\n")
+
+  ggplot(data = ss,
+         aes(
+           x = wanted,
+           y = four_state,
+           fill = four_state,
+           colour = four_state
+         )) +
+    geom_density_ridges(
+      alpha = 0.75,
+      size = 0.75,
+      jittered_points = TRUE,
+      scale = .95,
+      rel_min_height = .01,
+      point_shape = "|",
+      point_size = 1,
+      position = position_nudge(y = rep(-.2, 4))
+    ) +
+    geom_errorbarh(
+      data = ss.sum,
+      position = position_nudge(y = rep(-0.35, 4)),
+      aes(
+        xmin = Mean - SD,
+        xmax = Mean + SD,
+        y = four_state,
+        colour = four_state
+      ),
+      height = 0.05,
+      inherit.aes = FALSE
+    ) +
+    geom_point(
+      data = ss.sum,
+      pch = 21,
+      position = position_nudge(y = rep(-0.3, 4)),
+      aes(y = four_state,
+          x = Mean,
+          colour = four_state),
+      size = 3,
+      inherit.aes = FALSE
+    ) +
+    scale_x_continuous(breaks = pretty(x=c(0,max_rate), n = 10))+
+    scale_fill_manual(values = fill_colors) +
+    scale_colour_manual(values = line_colors) +
+    labs(y = "", x = parameter) +
+    theme_classic() +
+    theme(legend.position = "none")
+}

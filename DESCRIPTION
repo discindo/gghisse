@@ -1,0 +1,11 @@
+Package: utilhisse
+Type: Package
+Title: A Collection of Functions for Summarising and Visualizing `hisse` Results. 
+Version: 0.1.0
+Author: Teofil Nakov
+Maintainer: Teofil Nakov <teofiln@gmail.com>
+Description: While working with the awesome package `hisse` I wrote a bunch of functions to help me summarise the results and plot. `utilhisse` (pronounced with a silent `hi`) bundles these functions into a package for easier using and sharing. The package relies heavily on the `tidyverse`. 
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
