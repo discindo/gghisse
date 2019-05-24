@@ -9,7 +9,7 @@ m_ridgelines(processed_muhisse_recon, states_names = c("00", "01", "10",
   fill_colors = rep(NA, 4), line_colors = viridis(n = 4))
 }
 \arguments{
-\item{processed_muhisse_recon}{An object produced by \code{h_process_recon}}
+\item{processed_muhisse_recon}{An object produced by \code{m_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 

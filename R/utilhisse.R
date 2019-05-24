@@ -9,6 +9,8 @@
 # 6. g_ functions for HiGeoSSE
 # 7. diagram functions
 # 8. shiny app
+# 9. muhisse rate plot functions all rely on the same piece of code to format prior to plotting. Probably better to isolate this as a function
+# 10.
 
 
 ##### --- HiSSE functions ------------------------- #####
@@ -143,7 +145,7 @@ h_boxplot <-
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param x_labels A character vector of length two giving the labels for the x axis tick marks. This is usually the binary trait whose assosiation with diversification is being tested. The replacement for `0` should be first, e.g., `c("0"="Plankton", "1"="Benthos").
-#' @param bind_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
+#' @param bin_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
 #' @param paint_colors Colors for the points in the two alternate states
 #' @param plot_as_waiting_time Whether to plot the rates or their inverse (waiting times)
 #'
@@ -1102,7 +1104,7 @@ m_scatterplot_cp <-
 #'
 #' @description A function to plot a ridgeline of (model-averaged) diversification rates in the alternative states.
 #'
-#' @param processed_muhisse_recon An object produced by \code{h_process_recon}
+#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
 #' @param state_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param fill_colors Colors for the density polygons
@@ -1227,13 +1229,13 @@ m_ridgelines <- function(processed_muhisse_recon,
 #'
 #' @description A function to plot a jittered scatterplot of (model-averaged) diversification rates and summary statistics in the alternative states.
 #'
-#' @param processed_muhisse_recon An object produced by \code{h_process_recon}
+#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
 #' @param state_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param colors Colors for the lines and points
 #' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
 #'
-#' @return A jittered scatterplot plot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
+#' @return A jittered scatterplot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
 #'
 #' @examples
 #'
@@ -1256,7 +1258,7 @@ m_scatterplot <-
   function(processed_muhisse_recon,
            states_names = c("00", "01", "10", "11"),
            parameter = "turnover",
-           colors = viridis(n = 4),
+           colors = viridis(n = 4, option=2, end=0.7),
            plot_as_waiting_time = FALSE) {
     message(
       "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n\n"
@@ -1305,7 +1307,7 @@ m_scatterplot <-
       ggplot(data = ss,
              aes(
                x = four_state,
-               y = !!wanted,
+               y = wanted,
                fill = four_state
              )) +
       geom_point(
@@ -1344,5 +1346,133 @@ m_scatterplot <-
       labs(x = "",
            y = parameter) +
       theme(legend.position = "top")
+    return(pl)
+  }
+
+#' Plot diversification rates estimated by a MuHiSSE model with means and standard deviations across tips
+#'
+#' @description A function to plot a stacked dotplot of (model-averaged) diversification rates and summary statistics in the alternative states.
+#'
+#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
+#' @param state_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
+#' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param colors Colors for the lines and points
+#' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
+#' @param bin_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
+#'
+#' @return A stacked dotplot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(ggridges)
+#'library(treeio)
+#'
+#'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
+#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'
+#'m_dotplot(
+#'  processed_muhisse_recon = processed_muhisse,
+#'  parameter = "extinction",
+#'  colors = viridis(n = 4, option=1, end=.8))
+
+m_dotplot <-
+  function(processed_muhisse_recon,
+           states_names = c("00", "01", "10", "11"),
+           parameter = "turnover",
+           colors = viridis(n = 4, option = 2, end = 0.7),
+           plot_as_waiting_time = FALSE,
+           bin_width = 0.1) {
+    message(
+      "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n\n"
+    )
+
+    ss <- processed_muhisse_recon$tip_rates %>%
+      mutate(what_state = paste(state.00, state.01, state.10, state.11, sep = "")) %>%
+      mutate(four_state = factor(
+        case_when(
+          what_state == "1000" ~ states_names[1],
+          what_state == "0100" ~ states_names[2],
+          what_state == "0010" ~ states_names[3],
+          what_state == "0001" ~ states_names[4]
+        ),
+        levels = states_names
+      )) %>%
+      mutate(wanted = !!as.name(parameter))
+
+    message("Summarising grouped by character state\n\n")
+    wanted <- as.name(parameter)
+
+    summ <- . %>% summarise_at(.vars = vars(wanted),
+                               .funs = list(
+                                 Mean = mean,
+                                 Median = median,
+                                 SD = sd
+                               ))
+
+    if (plot_as_waiting_time) {
+      ss <- mutate(ss, wanted = 1 / !!wanted)
+      ss.sum <- ss %>% group_by(four_state) %>%
+        summ(.)
+    } else {
+      ss <- mutate(ss, wanted = !!wanted)
+      ss.sum <- ss %>% group_by(four_state) %>%
+        summ(.)
+    }
+    max_rate <-
+      ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
+    print(ss %>% head)
+    print(ss.sum)
+
+    cat ("\nPlotting\n\n")
+
+    pl <- ggplot(data = ss,
+                 aes(
+                   x = four_state,
+                   y = wanted,
+                   fill = four_state
+                 )) +
+      geom_dotplot(
+        alpha = .75,
+        colour = "white",
+        binwidth = bin_width,
+        dotsize = 1.2,
+        stackratio = 0.5,
+        binpositions = "all",
+        binaxis = "y",
+        stackdir = "up"
+      ) +
+      geom_errorbar(
+        inherit.aes = FALSE,
+        data = ss.sum,
+        aes(
+          x = four_state,
+          y = Mean,
+          colour = four_state,
+          ymin = Mean - SD,
+          ymax = Mean + SD
+        ),
+        width = .05,
+        position = position_nudge(x = -.1)
+      ) +
+      geom_point(
+        inherit.aes = FALSE,
+        data = ss.sum,
+        aes(x = four_state, y = Mean, colour = four_state),
+        pch = 21,
+        fill = "white",
+        size = 3,
+        stroke = 2,
+        position = position_nudge(x = -.1)
+      ) +
+      scale_fill_manual(name = "", values = colors) +
+      scale_colour_manual(name = "", values = colors) +
+      scale_y_continuous(breaks = pretty(x=c(0,max_rate), n = 10)) +
+      labs(x = "", y = parameter) +
+      theme_classic() +
+      theme(legend.position = "none")
     return(pl)
   }

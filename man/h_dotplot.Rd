@@ -15,11 +15,11 @@ h_dotplot(processed_hisse_recon, parameter = "turnover",
 
 \item{x_labels}{A character vector of length two giving the labels for the x axis tick marks. This is usually the binary trait whose assosiation with diversification is being tested. The replacement for `0` should be first, e.g., `c("0"="Plankton", "1"="Benthos").}
 
+\item{bin_width}{The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.}
+
 \item{paint_colors}{Colors for the points in the two alternate states}
 
 \item{plot_as_waiting_time}{Whether to plot the rates or their inverse (waiting times)}
-
-\item{bind_width}{The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.}
 }
 \value{
 A dotplot of tip-associated rates (possibly model averaged).
