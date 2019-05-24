@@ -2,50 +2,43 @@
 % Please edit documentation in R/utilhisse.R
 \name{m_scatterplot}
 \alias{m_scatterplot}
-\title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
+\title{Plot diversification rates estimated by a MuHiSSE model with means and standard deviations across tips}
 \usage{
-m_scatterplot(processed_muhisse_recon, parameter = "turnover",
-  focal_probability = c("prob_0x", "prob_x0"), focal_character_label,
-  second_character_label, colors, plot_as_waiting_time = FALSE)
+m_scatterplot(processed_muhisse_recon, states_names = c("00", "01", "10",
+  "11"), parameter = "turnover", colors = viridis(n = 4),
+  plot_as_waiting_time = FALSE)
 }
 \arguments{
-\item{processed_muhisse_recon}{An object produced with \code{m_process_recon}}
+\item{processed_muhisse_recon}{An object produced by \code{h_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
-\item{focal_probability}{Specifies the x axis. Either \code{prob_0x} to plot the probability of state 0 for the first character, or \code{prob_x0} to plot the probability for state 0 for the second character.}
+\item{colors}{Colors for the lines and points}
 
-\item{focal_character_label}{Label for the x axis of the scatterplot and two-dimensional color gradient. This should match the focal probability.}
+\item{plot_as_waiting_time}{Whether to plot the rates (FALSE, default) or their inverse (waiting times)}
 
-\item{second_character_label}{Label for the y axis of the scatterplot and two-dimensional color gradient.}
-
-\item{colors}{A vector of three colors in the order: (1) zero color (color when the two traits are in state 0), (2) horizontal_color (color to interpolate towards state 1 of the focal character) and (2) vertical_color (color to interpolate towards state 1 of the second character). See \code{?colorplaner::color_projections} for details.}
-
-\item{plot_as_waiting_time}{Logical, whether to convert the rate to waiting time (1/rate)}
+\item{state_names}{Translation for the character states in the order 00, 01, 10, 11 (if wanted)}
 }
 \value{
-A scatterplot with focal probability (0 or 1) on the x axis and the chosen diversification parameter on the y axis with means and error bars (mean +/- SD) for each state color coded with in two-dimensional colorplane.
+A jittered scatterplot plot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
 }
 \description{
-A function to plot a jittered scatterplot of (model-averaged) diversification rates in the alternative states.
+A function to plot a jittered scatterplot of (model-averaged) diversification rates and summary statistics in the alternative states.
 }
 \examples{
 
 library(hisse)
-library(tidyverse)
-library(treeio)
-library(colorplaner)
+library(dplyr)
+library(ggplot2)
 library(viridis)
+library(ggridges)
+library(treeio)
 
 asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 processed_muhisse <- m_process_recon(muhisse_recon=asr)
+
 m_scatterplot(
  processed_muhisse_recon = processed_muhisse,
- parameter = "turnover",
- focal_probability = "prob_0x",
- focal_character_label = "p(mar)",
- second_character_label = "p(pla)",
- colors = viridis(n = 9)[c(5, 1, 9)],
- plot_as_waiting_time = TRUE) +
- labs(y="Net turnover\\n(waiting time in millions of years)")
+ parameter = "extinction",
+ colors = viridis(n = 4, option=1, end=.8))
 }

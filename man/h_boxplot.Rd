@@ -29,7 +29,7 @@ library(treeio)
 
 asr <- get(load("data/hab.cid4.recon.Rsave"))
 processed_hisse <- h_process_recon(hisse_recon=asr)
-hisse_rates_plot <- h_plot_states_rates(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
+hisse_rates_plot <- h_boxplot(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
 
 # change x axis tick labels
 hisse_rates_plot +
