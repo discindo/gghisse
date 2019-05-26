@@ -417,7 +417,7 @@ h_trait_recon <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .26,
+        size = .6,
         open.angle = open_angle
       ) +
       theme(
@@ -587,7 +587,7 @@ h_rate_recon <-
     ggg <-
       ggtree(tr = tree,
              layout = tree_layout,
-             size = .26,
+             size = .6,
              open.angle = 10) +
       theme(
         legend.direction = "horizontal",
@@ -738,19 +738,19 @@ h_rate_recon <-
 #'
 #'# muhisse model
 #'MH <- get(load("data/final.MuHiSSE2.Rsave"))
-#'get_transitions_matrix_muhisse(model_fit = MH, hidden_states = TRUE, states = States)
+#'m_transitions_matrix(model_fit = MH, hidden_states = TRUE, states = States)
 #'
 #'# CID8 model
 #'C8 <- get(load("data/final.CID8relax.Rsave"))
 #'# we have 8 hidden states, so the transition matrix is cumbersome
-#'get_transitions_matrix_muhisse(model_fit = C8, hidden_states = TRUE, states = States)
+#'m_transitions_matrix(model_fit = C8, hidden_states = TRUE, states = States)
 #'
 #'# musse model, no hidden states
 #'MU <- get(load("data/MuSSE.Rsave"))
-#'get_transitions_matrix_muhisse(model_fit = MU, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
+#'m_transitions_matrix(model_fit = MU, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
 #'
 
-get_transitions_matrix_muhisse <-
+m_transition_matrix <-
   function(model_fit,
            hidden_states = TRUE,
            states) {
@@ -832,17 +832,17 @@ get_transitions_matrix_muhisse <-
 #'
 #'# muhisse model
 #'MH <- get(load("data/final.MuHiSSE2.Rsave"))
-#'get_diversification_rates_muhisse(model_fit = MH, states=States)
+#'m_diversification_rates(model_fit = MH, states=States)
 #'
 #'# CID8 model
 #'C8 <- get(load("data/final.CID8relax.Rsave"))
-#'get_diversification_rates_muhisse(model_fit = C8, states=States)
+#'m_diversification_rates(model_fit = C8, states=States)
 #'
 #'# musse model, no hidden states
 #'MU <- get(load("data/MuSSE.Rsave"))
-#'get_diversification_rates_muhisse(model_fit = MU, states = States)
+#'m_diversification_rates(model_fit = MU, states = States)
 
-get_diversification_rates_muhisse <- function(model_fit, states) {
+m_diversification_rates <- function(model_fit, states) {
   hidden_traits <-
     str_extract(string = colnames(model_fit$trans.matrix),
                 pattern = regex("[A-Z]")) %>% unique
@@ -899,10 +899,10 @@ get_diversification_rates_muhisse <- function(model_fit, states) {
 #'
 #'# muhisse model
 #'MH <- get(load("data/final.MuHiSSE2.Rsave"))
-#'get_muhisse_rates(model_fit = MH, hidden_traits=TRUE, character_states=States)
+#'m_collect_rates(model_fit = MH, hidden_traits=TRUE, character_states=States)
 
 
-get_muhisse_rates <-
+m_collect_rates <-
   function(model_fit,
            hidden_traits,
            character_states) {
@@ -1476,3 +1476,193 @@ m_dotplot <-
       theme(legend.position = "none")
     return(pl)
   }
+
+#' Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait
+#'
+#' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
+#'
+#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
+#' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
+#' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
+#' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10). Passed on to \code{pretty} internally, so the number of plotted ticks might not be exactly the same.
+#' @param open_angle The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.
+#' @param focal_character Specifies the x axis of the two-dimensional color key. Either \code{prob_0x} to plot the probability of state 0 for the first character, or \code{prob_x0} to plot the probability for state 0 for the second character.
+#' @param focal_character_label Label for the x axis of the two-dimensional color gradient. This should match the focal probability.
+#' @param second_character_label Label for the y axis of the two-dimensional color gradient.
+#' @param colors A vector of three colors in the order: (1) zero color (color when the two traits are in state 0), (2) horizontal_color (color to interpolate towards state 1 of the focal character) and (2) vertical_color (color to interpolate towards state 1 of the second character). See \code{?colorplaner::color_projections} for details.
+#'
+#' @return A plot of the phylogeny with branches colored by muhisse-inferred marginal ancestral states.
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(ggtree)
+#'library(treeio)
+#'
+#'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
+#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'
+#'m_trait_recon_cp(
+#'  processed_muhisse_recon = processed_muhisse,
+#'  tree_layout = "fan",
+#'  focal_character = "prob_0x",
+#'  focal_character_label = "p(marine)",
+#'  second_character_label = "p(plankton)",
+#'  colors = viridis(9)[c(5,1,9)]
+#'  )
+
+m_trait_recon_cp <-
+  function(processed_muhisse_recon,
+           tree_layout = "rectangular",
+           tree_direction = "right",
+           time_axis_ticks = 10,
+           open_angle = 10,
+           focal_character = c("prob_0x", "prob_x0"),
+           focal_character_label,
+           second_character_label,
+           colors = viridis(9)[c(5, 1, 9)]) {
+
+    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+      stop("The selected tree layout is not supported.")
+    }
+
+    tree <- processed_muhisse_recon$tree_data@phylo
+    datas <- processed_muhisse_recon$tree_data@data
+    agemax <- tree %>% ape::branching.times() %>% max()
+
+    ggg <-
+      ggtree(
+        tr = tree,
+        layout = tree_layout,
+        size = .6,
+        open.angle = open_angle
+      ) +
+      theme(
+        legend.direction = "horizontal",
+        legend.position = "right",
+        legend.key.size = unit(x = .5, units = "cm"),
+        legend.margin = margin(0, 0, 0, 0),
+        legend.background = element_blank(),
+        plot.background = element_blank()
+      ) +
+      scale_color_colorplane(
+        color_projection = interpolate_projection,
+        zero_color = colors[1],
+        horizontal_color = colors[2],
+        vertical_color = colors[3],
+        axis_title = focal_character_label,
+        axis_title_y = second_character_label,
+        breaks = c(0, 0.5, 1),
+        breaks_y = c(0, 0.5, 1),
+        labels = as.character(c(0, 0.5, 1)),
+        labels_y = as.character(c(0, 0.5, 1))
+      )
+
+    if (focal_character == "prob_0x") {
+      ggg <- ggg + aes(color = datas$prob_0x, color2 = datas$prob_x0)
+    }
+
+    if (focal_character == "prob_x0") {
+      ggg <- ggg + aes(color = datas$prob_x0, color2 = datas$prob_0x)
+    }
+
+    if (tree_layout %in% c("rectangular", "slanted")) {
+      if (tree_direction == "up") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+      if (tree_direction == "down") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "left") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "right") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+    }
+
+    if (tree_layout %in% c("circular", "fan", "radial")) {
+      maxx <- ggg$data %>%
+        top_n(n = 1, wt = x) %>%
+        select(x) %>%
+        unlist %>%
+        unname %>%
+        unique %>%
+        round(., 1)
+      ntip <- Ntip(tree) + 10
+      pretty_points <-
+        maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+
+      pp <- tibble(x = rev(pretty_points), y = 0) %>%
+        filter(x <= maxx, x > 0) %>%
+        mutate(label = rev(x) - min(x))
+
+      ggg <- ggg +
+        geom_vline(
+          data = pp,
+          aes(xintercept = x),
+          size = .2,
+          color = "darkgrey",
+          inherit.aes = FALSE
+        ) +
+        geom_text(
+          data = pp,
+          aes(
+            x = x + 0.1,
+            y = ntip + 2,
+            label = label
+          ),
+          size = 2,
+          inherit.aes = FALSE
+        )
+    }
+    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+  }
+
