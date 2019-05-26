@@ -20,7 +20,7 @@ m_scatterplot(processed_muhisse_recon, states_names = c("00", "01", "10",
 \item{state_names}{Translation for the character states in the order 00, 01, 10, 11 (if wanted)}
 }
 \value{
-A jittered scatterplot plot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
+A jittered scatterplot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
 }
 \description{
 A function to plot a jittered scatterplot of (model-averaged) diversification rates and summary statistics in the alternative states.
