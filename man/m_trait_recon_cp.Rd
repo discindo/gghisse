@@ -16,7 +16,7 @@ m_trait_recon_cp(processed_muhisse_recon, tree_layout = "rectangular",
 
 \item{tree_direction}{'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts}
 
-\item{time_axis_ticks}{numeric giving the number of ticks for the time axis (default=10)}
+\item{time_axis_ticks}{numeric giving the number of ticks for the time axis (default=10). Passed on to \code{pretty} internally, so the number of plotted ticks might not be exactly the same.}
 
 \item{open_angle}{The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.}
 

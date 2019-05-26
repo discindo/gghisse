@@ -1089,7 +1089,11 @@ m_scatterplot_cp <-
         horizontal_color = colors[2],
         vertical_color = colors[3],
         axis_title = focal_character_label,
-        axis_title_y = second_character_label
+        axis_title_y = second_character_label,
+        breaks = c(0, 0.5, 1),
+        breaks_y = c(0, 0.5, 1),
+        labels = as.character(c(0, 0.5, 1)),
+        labels_y = as.character(c(0, 0.5, 1))
       ) +
       scale_y_continuous(breaks = pretty(x=c(0,max_rate), n = 10)) +
       theme_classic() +
