@@ -29,10 +29,6 @@
 #'
 #'@examples
 #'
-#'library(hisse)
-#'library(dplyr)
-#'library(treeio)
-#'
 #'asr <- get(load("data/hab.cid4.recon.Rsave"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
 #'processed_hisse$tip_rates
@@ -81,12 +77,6 @@ h_process_recon <- function(hisse_recon) {
 #' @return A boxplot. Tip-associated rates (possibly model averaged) are plotted as points.
 #'
 #' @examples
-#'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(treeio)
 #'
 #'asr <- get(load("data/hab.cid4.recon.Rsave"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
@@ -151,12 +141,6 @@ h_boxplot <-
 #' @return A dotplot of tip-associated rates (possibly model averaged).
 #'
 #' @examples
-#'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(treeio)
 #'
 #'asr <- get(load("data/hab.cid4.recon.Rsave"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
@@ -265,13 +249,6 @@ h_dotplot <-
 #'
 #' @examples
 #'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(ggridges)
-#'library(treeio)
-#'
 #'asr <- get(load("data/hab.cid4.recon.Rsave"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
 #'paint_cols <- c("orange", "violet")
@@ -367,13 +344,6 @@ h_ridgelines <- function(processed_hisse_recon,
 #' @return A plot of the phylogeny with branches colored by hisse-inferred marginal ancestral states.
 #'
 #' @examples
-#'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(ggtree)
-#'library(treeio)
 #'
 #'asr <- get(load("data/hab.cid4.recon.Rsave"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
@@ -541,13 +511,6 @@ h_trait_recon <-
 #' @return A plot of the phylogeny with branches colored by hisse-inferred marginal ancestral states.
 #'
 #' @examples
-#'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(ggtree)
-#'library(treeio)
 #'
 #'asr <- get(load("data/hab.cid4.recon.Rsave"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
@@ -722,9 +685,6 @@ h_rate_recon <-
 #'
 #'@examples
 #'
-#'library(hisse)
-#'library(dplyr)
-#'
 #'# The translation should follow the order of states in model_fit$solution.
 #'# In this example, hisse's 00, 01, 10, and 11 states correspond to
 #'# marine-plankton, marine-benthos, freshwater-plankton, and freshwater-benthos
@@ -827,9 +787,6 @@ m_transition_matrix <-
 #'
 #'@examples
 #'
-#'library(hisse)
-#'library(dplyr)
-#'
 #'States <- c("mp", "mb", "fp", "fb")
 #'
 #'# muhisse model
@@ -894,9 +851,6 @@ m_diversification_rates <- function(model_fit, states) {
 #'
 #'@examples
 #'
-#'library(hisse)
-#'library(dplyr)
-#'
 #'States <- c("mp", "mb", "fp", "fb")
 #'
 #'# muhisse model
@@ -942,10 +896,6 @@ m_collect_rates <-
 #'
 #'
 #'@examples
-#'
-#'library(hisse)
-#'library(dplyr)
-#'library(treeio)
 #'
 #'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
@@ -1003,12 +953,6 @@ m_process_recon <- function(muhisse_recon) {
 #' @return A scatterplot with focal probability (0 or 1) on the x axis and the chosen diversification parameter on the y axis with means and error bars (mean +/- SD) for each state color coded with in two-dimensional colorplane.
 #'
 #' @examples
-#'
-#'library(hisse)
-#'library(tidyverse)
-#'library(treeio)
-#'library(colorplaner)
-#'library(viridis)
 #'
 #'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
@@ -1132,13 +1076,6 @@ m_scatterplot_cp <-
 #'
 #' @examples
 #'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(ggridges)
-#'library(treeio)
-#'
 #'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 #'processed_muhisse <- m_process_recon(hisse_recon=asr)
 #'
@@ -1255,13 +1192,6 @@ m_ridgelines <- function(processed_muhisse_recon,
 #' @return A jittered scatterplot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
 #'
 #' @examples
-#'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(ggridges)
-#'library(treeio)
 #'
 #'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
@@ -1380,13 +1310,6 @@ m_scatterplot <-
 #' @return A stacked dotplot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
 #'
 #' @examples
-#'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(ggridges)
-#'library(treeio)
 #'
 #'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
@@ -1511,13 +1434,6 @@ m_dotplot <-
 #' @return A plot of the phylogeny with branches colored by muhisse-inferred marginal ancestral states.
 #'
 #' @examples
-#'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(ggtree)
-#'library(treeio)
 #'
 #'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
@@ -1701,17 +1617,10 @@ m_trait_recon_cp <-
 #'
 #' @examples
 #'
-#'library(hisse)
-#'library(dplyr)
-#'library(ggplot2)
-#'library(viridis)
-#'library(ggtree)
-#'library(treeio)
-#'
 #'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
 #'
-#'# eight categories after binning
+#'# eight categories after binning with a cutoff of 0.2
 #'m_trait_recon(
 #'  processed_muhisse_recon = processed_muhisse,
 #'  cutoff = c(.2, .2),
