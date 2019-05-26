@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilhisse.R
 \name{m_transition_matrix}
 \alias{m_transition_matrix}
-\title{Extract estimated transition rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)}
+\title{Extract transition rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)}
 \usage{
 m_transition_matrix(model_fit, hidden_states = TRUE, states)
 }

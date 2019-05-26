@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilhisse.R
 \name{m_collect_rates}
 \alias{m_collect_rates}
-\title{Extract estimated transition and diversification rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)}
+\title{Extract transition and diversification rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)}
 \usage{
 m_collect_rates(model_fit, hidden_traits, character_states)
 }
@@ -10,7 +10,7 @@ m_collect_rates(model_fit, hidden_traits, character_states)
 A list with two components, the transition rates formatted as a rate matrix and a data frame of diversification rates
 }
 \description{
-This is a function that wraps \code{get_transition_matrix_muhisse} and \code{get_diversification_rates_muhisse}
+This is a function that wraps \code{m_transition_matrix} and \code{m_diversification_rates}
 so rates can be extracted in one step
 }
 \examples{

@@ -73,6 +73,6 @@ m_trait_recon(
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
- colors = viridis(4,option = "E", direction = 1, end=.8))
+ colors = viridis(7,option = "E", direction = 1, end=.9)[c(1,3,5,7)])
 
 }

@@ -10,7 +10,7 @@
 # 7. diagram functions
 # 8. shiny app
 # 9. muhisse rate plot functions all rely on the same piece of code to format prior to plotting. Probably better to isolate this as a function
-# 10.
+# 10. Axis labels for time mostly in trees
 
 
 ##### --- HiSSE functions ------------------------- #####
@@ -39,7 +39,6 @@
 #'processed_hisse$node_rates
 #'processed_hisse$tree_data
 #'
-
 
 h_process_recon <- function(hisse_recon) {
   tip.rates <-
@@ -431,7 +430,8 @@ h_trait_recon <-
 
     if (discrete) {
       d_state <- ifelse(state > cutoff, 1, 0) %>% as.factor()
-      ggg <- ggg + aes(color = d_state) + scale_color_viridis_d(name = x_label, end = 0.6)
+      ggg <- ggg + aes(color = d_state) + scale_color_viridis_d(name = x_label, end = 0.6) +
+        guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       d_state <- state
       ggg <- ggg + aes(color = d_state) + scale_color_viridis_c(name = x_label, end = 0.6)
@@ -578,6 +578,10 @@ h_rate_recon <-
            time_axis_ticks = 10,
            open_angle = 10) {
 
+    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+      stop("The selected tree layout is not supported.")
+    }
+
     tree <- processed_hisse_recon$tree_data@phylo
     datas <- processed_hisse_recon$tree_data@data
     agemax <- tree %>% ape::branching.times() %>% max()
@@ -605,7 +609,7 @@ h_rate_recon <-
           begin = 0.25,
           end = 0.8,
           name = parameter
-        ) + guides(color = guide_legend(override.aes = list(size = 2)))
+        ) + guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       param <- datas %>% select(!!wanted) %>% unlist %>% unname
       ggg <-
@@ -706,7 +710,7 @@ h_rate_recon <-
 
 ##### --- MuHiSSE functions ------------------------- #####
 
-#' Extract estimated transition rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)
+#' Extract transition rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)
 #'
 #'@description A helper function that formats \code{hisse::MuHiSSE}'s output into a matrix so transition rates between states can be easier to visualize.
 #'
@@ -881,9 +885,9 @@ m_diversification_rates <- function(model_fit, states) {
   return(res)
 }
 
-#' Extract estimated transition and diversification rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)
+#' Extract transition and diversification rates from a multistate HiSSE model (MuSSE, MuHiSSE or CID)
 #'
-#'@description This is a function that wraps \code{get_transition_matrix_muhisse} and \code{get_diversification_rates_muhisse}
+#'@description This is a function that wraps \code{m_transition_matrix} and \code{m_diversification_rates}
 #' so rates can be extracted in one step
 #'
 #'@return A list with two components, the transition rates formatted as a rate matrix and a data frame of diversification rates
@@ -1734,7 +1738,7 @@ m_trait_recon_cp <-
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
-#'  colors = viridis(4,option = "E", direction = 1, end=.8))
+#'  colors = viridis(7,option = "E", direction = 1, end=.9)[c(1,3,5,7)])
 #'
 
 m_trait_recon <-
@@ -1795,7 +1799,8 @@ m_trait_recon <-
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank(),
         plot.background = element_blank()
-      )
+      ) +
+      guides(color = guide_legend(override.aes = list(size = 4)))
 
     if (tree_layout %in% c("rectangular", "slanted")) {
       if (tree_direction == "up") {
