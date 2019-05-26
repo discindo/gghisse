@@ -515,8 +515,7 @@ h_trait_recon <-
         geom_vline(data = pp,
                    aes(xintercept = x),
                    size = .2,
-                   color = "darkgrey",
-                   inherit.aes=FALSE) +
+                   color = "darkgrey") +
         geom_text(data = pp,
                   aes(x = x + 0.1, y = ntip+2, label = label),
                   size = 2,
@@ -695,8 +694,7 @@ h_rate_recon <-
         geom_vline(data = pp,
                    aes(xintercept = x),
                    size = .2,
-                   color = "darkgrey",
-                   inherit.aes=FALSE) +
+                   color = "darkgrey") +
         geom_text(data = pp,
                   aes(x = x + 0.1, y = ntip+2, label = label),
                   size = 2,
@@ -1664,8 +1662,7 @@ m_trait_recon_cp <-
           data = pp,
           aes(xintercept = x),
           size = .2,
-          color = "darkgrey",
-          inherit.aes = FALSE
+          color = "darkgrey"
         ) +
         geom_text(
           data = pp,
@@ -1681,3 +1678,209 @@ m_trait_recon_cp <-
     return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
   }
 
+
+#' Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with discretized probabilities
+#'
+#' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
+#'
+#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
+#' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
+#' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
+#' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10). Passed on to \code{pretty} internally, so the number of plotted ticks might not be exactly the same.
+#' @param open_angle The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.
+#' @param colors A vector of colors for the character states. Note that the number of categories depends on the cutoff value. Internally this vector of colors is subset to \code{colors[1:number of states]}, so some tinkering might be necessary to get colors that work well together.
+#' @param cutoff A vector of length 2 giving the values for discretizing the reconstructed probabilities for the first and second character. Categories "0", "uncertain", or "1" are assigned to probabilities \code{>= 1-cutoff}, \code{1-cutoff:cutoff}, \code{<=cutoff}. A cutoff=0.5 will result with four categories, essentially ignoring the uncertainty in ancestral state reconstruction. A cutoff < 0.5 will produce a category "uncertain" for probabilities in the range \code{1-cutoff:cutoff}. The function will print a count of the categories after discretizing, so it is possible to adjust the cutoff values to avoid plotting of categories with too few nodes
+#' @param states_of_first_character Translation for the character states
+#' @param states_of_second_character Translation for the character states
+#'
+#' @return A plot of the phylogeny with branches colored by muhisse-inferred marginal ancestral states.
+#'
+#' @examples
+#'
+#'library(hisse)
+#'library(dplyr)
+#'library(ggplot2)
+#'library(viridis)
+#'library(ggtree)
+#'library(treeio)
+#'
+#'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
+#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'
+#'# eight categories after binning
+#'m_trait_recon(
+#'  processed_muhisse_recon = processed_muhisse,
+#'  cutoff = c(.2, .2),
+#'  states_of_first_character = c("marine", "freshwater"),
+#'  states_of_second_character = c("plankton", "benthos"),
+#'  tree_layout = "radial",
+#'  colors = RColorBrewer::brewer.pal(name="Paired", n=10))
+#'
+#'# three of these eight have < 3 nodes, so we could try to avoid plotting some of them
+#'# adjust the cutoff for the second variable
+#'
+#'m_trait_recon(
+#'  processed_muhisse_recon = processed_muhisse,
+#'  cutoff = c(.2, .3),
+#'  states_of_first_character = c("marine", "freshwater"),
+#'  states_of_second_character = c("plankton", "benthos"),
+#'  tree_layout = "radial",
+#'  colors = RColorBrewer::brewer.pal(name="Paired", n=10))
+#'
+#'# ignoring uncertainty
+#'m_trait_recon(
+#'  processed_muhisse_recon = processed_muhisse,
+#'  cutoff = c(.5, .5),
+#'  states_of_first_character = c("marine", "freshwater"),
+#'  states_of_second_character = c("plankton", "benthos"),
+#'  tree_layout = "radial",
+#'  colors = viridis(4,option = "E", direction = 1, end=.8))
+#'
+
+m_trait_recon <-
+  function(processed_muhisse_recon,
+           cutoff = c(.2,.2),
+           states_of_first_character,
+           states_of_second_character,
+           tree_layout = "rectangular",
+           tree_direction = "right",
+           time_axis_ticks = 10,
+           open_angle=10,
+           colors=viridis(n=9)) {
+
+    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+      stop("The selected tree layout is not supported.")
+    }
+
+    tree <- processed_muhisse_recon$tree_data@phylo
+    agemax <- tree %>% ape::branching.times() %>% max()
+
+    ss <- processed_muhisse_recon$tree_data@data %>%
+      mutate(
+        prob_0x_named =
+          case_when(
+            prob_0x >= 1 - cutoff[1] ~ states_of_first_character[1],
+            prob_0x <= cutoff[1] ~ states_of_first_character[2],
+            TRUE ~ paste(states_of_first_character[1], "/", states_of_first_character[2], " uncertain", sep="")
+          )
+      ) %>%
+      mutate(
+        prob_x0_named =
+          case_when(
+            prob_x0 >= 1 - cutoff[2] ~ states_of_second_character[1],
+            prob_x0 <= cutoff[2] ~ states_of_second_character[2],
+            TRUE ~ paste(states_of_second_character[1], "/", states_of_second_character[2], " uncertain", sep="")
+          )
+      ) %>%
+      mutate(four_state = paste(prob_0x_named, prob_x0_named, sep = "-"))
+
+    message("Categories after discretizing with the provided cutoff:\n")
+    ss.cnt <- ss %>% ungroup %>% group_by(four_state) %>% add_tally() %>% select(four_state, n) %>% distinct
+    print(ss.cnt)
+
+    nstat <- ss %>% select(four_state) %>% distinct %>% nrow
+
+    ggg <-
+      ggtree(
+        tr = tree,
+        layout = tree_layout,
+        size = .6,
+        open.angle = open_angle,
+        aes(color=ss$four_state)
+      ) +
+      scale_color_manual(name="", values = colors[1:nstat]) +
+      theme(
+        legend.position = "right",
+        legend.key.size = unit(x = .5, units = "cm"),
+        legend.margin = margin(0, 0, 0, 0),
+        legend.background = element_blank(),
+        plot.background = element_blank()
+      )
+
+    if (tree_layout %in% c("rectangular", "slanted")) {
+      if (tree_direction == "up") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+      if (tree_direction == "down") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "left") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "right") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+    }
+
+    if (tree_layout %in% c("circular", "fan", "radial")) {
+      maxx <- ggg$data %>%
+        top_n(n = 1, wt = x) %>%
+        select(x) %>%
+        unlist %>%
+        unname %>%
+        unique %>%
+        round(., 1)
+      ntip <- Ntip(tree) +10
+      pretty_points <- maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+
+      pp <- tibble(x = rev(pretty_points), y = 0) %>%
+        filter(x <= maxx, x > 0) %>%
+        mutate(label = rev(x) - min(x))
+
+      ggg <- ggg +
+        geom_vline(data = pp,
+                   aes(xintercept = x),
+                   size = .2,
+                   color = "darkgrey") +
+        geom_text(data = pp,
+                  aes(x = x + 0.1, y = ntip+2, label = label),
+                  size = 2,
+                  inherit.aes=FALSE)
+    }
+
+    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+  }
