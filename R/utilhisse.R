@@ -1,7 +1,7 @@
 ##### --- TO DO ----------------------------------- #####
 
 # 0. Finish adding preexisting m_ functions
-# 1. Make h_boxplot -- h_scatterplot and add means +- sd instead of boxes
+# 1. Make h_boxplot --> h_scatterplot and add means +- sd instead of boxes
 # 2. Add pretty() for axis ticks for all functions
 # 3. Data objects
 # 4. Make functions to create hisse objects on the fly -- though still need recons and support regions
@@ -1013,7 +1013,7 @@ m_process_recon <- function(muhisse_recon) {
 #'m_scatterplot_cp(
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "turnover",
-#'  focal_probability = "prob_0x",
+#'  focal_character = "prob_0x",
 #'  focal_character_label = "p(mar)",
 #'  second_character_label = "p(pla)",
 #'  colors = viridis(n = 9)[c(5, 1, 9)],
@@ -1023,7 +1023,7 @@ m_process_recon <- function(muhisse_recon) {
 m_scatterplot_cp <-
   function(processed_muhisse_recon,
            parameter = "turnover",
-           focal_probability = c("prob_0x", "prob_x0"),
+           focal_character = c("prob_0x", "prob_x0"),
            focal_character_label,
            second_character_label,
            colors,
@@ -1048,36 +1048,47 @@ m_scatterplot_cp <-
       mutate(prob_0x=str_extract(both_prob, regex("^\\d+")) %>% as.numeric()) %>%
       mutate(prob_x0=str_extract(both_prob, regex("\\d+$")) %>% as.numeric())
 
-    if (focal_probability == "prob_0x") {
-      sum_tip_rates <- mutate(sum_tip_rates, focal_probability = factor(prob_0x))
+    if (focal_character == "prob_0x") {
+      sum_tip_rates <- mutate(sum_tip_rates, focal_character = factor(prob_0x))
       print(sum_tip_rates)
+      sss <-
+        ggplot(tip_rates,
+               aes(
+                 x = factor(!!as.name(focal_character)),
+                 y = wanted,
+                 color = prob_0x,
+                 color2 = prob_x0
+               ))
+      nudgex <- c(-0.3,-0.3, 0.3, 0.3)
     }
 
-    if (focal_probability == "prob_x0") {
-      sum_tip_rates <- mutate(sum_tip_rates, focal_probability = factor(prob_0x))
+    if (focal_character == "prob_x0") {
+      sum_tip_rates <- mutate(sum_tip_rates, focal_character = factor(prob_x0))
       print(sum_tip_rates)
+      sss <-
+        ggplot(tip_rates,
+               aes(
+                 x = factor(!!as.name(focal_character)),
+                 y = wanted,
+                 color = prob_x0,
+                 color2 = prob_0x
+               ))
+      nudgex <- c(-0.3, 0.3,-0.3, 0.3)
     }
 
-    sss <-
-      ggplot(tip_rates,
-             aes(
-               x = factor(!!as.name(focal_probability)),
-               y = wanted,
-               color = prob_0x,
-               color2 = prob_x0
-             )) +
+    sss <- sss +
       geom_point(alpha = .7,
                  size = 1.25,
                  position = position_jitter(width = .15)) +
       geom_errorbar(data=sum_tip_rates,
-                    aes(x=focal_probability, y=MN, ymin=LB, ymax=UB),
-                    position = position_nudge(x=c(-0.3, -0.3, 0.3, 0.3), y=0),
+                    aes(x=focal_character, y=MN, ymin=LB, ymax=UB),
+                    position = position_nudge(x=nudgex, y=0),
                     inherit.aes = TRUE,
                     width=.04
       ) +
       geom_point(data=sum_tip_rates,
-                 aes(x=focal_probability, y=MN),
-                 position = position_nudge(c(-0.3, -0.3, 0.3, 0.3)),
+                 aes(x=focal_character, y=MN),
+                 position = position_nudge(x= nudgex, y=0),
                  inherit.aes = TRUE,
                  pch=21,
                  stroke=1,
