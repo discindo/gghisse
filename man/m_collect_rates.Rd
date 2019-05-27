@@ -15,9 +15,6 @@ so rates can be extracted in one step
 }
 \examples{
 
-library(hisse)
-library(dplyr)
-
 States <- c("mp", "mb", "fp", "fb")
 
 # muhisse model

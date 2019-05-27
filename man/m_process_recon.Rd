@@ -22,10 +22,6 @@ Internally, the probabilities for individual states (00, 01, 10, 11) are convert
 }
 \examples{
 
-library(hisse)
-library(dplyr)
-library(treeio)
-
 asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 processed_muhisse <- m_process_recon(muhisse_recon=asr)
 processed_muhisse$tip_rates

@@ -33,13 +33,6 @@ A function to plot a (model-averaged) marginal ancestral reconstruction for the 
 }
 \examples{
 
-library(hisse)
-library(dplyr)
-library(ggplot2)
-library(viridis)
-library(ggtree)
-library(treeio)
-
 asr <- get(load("data/hab.cid4.recon.Rsave"))
 processed_hisse <- h_process_recon(hisse_recon=asr)
 

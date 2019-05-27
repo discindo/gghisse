@@ -36,17 +36,10 @@ A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction 
 }
 \examples{
 
-library(hisse)
-library(dplyr)
-library(ggplot2)
-library(viridis)
-library(ggtree)
-library(treeio)
-
 asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 processed_muhisse <- m_process_recon(muhisse_recon=asr)
 
-# eight categories after binning
+# eight categories after binning with a cutoff of 0.2
 m_trait_recon(
  processed_muhisse_recon = processed_muhisse,
  cutoff = c(.2, .2),

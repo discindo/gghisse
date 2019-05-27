@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilhisse.R
 \name{m_trait_recon_cp}
 \alias{m_trait_recon_cp}
-\title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait}
+\title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with a two-dimensional colorplane}
 \usage{
 m_trait_recon_cp(processed_muhisse_recon, tree_layout = "rectangular",
   tree_direction = "right", time_axis_ticks = 10, open_angle = 10,
@@ -35,13 +35,6 @@ A plot of the phylogeny with branches colored by muhisse-inferred marginal ances
 A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
 }
 \examples{
-
-library(hisse)
-library(dplyr)
-library(ggplot2)
-library(viridis)
-library(ggtree)
-library(treeio)
 
 asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 processed_muhisse <- m_process_recon(muhisse_recon=asr)

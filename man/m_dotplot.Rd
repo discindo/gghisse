@@ -29,13 +29,6 @@ A function to plot a stacked dotplot of (model-averaged) diversification rates a
 }
 \examples{
 
-library(hisse)
-library(dplyr)
-library(ggplot2)
-library(viridis)
-library(ggridges)
-library(treeio)
-
 asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
 processed_muhisse <- m_process_recon(muhisse_recon=asr)
 

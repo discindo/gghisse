@@ -1,6 +1,5 @@
 ##### --- TO DO ----------------------------------- #####
 
-# 0. Finish adding preexisting m_ functions
 # 1. Make h_boxplot --> h_scatterplot and add means +- sd instead of boxes
 # 2. Add pretty() for axis ticks for all functions
 # 3. Data objects
@@ -66,22 +65,23 @@ h_process_recon <- function(hisse_recon) {
   ))
 }
 
-#' Plot diversification rates estimated by a HiSSE model
+#' Plot diversification rates estimated by a HiSSE model (HiSSE, BiSSE, CID2, CID4)
 #'
-#' @description A function to plot a boxplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait). Further modifications are straightforward with ggplot (see examples).
+#' @description A function to plot a scatterplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait).
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param x_label Label for the x axis. This is usually the binary trait whose assosiation with diversification is being tested.
 #'
-#' @return A boxplot. Tip-associated rates (possibly model averaged) are plotted as points.
+#' @return A jittered scatterplot of (model averaged) tip-associated rates.
 #'
 #' @examples
 #'
 #'asr <- get(load("data/hab.cid4.recon.Rsave"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
-#'hisse_rates_plot <- h_boxplot(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
+#'hisse_rates_plot <- h_scatterplot(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
 #'
+#'# modifications are easy with ggplot
 #'# change x axis tick labels
 #'hisse_rates_plot +
 #'  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos"))
@@ -96,16 +96,21 @@ h_process_recon <- function(hisse_recon) {
 #'  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
 #'  theme(legend.position="top") +
 #'  labs(y=expression(paste(tau, "=", lambda, "+", mu))) +
-#'  theme(axis.text.y=element_text(size=15)) +
-#'  theme_grey()
+#'  theme(axis.text.y=element_text(size=15))
 #'
 
-h_boxplot <-
+h_scatterplot <-
   function(processed_hisse_recon,
            parameter = "turnover",
            x_label) {
     tip.rates <- processed_hisse_recon$tip_rates
     tip.rates$f_state <- as.factor(tip.rates$state)
+
+    tip.rates.sum <- tip.rates %>%
+      group_by(f_state) %>%
+      select(f_state, !!as.name(parameter)) %>%
+      summarise_if(is.numeric, .funs=list(Mean=mean, SD=sd))
+
     result <-
       ggplot(data = tip.rates,
              aes(
@@ -113,10 +118,27 @@ h_boxplot <-
                y = !!as.name(parameter),
                color = f_state
              )) +
-      geom_boxplot(notch = TRUE, width = 0.6) +
       geom_point(alpha = .7,
                  size = 0.75,
-                 position = position_jitter(width = .25)) +
+                 position = position_jitter(width = .15)) +
+      geom_errorbar(
+        data = tip.rates.sum,
+        width = .05,
+        aes(
+          x = f_state,
+          ymax = Mean + SD,
+          ymin = Mean - SD,
+          y = Mean
+        ),
+        position = position_nudge(x = 0.3, y = 0)
+      ) +
+      geom_point(
+        data = tip.rates.sum,
+        size = 2.5,
+        position = position_nudge(x = 0.3, y = 0),
+        aes(x = f_state, y = Mean),
+        pch = 21
+      ) +
       scale_color_viridis(name = x_label,
                           end = 0.6,
                           discrete = TRUE) +
@@ -1417,7 +1439,7 @@ m_dotplot <-
     return(pl)
   }
 
-#' Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait
+#' Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with a two-dimensional colorplane
 #'
 #' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
@@ -1711,6 +1733,181 @@ m_trait_recon <-
       ) +
       guides(color = guide_legend(override.aes = list(size = 4)))
 
+    if (tree_layout %in% c("rectangular", "slanted")) {
+      if (tree_direction == "up") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+      if (tree_direction == "down") {
+        ggg <- ggg + coord_flip() +
+          theme(
+            axis.line.y = element_line(),
+            axis.ticks.y = element_line(),
+            axis.text.y = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "left") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            trans = "reverse",
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+
+      if (tree_direction == "right") {
+        ggg <- ggg +
+          theme(
+            axis.line.x = element_line(),
+            axis.ticks.x = element_line(),
+            axis.text.x = element_text()
+          ) +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = pretty(0:agemax, n = time_axis_ticks),
+            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+          )
+      }
+    }
+
+    if (tree_layout %in% c("circular", "fan", "radial")) {
+      maxx <- ggg$data %>%
+        top_n(n = 1, wt = x) %>%
+        select(x) %>%
+        unlist %>%
+        unname %>%
+        unique %>%
+        round(., 1)
+      ntip <- Ntip(tree) +10
+      pretty_points <- maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+
+      pp <- tibble(x = rev(pretty_points), y = 0) %>%
+        filter(x <= maxx, x > 0) %>%
+        mutate(label = rev(x) - min(x))
+
+      ggg <- ggg +
+        geom_vline(data = pp,
+                   aes(xintercept = x),
+                   size = .2,
+                   color = "darkgrey") +
+        geom_text(data = pp,
+                  aes(x = x + 0.1, y = ntip+2, label = label),
+                  size = 2,
+                  inherit.aes=FALSE)
+    }
+
+    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+  }
+
+#' Plot MuHiSSE model-averaged marginal ancestral state reconstruction for diversification rates
+#'
+#' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
+#'
+#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
+#' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}
+#' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
+#' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
+#' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10)
+#' @param open_angle The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.
+#'
+#' @return A plot of the phylogeny with branches colored by hisse-inferred marginal ancestral states.
+#'
+#' @examples
+#'
+#'asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
+#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'
+#'map_continuous <-
+#'  m_rate_recon(
+#'    processed_muhisse_recon = processed_hisse,
+#'    parameter = "extinction", discrete=FALSE)
+#'
+#'# change colors, your can pass the trait name to `name=` to title the colorbar
+#'map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
+#'
+#'map_discrete <-
+#'  m_rate_recon(
+#'    processed_muhisse_recon = processed_hisse,
+#'    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
+#'
+#'# change colors
+#'map_discrete + scale_color_manual(name="", values = c("red", "blue", "orange", "green"))
+
+m_rate_recon <-
+  function(processed_muhisse_recon,
+           parameter = "turnover",
+           discrete = FALSE,
+           breaks = seq(0, 1, 0.2),
+           tree_layout="rectangular",
+           tree_direction = "right",
+           time_axis_ticks = 10,
+           open_angle = 10) {
+
+    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+      stop("The selected tree layout is not supported.")
+    }
+
+    tree <- processed_muhisse_recon$tree_data@phylo
+    datas <- processed_muhisse_recon$tree_data@data
+    agemax <- tree %>% ape::branching.times() %>% max()
+    wanted <- as.name(parameter)
+
+    ggg <-
+      ggtree(tr = tree,
+             layout = tree_layout,
+             size = .6,
+             open.angle = 10) +
+      theme(
+        legend.position = "right",
+        legend.key.size = unit(x = .5, units = "cm"),
+        legend.margin = margin(0, 0, 0, 0),
+        legend.background = element_blank()
+      )
+
+    if (discrete) {
+      param <-
+        datas %>% select(!!wanted) %>% unlist %>% unname %>% cut(., breaks = breaks)
+      ggg <-
+        ggg + aes(color = param) + scale_color_viridis_d(
+          option = "B",
+          begin = 0.25,
+          end = 0.8,
+          name = parameter
+        ) + guides(color = guide_legend(override.aes = list(size = 4)))
+    } else {
+      param <- datas %>% select(!!wanted) %>% unlist %>% unname
+      ggg <-
+        ggg + aes(color = param) + scale_color_viridis_c(
+          option = "B",
+          begin = 0.25,
+          end = 0.8,
+          name = parameter
+        )
+    }
     if (tree_layout %in% c("rectangular", "slanted")) {
       if (tree_direction == "up") {
         ggg <- ggg + coord_flip() +

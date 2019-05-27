@@ -19,9 +19,6 @@ A helper function that formats \code{hisse::MuHiSSE}'s diversification parameter
 }
 \examples{
 
-library(hisse)
-library(dplyr)
-
 States <- c("mp", "mb", "fp", "fb")
 
 # muhisse model

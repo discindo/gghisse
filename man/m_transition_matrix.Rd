@@ -21,9 +21,6 @@ A helper function that formats \code{hisse::MuHiSSE}'s output into a matrix so t
 }
 \examples{
 
-library(hisse)
-library(dplyr)
-
 # The translation should follow the order of states in model_fit$solution.
 # In this example, hisse's 00, 01, 10, and 11 states correspond to
 # marine-plankton, marine-benthos, freshwater-plankton, and freshwater-benthos
