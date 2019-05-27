@@ -27,7 +27,7 @@ A function to plot a ridgeline of (model-averaged) diversification rates in the 
 }
 \examples{
 
-asr <- get(load("data/hab.cid4.recon.Rsave"))
+asr <- get(load("data/hab.cid4.recon.Rdata"))
 processed_hisse <- h_process_recon(hisse_recon=asr)
 paint_cols <- c("orange", "violet")
 

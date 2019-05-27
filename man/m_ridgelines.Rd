@@ -29,7 +29,7 @@ A function to plot a ridgeline of (model-averaged) diversification rates in the 
 }
 \examples{
 
-asr <- get(load("data/muhisse_relax_20_recon.Rsave"))
+asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
 processed_muhisse <- m_process_recon(hisse_recon=asr)
 
 m_ridgelines(

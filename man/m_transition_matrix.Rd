@@ -35,16 +35,16 @@ States <-
    select(Name) \%>\% unlist \%>\% unname
 
 # muhisse model
-MH <- get(load("data/final.MuHiSSE2.Rsave"))
+MH <- get(load("data/final.MuHiSSE2.Rdata"))
 m_transitions_matrix(model_fit = MH, hidden_states = TRUE, states = States)
 
 # CID8 model
-C8 <- get(load("data/final.CID8relax.Rsave"))
+C8 <- get(load("data/final.CID8relax.Rdata"))
 # we have 8 hidden states, so the transition matrix is cumbersome
 m_transitions_matrix(model_fit = C8, hidden_states = TRUE, states = States)
 
 # musse model, no hidden states
-MU <- get(load("data/MuSSE.Rsave"))
+MU <- get(load("data/MuSSE.Rdata"))
 m_transitions_matrix(model_fit = MU, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
 
 }
