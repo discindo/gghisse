@@ -7,8 +7,6 @@
 # 7. diagram functions
 # 8. shiny app
 # 9. muhisse rate plot functions all rely on the same piece of code to format prior to plotting. Probably better to isolate this as a function
-# 10. Axis labels! Mostly for time in trees
-
 
 ##### --- HiSSE functions ------------------------- #####
 
@@ -169,7 +167,7 @@ h_scatterplot <-
 #' @param x_label Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.
 #' @param state_names A character vector of length two giving the translation for states 0 and 1.
 #' @param bin_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
-#' @param paint_colors Colors for the points in the two alternate states
+#' @param colors Colors for the points in the two alternate states
 #' @param plot_as_waiting_time Whether to plot the rates or their inverse (waiting times)
 #'
 #' @return A dotplot of tip-associated rates (possibly model averaged).
@@ -185,7 +183,7 @@ h_scatterplot <-
 #'   parameter = "turnover",
 #'   x_labels = c("Plankton", "Benthos"),
 #'   bin_width = 0.2,
-#'   paint_colors=paint_cols[1:2],
+#'   colors=paint_cols[1:2],
 #'   plot_as_waiting_time = TRUE
 #' ) + labs(x = "", y = "waiting time (My)", title = "Turnover")
 #'
@@ -196,7 +194,7 @@ h_dotplot <-
            parameter = "turnover",
            x_labels = c("Marine", "Freshwater"),
            bin_width = 0.1,
-           paint_colors,
+           colors,
            plot_as_waiting_time=TRUE) {
 
     tip.rates <- processed_hisse_recon$tip_rates
@@ -248,8 +246,8 @@ h_dotplot <-
         aes(x = f_state, y = Mean),
         pch = 21
       ) +
-      scale_color_manual(values = paint_colors, name = "") +
-      scale_fill_manual(values = paint_colors, name = "") +
+      scale_color_manual(values = colors, name = "") +
+      scale_fill_manual(values = colors, name = "") +
       scale_x_discrete(breaks = c(0,1), labels = x_labels) +
       scale_y_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
       theme_classic() +
@@ -268,7 +266,7 @@ h_dotplot <-
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param state_names The names for character states
-#' @param paint_colors Colors for the points in the two alternate states
+#' @param colors Colors for the points in the two alternate states
 #' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
 #'
 #' @return A ridgeline plot of tip-associated rates (possibly model averaged).
@@ -283,12 +281,12 @@ h_dotplot <-
 #'  processed_hisse_recon = processed_hisse,
 #'  state_names = c("Plankton", "Benthos"),
 #'  parameter = "extinction",
-#'  paint_colors = c("yellow", "red"))
+#'  colors = c("yellow", "red"))
 
 h_ridgelines <- function(processed_hisse_recon,
                          parameter = "turnover",
                          state_names = c("Marine", "Freshwater"),
-                         paint_colors = c("yellow", "red"),
+                         colors = c("yellow", "red"),
                          plot_as_waiting_time = FALSE) {
   tip.rates <- processed_hisse_recon$tip_rates
   tip.rates$f_state <-
@@ -348,7 +346,7 @@ h_ridgelines <- function(processed_hisse_recon,
       height = 0.05,
       inherit.aes = FALSE
     ) +
-    scale_fill_manual(values = paint_colors) +
+    scale_fill_manual(values = colors) +
     scale_x_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
     labs(y = "", x=parameter) +
     theme_classic() +
@@ -969,19 +967,12 @@ m_ridgelines <- function(processed_muhisse_recon,
     "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n\n"
   )
 
-  ss <- processed_muhisse_recon$tip_rates %>%
-    mutate(what_state = paste(state.00, state.01, state.10, state.11, sep = "")) %>%
-    mutate(four_state = factor(
-      case_when(
-        what_state == "1000" ~ states_names[1],
-        what_state == "0100" ~ states_names[2],
-        what_state == "0010" ~ states_names[3],
-        what_state == "0001" ~ states_names[4]
-      ),
-      levels = states_names
-    )) %>%
-    mutate(wanted = !!as.name(parameter))
-  print(ss %>% head)
+  ss <-
+    m_prep_df(
+      processed_muhisse_recon = processed_muhisse_recon,
+      states_names = states_names,
+      parameter = parameter
+    )
 
   message("Summarising grouped by character state\n\n")
   wanted <- as.name(parameter)
@@ -1083,24 +1074,17 @@ m_scatterplot <-
            colors = viridis(n = 4, option=2, end=0.7),
            plot_as_waiting_time = FALSE) {
     message(
-      "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n\n"
+      "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n"
     )
 
-    ss <- processed_muhisse_recon$tip_rates %>%
-      mutate(what_state = paste(state.00, state.01, state.10, state.11, sep = "")) %>%
-      mutate(four_state = factor(
-        case_when(
-          what_state == "1000" ~ states_names[1],
-          what_state == "0100" ~ states_names[2],
-          what_state == "0010" ~ states_names[3],
-          what_state == "0001" ~ states_names[4]
-        ),
-        levels = states_names
-      )) %>%
-      mutate(wanted = !!as.name(parameter))
-    print(ss %>% head)
+    ss <-
+      m_prep_df(
+        processed_muhisse_recon = processed_muhisse_recon,
+        states_names = states_names,
+        parameter = parameter
+      )
 
-    message("Summarising grouped by character state\n\n")
+    message("Summarising grouped by character state\n")
     wanted <- as.name(parameter)
 
     summ <- . %>% summarise_at(.vars = vars(wanted),
@@ -1108,7 +1092,8 @@ m_scatterplot <-
                                  Mean = mean,
                                  Median = median,
                                  SD = sd
-                               ))
+                               )) %>%
+      mutate(wanted=Mean) # to bypass warning in geom_errorbar
 
     if (plot_as_waiting_time) {
       ss <- mutate(ss, wanted = 1 / !!wanted)
@@ -1121,9 +1106,9 @@ m_scatterplot <-
     }
     max_rate <-
       ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
-    print(ss.sum)
+    print(select(ss.sum, -wanted))
 
-    message("\nPlotting\n\n")
+    message("\nPlotting\n")
 
     pl <-
       ggplot(data = ss,
@@ -1143,7 +1128,6 @@ m_scatterplot <-
         data = ss.sum,
         aes(
           x = four_state,
-          y = Mean,
           colour = four_state,
           ymin = Mean - SD,
           ymax = Mean + SD
@@ -1205,18 +1189,12 @@ m_dotplot <-
       "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n\n"
     )
 
-    ss <- processed_muhisse_recon$tip_rates %>%
-      mutate(what_state = paste(state.00, state.01, state.10, state.11, sep = "")) %>%
-      mutate(four_state = factor(
-        case_when(
-          what_state == "1000" ~ states_names[1],
-          what_state == "0100" ~ states_names[2],
-          what_state == "0010" ~ states_names[3],
-          what_state == "0001" ~ states_names[4]
-        ),
-        levels = states_names
-      )) %>%
-      mutate(wanted = !!as.name(parameter))
+    ss <-
+      m_prep_df(
+        processed_muhisse_recon = processed_muhisse_recon,
+        states_names = states_names,
+        parameter = parameter
+      )
 
     message("Summarising grouped by character state\n\n")
     wanted <- as.name(parameter)
@@ -1724,3 +1702,24 @@ tree_flip <- function(ggtree_object,
   }
   return(ggtree_object)
 }
+
+m_prep_df <-
+  function(processed_muhisse_recon,
+           states_names,
+           parameter) {
+    ss <- processed_muhisse_recon$tip_rates %>%
+      mutate(what_state = paste(state.00, state.01, state.10, state.11, sep = "")) %>%
+      mutate(four_state = factor(
+        case_when(
+          what_state == "1000" ~ states_names[1],
+          what_state == "0100" ~ states_names[2],
+          what_state == "0010" ~ states_names[3],
+          what_state == "0001" ~ states_names[4]
+        ),
+        levels = states_names
+      )) %>%
+      mutate(wanted = !!as.name(parameter))
+    print(ss %>% head)
+
+    return(ss)
+  }

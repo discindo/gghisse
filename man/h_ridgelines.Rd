@@ -5,8 +5,8 @@
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
 h_ridgelines(processed_hisse_recon, parameter = "turnover",
-  state_names = c("Marine", "Freshwater"), paint_colors = c("yellow",
-  "red"), plot_as_waiting_time = FALSE)
+  state_names = c("Marine", "Freshwater"), colors = c("yellow", "red"),
+  plot_as_waiting_time = FALSE)
 }
 \arguments{
 \item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
@@ -15,7 +15,7 @@ h_ridgelines(processed_hisse_recon, parameter = "turnover",
 
 \item{state_names}{The names for character states}
 
-\item{paint_colors}{Colors for the points in the two alternate states}
+\item{colors}{Colors for the points in the two alternate states}
 
 \item{plot_as_waiting_time}{Whether to plot the rates (FALSE, default) or their inverse (waiting times)}
 }
@@ -35,5 +35,5 @@ h_ridgelines(
  processed_hisse_recon = processed_hisse,
  state_names = c("Plankton", "Benthos"),
  parameter = "extinction",
- paint_colors = c("yellow", "red"))
+ colors = c("yellow", "red"))
 }

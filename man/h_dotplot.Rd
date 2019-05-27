@@ -5,7 +5,7 @@
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
 h_dotplot(processed_hisse_recon, parameter = "turnover",
-  x_labels = c("Marine", "Freshwater"), bin_width = 0.1, paint_colors,
+  x_labels = c("Marine", "Freshwater"), bin_width = 0.1, colors,
   plot_as_waiting_time = TRUE)
 }
 \arguments{
@@ -15,7 +15,7 @@ h_dotplot(processed_hisse_recon, parameter = "turnover",
 
 \item{bin_width}{The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.}
 
-\item{paint_colors}{Colors for the points in the two alternate states}
+\item{colors}{Colors for the points in the two alternate states}
 
 \item{plot_as_waiting_time}{Whether to plot the rates or their inverse (waiting times)}
 
@@ -40,7 +40,7 @@ h_dotplot(
   parameter = "turnover",
   x_labels = c("Plankton", "Benthos"),
   bin_width = 0.2,
-  paint_colors=paint_cols[1:2],
+  colors=paint_cols[1:2],
   plot_as_waiting_time = TRUE
 ) + labs(x = "", y = "waiting time (My)", title = "Turnover")
 
