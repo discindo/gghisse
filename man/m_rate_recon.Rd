@@ -10,6 +10,8 @@ m_rate_recon(processed_muhisse_recon, parameter = "turnover",
   time_axis_ticks = 10, open_angle = 10)
 }
 \arguments{
+\item{processed_muhisse_recon}{An object produced by \code{h_process_recon}}
+
 \item{parameter}{The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
 \item{discrete}{Logical. Whether to discretize the distribution of reconstructed rates into bins}
@@ -23,8 +25,6 @@ m_rate_recon(processed_muhisse_recon, parameter = "turnover",
 \item{time_axis_ticks}{numeric giving the number of ticks for the time axis (default=10)}
 
 \item{open_angle}{The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.}
-
-\item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
 }
 \value{
 A plot of the phylogeny with branches colored by hisse-inferred marginal ancestral states.

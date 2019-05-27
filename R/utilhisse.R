@@ -1,5 +1,6 @@
 ##### --- TO DO ----------------------------------- #####
 
+# 1. add option to plot as waiting time everywhere where applicable
 # 2. Add pretty() for axis ticks for all functions
 # 3. Data objects
 # 4. Make functions to create hisse objects on the fly -- though still need recons and support regions
@@ -108,7 +109,7 @@ h_scatterplot <-
     tip.rates.sum <- tip.rates %>%
       group_by(f_state) %>%
       select(f_state, !!as.name(parameter)) %>%
-      summarise_if(is.numeric, .funs=list(Mean=mean, SD=sd))
+      summarise_if(is.numeric, .funs=list(Mean=mean, SD=sd, Max=max))
 
     result <-
       ggplot(data = tip.rates,
@@ -141,6 +142,7 @@ h_scatterplot <-
       scale_color_viridis(name = x_label,
                           end = 0.6,
                           discrete = TRUE) +
+      scale_y_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
       theme_classic() +
       theme(legend.position = "right",
             legend.key.size = unit(x = .6, units = "cm")) +
@@ -247,6 +249,7 @@ h_dotplot <-
       scale_color_manual(values = paint_colors, name = "") +
       scale_fill_manual(values = paint_colors, name = "") +
       scale_x_discrete(breaks = x_labels, labels = x_labels) +
+      scale_y_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
       theme_classic() +
       theme(
         legend.position = "none",
@@ -344,7 +347,9 @@ h_ridgelines <- function(processed_hisse_recon,
       inherit.aes = FALSE
     ) +
     scale_fill_manual(values = paint_colors) +
+    scale_x_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
     labs(y = "", x=parameter) +
+    theme_classic() +
     theme(legend.position = "none")
 }
 
@@ -411,8 +416,8 @@ h_trait_recon <-
         open.angle = open_angle
       ) +
       theme(
-        legend.direction = "horizontal",
-        legend.position = "bottom",
+        # legend.direction = "horizontal",
+        # legend.position = "bottom",
         legend.key.size = unit(x = .5, units = "cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank(),
@@ -438,8 +443,8 @@ h_trait_recon <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
       if (tree_direction == "down") {
@@ -452,8 +457,8 @@ h_trait_recon <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -467,8 +472,8 @@ h_trait_recon <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -481,8 +486,8 @@ h_trait_recon <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
     }
@@ -496,7 +501,7 @@ h_trait_recon <-
         unique %>%
         round(., 1)
       ntip <- Ntip(tree) +10
-      pretty_points <- maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+      pretty_points <- maxx - c(maxx, pretty(c(maxx:0), n = time_axis_ticks))
 
       pp <- tibble(x = rev(pretty_points), y = 0) %>%
         filter(x <= maxx, x > 0) %>%
@@ -577,8 +582,8 @@ h_rate_recon <-
              size = .45,
              open.angle = 10) +
       theme(
-        legend.direction = "horizontal",
-        legend.position = "bottom",
+        # legend.direction = "horizontal",
+        # legend.position = "bottom",
         legend.key.size = unit(x = .5, units = "cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank()
@@ -614,8 +619,8 @@ h_rate_recon <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
       if (tree_direction == "down") {
@@ -628,8 +633,8 @@ h_rate_recon <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -643,8 +648,8 @@ h_rate_recon <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -657,8 +662,8 @@ h_rate_recon <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
     }
@@ -672,7 +677,7 @@ h_rate_recon <-
         unique %>%
         round(., 1)
       ntip <- Ntip(tree) +10
-      pretty_points <- maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+      pretty_points <- maxx - c(maxx, pretty(c(maxx,0), n = time_axis_ticks))
 
       pp <- tibble(x = rev(pretty_points), y = 0) %>%
         filter(x <= maxx, x > 0) %>%
@@ -877,7 +882,6 @@ m_diversification_rates <- function(model_fit, states) {
 #'# muhisse model
 #'MH <- get(load("data/final.MuHiSSE2.Rsave"))
 #'m_collect_rates(model_fit = MH, hidden_traits=TRUE, character_states=States)
-
 
 m_collect_rates <-
   function(model_fit,
@@ -1533,8 +1537,8 @@ m_trait_recon_cp <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
       if (tree_direction == "down") {
@@ -1547,8 +1551,8 @@ m_trait_recon_cp <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -1562,8 +1566,8 @@ m_trait_recon_cp <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -1576,8 +1580,8 @@ m_trait_recon_cp <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
     }
@@ -1592,7 +1596,7 @@ m_trait_recon_cp <-
         round(., 1)
       ntip <- Ntip(tree) + 10
       pretty_points <-
-        maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+        maxx - c(maxx, pretty(c(maxx,0), n = time_axis_ticks))
 
       pp <- tibble(x = rev(pretty_points), y = 0) %>%
         filter(x <= maxx, x > 0) %>%
@@ -1755,8 +1759,8 @@ m_trait_recon <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -1770,8 +1774,8 @@ m_trait_recon <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -1784,8 +1788,8 @@ m_trait_recon <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
     }
@@ -1799,7 +1803,7 @@ m_trait_recon <-
         unique %>%
         round(., 1)
       ntip <- Ntip(tree) +10
-      pretty_points <- maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+      pretty_points <- maxx - c(maxx, pretty(c(maxx,0), n = time_axis_ticks))
 
       pp <- tibble(x = rev(pretty_points), y = 0) %>%
         filter(x <= maxx, x > 0) %>%
@@ -1823,7 +1827,7 @@ m_trait_recon <-
 #'
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
 #'
-#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param processed_muhisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
 #' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether max(rate) is in this vector and adds it if not.
@@ -1920,8 +1924,8 @@ m_rate_recon <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
       if (tree_direction == "down") {
@@ -1934,8 +1938,8 @@ m_rate_recon <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -1949,8 +1953,8 @@ m_rate_recon <-
           scale_x_continuous(
             trans = "reverse",
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
 
@@ -1963,8 +1967,8 @@ m_rate_recon <-
           ) +
           scale_x_continuous(
             expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
+            breaks = pretty(c(0,agemax), n = time_axis_ticks),
+            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
           )
       }
     }
@@ -1978,7 +1982,7 @@ m_rate_recon <-
         unique %>%
         round(., 1)
       ntip <- Ntip(tree) +10
-      pretty_points <- maxx - c(maxx, pretty(maxx:0, n = time_axis_ticks))
+      pretty_points <- maxx - c(maxx, pretty(c(maxx,0), n = time_axis_ticks))
 
       pp <- tibble(x = rev(pretty_points), y = 0) %>%
         filter(x <= maxx, x > 0) %>%
