@@ -1,7 +1,6 @@
 ##### --- TO DO ----------------------------------- #####
 
 # 1. add option to plot as waiting time everywhere where applicable
-# 2. Add pretty() for axis ticks for all functions
 # 3. Data objects
 # 4. Make functions to create hisse objects on the fly -- though still need recons and support regions
 # 5. Support region functions. Making tables, plots, and contour plots?
@@ -70,8 +69,10 @@ h_process_recon <- function(hisse_recon) {
 #' @description A function to plot a scatterplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait).
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
-#' @param parameter parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
-#' @param x_label Label for the x axis. This is usually the binary trait whose assosiation with diversification is being tested.
+#' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
+#' @param x_label Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.
+#' @param state_names A character vector of length two giving the translation for states 0 and 1.
+#' @param plot_as_waiting_time Logical. Whether to plot the rates or their inverse (waiting times)
 #'
 #' @return A jittered scatterplot of (model averaged) tip-associated rates.
 #'
@@ -102,20 +103,30 @@ h_process_recon <- function(hisse_recon) {
 h_scatterplot <-
   function(processed_hisse_recon,
            parameter = "turnover",
-           x_label) {
+           x_label="",
+           state_names=c("0", "1"),
+           plot_as_waiting_time=FALSE) {
+
     tip.rates <- processed_hisse_recon$tip_rates
     tip.rates$f_state <- as.factor(tip.rates$state)
 
+    if (plot_as_waiting_time) {
+      tip.rates <- mutate(tip.rates, wanted = 1/!!as.name(parameter))
+    } else {
+      tip.rates <- mutate(tip.rates, wanted = !!as.name(parameter))
+    }
+
     tip.rates.sum <- tip.rates %>%
       group_by(f_state) %>%
-      select(f_state, !!as.name(parameter)) %>%
-      summarise_if(is.numeric, .funs=list(Mean=mean, SD=sd, Max=max))
+      select(f_state, wanted) %>%
+      summarise_if(is.numeric, .funs=list(Mean=mean, SD=sd, Max=max)) %>%
+      mutate(wanted=Mean) #to bypass warning in geom_errorbar
 
     result <-
       ggplot(data = tip.rates,
              aes(
                x = f_state,
-               y = !!as.name(parameter),
+               y = wanted,
                color = f_state
              )) +
       geom_point(alpha = .7,
@@ -127,8 +138,7 @@ h_scatterplot <-
         aes(
           x = f_state,
           ymax = Mean + SD,
-          ymin = Mean - SD,
-          y = Mean
+          ymin = Mean - SD
         ),
         position = position_nudge(x = 0.3, y = 0)
       ) +
@@ -143,6 +153,7 @@ h_scatterplot <-
                           end = 0.6,
                           discrete = TRUE) +
       scale_y_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
+      scale_x_discrete(breaks=c(0,1), labels=state_names) +
       theme_classic() +
       theme(legend.position = "right",
             legend.key.size = unit(x = .6, units = "cm")) +
@@ -152,11 +163,12 @@ h_scatterplot <-
 
 #' Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips
 #'
-#' @description A function to plot a dotplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait). Further modifications are straightforward with ggplot (see examples).
+#' @description A function to plot a dotplot of (model-averaged) diversification rates in the alternative states.
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
-#' @param x_labels A character vector of length two giving the labels for the x axis tick marks. This is usually the binary trait whose assosiation with diversification is being tested. The replacement for `0` should be first, e.g., `c("0"="Plankton", "1"="Benthos").
+#' @param x_label Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.
+#' @param state_names A character vector of length two giving the translation for states 0 and 1.
 #' @param bin_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
 #' @param paint_colors Colors for the points in the two alternate states
 #' @param plot_as_waiting_time Whether to plot the rates or their inverse (waiting times)
@@ -187,35 +199,27 @@ h_dotplot <-
            bin_width = 0.1,
            paint_colors,
            plot_as_waiting_time=TRUE) {
+
     tip.rates <- processed_hisse_recon$tip_rates
-    tip.rates$f_state <-
-      factor(ifelse(tip.rates$state == 0, x_labels[1], x_labels[2]), levels = x_labels)
-    wanted <- as.name(parameter)
+    tip.rates$f_state <- as.factor(tip.rates$state)
 
     if (plot_as_waiting_time) {
-      tip.rates <- tip.rates %>% mutate(var_to_plot= 1 / !!wanted)
+      tip.rates <- mutate(tip.rates, wanted = 1/!!as.name(parameter))
     } else {
-      tip.rates <- tip.rates %>% mutate(var_to_plot= !!wanted)
+      tip.rates <- mutate(tip.rates, wanted = !!as.name(parameter))
     }
 
     tip.rates.sum <- tip.rates %>%
       group_by(f_state) %>%
-      summarise_at(.vars = vars(var_to_plot),
-                   .funs = funs(mean, sd, median, min, max)) %>%
-      rename(
-        Mean = mean,
-        SD = sd,
-        Median = median,
-        Min = min,
-        Max = max
-      )
-    print(tip.rates.sum)
+      select(f_state, wanted) %>%
+      summarise_if(is.numeric, .funs=list(Mean=mean, SD=sd, Max=max)) %>%
+      mutate(wanted=Mean) #to bypass warning in geom_errorbar
 
     sss <-
       ggplot(data = tip.rates,
              aes(
                x = f_state,
-               y = var_to_plot,
+               y = wanted,
                fill = f_state
              )) +
       geom_dotplot(
@@ -234,8 +238,7 @@ h_dotplot <-
         aes(
           x = f_state,
           ymax = Mean + SD,
-          ymin = Mean - SD,
-          y = Mean
+          ymin = Mean - SD
         ),
         position = position_nudge(x = -0.1, y = 0)
       ) +
@@ -248,7 +251,7 @@ h_dotplot <-
       ) +
       scale_color_manual(values = paint_colors, name = "") +
       scale_fill_manual(values = paint_colors, name = "") +
-      scale_x_discrete(breaks = x_labels, labels = x_labels) +
+      scale_x_discrete(breaks = c(0,1), labels = x_labels) +
       scale_y_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
       theme_classic() +
       theme(

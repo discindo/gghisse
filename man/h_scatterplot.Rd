@@ -4,14 +4,20 @@
 \alias{h_scatterplot}
 \title{Plot diversification rates estimated by a HiSSE model (HiSSE, BiSSE, CID2, CID4)}
 \usage{
-h_scatterplot(processed_hisse_recon, parameter = "turnover", x_label)
+h_scatterplot(processed_hisse_recon, parameter = "turnover",
+  x_label = "", state_names = c("0", "1"),
+  plot_as_waiting_time = FALSE)
 }
 \arguments{
 \item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
 
-\item{parameter}{parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
+\item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
-\item{x_label}{Label for the x axis. This is usually the binary trait whose assosiation with diversification is being tested.}
+\item{x_label}{Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.}
+
+\item{state_names}{A character vector of length two giving the translation for states 0 and 1.}
+
+\item{plot_as_waiting_time}{Logical. Whether to plot the rates or their inverse (waiting times)}
 }
 \value{
 A jittered scatterplot of (model averaged) tip-associated rates.

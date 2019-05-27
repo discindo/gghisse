@@ -13,19 +13,21 @@ h_dotplot(processed_hisse_recon, parameter = "turnover",
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
-\item{x_labels}{A character vector of length two giving the labels for the x axis tick marks. This is usually the binary trait whose assosiation with diversification is being tested. The replacement for `0` should be first, e.g., `c("0"="Plankton", "1"="Benthos").}
-
 \item{bin_width}{The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.}
 
 \item{paint_colors}{Colors for the points in the two alternate states}
 
 \item{plot_as_waiting_time}{Whether to plot the rates or their inverse (waiting times)}
+
+\item{x_label}{Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.}
+
+\item{state_names}{A character vector of length two giving the translation for states 0 and 1.}
 }
 \value{
 A dotplot of tip-associated rates (possibly model averaged).
 }
 \description{
-A function to plot a dotplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait). Further modifications are straightforward with ggplot (see examples).
+A function to plot a dotplot of (model-averaged) diversification rates in the alternative states.
 }
 \examples{
 
