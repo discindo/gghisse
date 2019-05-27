@@ -14,7 +14,7 @@ m_rate_recon(processed_muhisse_recon, parameter = "turnover",
 
 \item{discrete}{Logical. Whether to discretize the distribution of reconstructed rates into bins}
 
-\item{breaks}{A numeric vector of cut points for binning the rates. Passed internally to \code{cut}}
+\item{breaks}{A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether max(rate) is in this vector and adds it if not.}
 
 \item{tree_layout}{A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.}
 

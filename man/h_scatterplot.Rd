@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilhisse.R
 \name{h_scatterplot}
 \alias{h_scatterplot}
-\title{Plot diversification rates estimated by a HiSSE model}
+\title{Plot diversification rates estimated by a HiSSE model (HiSSE, BiSSE, CID2, CID4)}
 \usage{
 h_scatterplot(processed_hisse_recon, parameter = "turnover", x_label)
 }
@@ -17,7 +17,7 @@ h_scatterplot(processed_hisse_recon, parameter = "turnover", x_label)
 A jittered scatterplot of (model averaged) tip-associated rates.
 }
 \description{
-A function to plot a boxplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait). Further modifications are straightforward with ggplot (see examples).
+A function to plot a scatterplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait).
 }
 \examples{
 
@@ -25,6 +25,7 @@ asr <- get(load("data/hab.cid4.recon.Rsave"))
 processed_hisse <- h_process_recon(hisse_recon=asr)
 hisse_rates_plot <- h_scatterplot(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
 
+# modifications are easy with ggplot
 # change x axis tick labels
 hisse_rates_plot +
  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos"))
@@ -39,7 +40,6 @@ hisse_rates_plot +
  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
  theme(legend.position="top") +
  labs(y=expression(paste(tau, "=", lambda, "+", mu))) +
- theme(axis.text.y=element_text(size=15)) +
- theme_grey()
+ theme(axis.text.y=element_text(size=15))
 
 }

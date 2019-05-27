@@ -1,6 +1,5 @@
 ##### --- TO DO ----------------------------------- #####
 
-# 1. Make h_boxplot --> h_scatterplot and add means +- sd instead of boxes
 # 2. Add pretty() for axis ticks for all functions
 # 3. Data objects
 # 4. Make functions to create hisse objects on the fly -- though still need recons and support regions
@@ -9,7 +8,7 @@
 # 7. diagram functions
 # 8. shiny app
 # 9. muhisse rate plot functions all rely on the same piece of code to format prior to plotting. Probably better to isolate this as a function
-# 10. Axis labels for time mostly in trees
+# 10. Axis labels! Mostly for time in trees
 
 
 ##### --- HiSSE functions ------------------------- #####
@@ -408,7 +407,7 @@ h_trait_recon <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .6,
+        size = .45,
         open.angle = open_angle
       ) +
       theme(
@@ -575,7 +574,7 @@ h_rate_recon <-
     ggg <-
       ggtree(tr = tree,
              layout = tree_layout,
-             size = .6,
+             size = .45,
              open.angle = 10) +
       theme(
         legend.direction = "horizontal",
@@ -1492,7 +1491,7 @@ m_trait_recon_cp <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .6,
+        size = .45,
         open.angle = open_angle
       ) +
       theme(
@@ -1712,14 +1711,13 @@ m_trait_recon <-
     message("Categories after discretizing with the provided cutoff:\n")
     ss.cnt <- ss %>% ungroup %>% group_by(four_state) %>% add_tally() %>% select(four_state, n) %>% distinct
     print(ss.cnt)
-
     nstat <- ss %>% select(four_state) %>% distinct %>% nrow
 
     ggg <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .6,
+        size = .45,
         open.angle = open_angle,
         aes(color=ss$four_state)
       ) +
@@ -1828,7 +1826,7 @@ m_trait_recon <-
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
-#' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}
+#' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether max(rate) is in this vector and adds it if not.
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
 #' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10)
@@ -1879,7 +1877,7 @@ m_rate_recon <-
     ggg <-
       ggtree(tr = tree,
              layout = tree_layout,
-             size = .6,
+             size = .45,
              open.angle = 10) +
       theme(
         legend.position = "right",
@@ -1889,8 +1887,12 @@ m_rate_recon <-
       )
 
     if (discrete) {
-      param <-
-        datas %>% select(!!wanted) %>% unlist %>% unname %>% cut(., breaks = breaks)
+      max_rate <- datas %>% select(!!wanted) %>% unlist %>% unname %>% max
+      if (!0%in% breaks) {breaks <- c(0, breaks)}
+      if(all(max_rate > breaks)) {breaks <- c(breaks, max_rate)}
+      message("Cutting distribution of rate with these breaks:\n")
+      print(breaks)
+      param <- datas %>% select(!!wanted) %>% unlist %>% unname %>% cut(., breaks = breaks)
       ggg <-
         ggg + aes(color = param) + scale_color_viridis_d(
           option = "B",
