@@ -39,7 +39,7 @@ h_dotplot(
   processed_hisse_recon = processed_hisse,
   parameter = "turnover",
   x_labels = c("Plankton", "Benthos"),
-  bin_width = 0.3,
+  bin_width = 0.2,
   paint_colors=paint_cols[1:2],
   plot_as_waiting_time = TRUE
 ) + labs(x = "", y = "waiting time (My)", title = "Turnover")

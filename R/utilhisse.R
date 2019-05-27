@@ -1,6 +1,5 @@
 ##### --- TO DO ----------------------------------- #####
 
-# 1. add option to plot as waiting time everywhere where applicable
 # 3. Data objects
 # 4. Make functions to create hisse objects on the fly -- though still need recons and support regions
 # 5. Support region functions. Making tables, plots, and contour plots?
@@ -185,7 +184,7 @@ h_scatterplot <-
 #'   processed_hisse_recon = processed_hisse,
 #'   parameter = "turnover",
 #'   x_labels = c("Plankton", "Benthos"),
-#'   bin_width = 0.3,
+#'   bin_width = 0.2,
 #'   paint_colors=paint_cols[1:2],
 #'   plot_as_waiting_time = TRUE
 #' ) + labs(x = "", y = "waiting time (My)", title = "Turnover")
@@ -356,7 +355,6 @@ h_ridgelines <- function(processed_hisse_recon,
     theme(legend.position = "none")
 }
 
-
 #' Plot HiSSE model-averaged marginal ancestral state reconstruction for the trait
 #'
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the trait data.
@@ -420,7 +418,7 @@ h_trait_recon <-
       ) +
       theme(
         # legend.direction = "horizontal",
-        # legend.position = "bottom",
+        legend.position = "right",
         legend.key.size = unit(x = .5, units = "cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank(),
@@ -436,90 +434,14 @@ h_trait_recon <-
       ggg <- ggg + aes(color = d_state) + scale_color_viridis_c(name = x_label, end = 0.6)
     }
 
-    if (tree_layout %in% c("rectangular", "slanted")) {
-      if (tree_direction == "up") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-      if (tree_direction == "down") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-
-      if (tree_direction == "left") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-
-      if (tree_direction == "right") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-    }
-
-    if (tree_layout %in% c("circular", "fan", "radial")) {
-      maxx <- ggg$data %>%
-        top_n(n = 1, wt = x) %>%
-        select(x) %>%
-        unlist %>%
-        unname %>%
-        unique %>%
-        round(., 1)
-      ntip <- Ntip(tree) +10
-      pretty_points <- maxx - c(maxx, pretty(c(maxx:0), n = time_axis_ticks))
-
-      pp <- tibble(x = rev(pretty_points), y = 0) %>%
-        filter(x <= maxx, x > 0) %>%
-        mutate(label = rev(x) - min(x))
-
-      ggg <- ggg +
-        geom_vline(data = pp,
-                   aes(xintercept = x),
-                   size = .2,
-                   color = "darkgrey") +
-        geom_text(data = pp,
-                  aes(x = x + 0.1, y = ntip+2, label = label),
-                  size = 2,
-                  inherit.aes=FALSE)
-    }
+    ggg <-
+      tree_flip(
+        ggtree_object = ggg,
+        tree_layout = tree_layout,
+        tree_direction = tree_direction,
+        time_axis_ticks = time_axis_ticks,
+        agemax = agemax
+      )
 
     return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
   }
@@ -612,90 +534,15 @@ h_rate_recon <-
           name = parameter
         )
     }
-    if (tree_layout %in% c("rectangular", "slanted")) {
-      if (tree_direction == "up") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-      if (tree_direction == "down") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
 
-      if (tree_direction == "left") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-
-      if (tree_direction == "right") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-    }
-
-    if (tree_layout %in% c("circular", "fan", "radial")) {
-      maxx <- ggg$data %>%
-        top_n(n = 1, wt = x) %>%
-        select(x) %>%
-        unlist %>%
-        unname %>%
-        unique %>%
-        round(., 1)
-      ntip <- Ntip(tree) +10
-      pretty_points <- maxx - c(maxx, pretty(c(maxx,0), n = time_axis_ticks))
-
-      pp <- tibble(x = rev(pretty_points), y = 0) %>%
-        filter(x <= maxx, x > 0) %>%
-        mutate(label = rev(x) - min(x))
-
-      ggg <- ggg +
-        geom_vline(data = pp,
-                   aes(xintercept = x),
-                   size = .2,
-                   color = "darkgrey") +
-        geom_text(data = pp,
-                  aes(x = x + 0.1, y = ntip+2, label = label),
-                  size = 2,
-                  inherit.aes=FALSE)
-    }
+    ggg <-
+      tree_flip(
+        ggtree_object = ggg,
+        tree_layout = tree_layout,
+        tree_direction = tree_direction,
+        time_axis_ticks = time_axis_ticks,
+        agemax = agemax
+      )
 
     return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
   }
@@ -1530,99 +1377,15 @@ m_trait_recon_cp <-
       ggg <- ggg + aes(color = datas$prob_x0, color2 = datas$prob_0x)
     }
 
-    if (tree_layout %in% c("rectangular", "slanted")) {
-      if (tree_direction == "up") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-      if (tree_direction == "down") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
+    ggg <-
+      tree_flip(
+        ggtree_object = ggg,
+        tree_layout = tree_layout,
+        tree_direction = tree_direction,
+        time_axis_ticks = time_axis_ticks,
+        agemax = agemax
+      )
 
-      if (tree_direction == "left") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-
-      if (tree_direction == "right") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-    }
-
-    if (tree_layout %in% c("circular", "fan", "radial")) {
-      maxx <- ggg$data %>%
-        top_n(n = 1, wt = x) %>%
-        select(x) %>%
-        unlist %>%
-        unname %>%
-        unique %>%
-        round(., 1)
-      ntip <- Ntip(tree) + 10
-      pretty_points <-
-        maxx - c(maxx, pretty(c(maxx,0), n = time_axis_ticks))
-
-      pp <- tibble(x = rev(pretty_points), y = 0) %>%
-        filter(x <= maxx, x > 0) %>%
-        mutate(label = rev(x) - min(x))
-
-      ggg <- ggg +
-        geom_vline(
-          data = pp,
-          aes(xintercept = x),
-          size = .2,
-          color = "darkgrey"
-        ) +
-        geom_text(
-          data = pp,
-          aes(
-            x = x + 0.1,
-            y = ntip + 2,
-            label = label
-          ),
-          size = 2,
-          inherit.aes = FALSE
-        )
-    }
     return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
   }
 
@@ -1738,90 +1501,14 @@ m_trait_recon <-
       ) +
       guides(color = guide_legend(override.aes = list(size = 4)))
 
-    if (tree_layout %in% c("rectangular", "slanted")) {
-      if (tree_direction == "up") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(0:agemax, n = time_axis_ticks),
-            labels = rev(pretty(0:agemax, n = time_axis_ticks))
-          )
-      }
-      if (tree_direction == "down") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-
-      if (tree_direction == "left") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-
-      if (tree_direction == "right") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-    }
-
-    if (tree_layout %in% c("circular", "fan", "radial")) {
-      maxx <- ggg$data %>%
-        top_n(n = 1, wt = x) %>%
-        select(x) %>%
-        unlist %>%
-        unname %>%
-        unique %>%
-        round(., 1)
-      ntip <- Ntip(tree) +10
-      pretty_points <- maxx - c(maxx, pretty(c(maxx,0), n = time_axis_ticks))
-
-      pp <- tibble(x = rev(pretty_points), y = 0) %>%
-        filter(x <= maxx, x > 0) %>%
-        mutate(label = rev(x) - min(x))
-
-      ggg <- ggg +
-        geom_vline(data = pp,
-                   aes(xintercept = x),
-                   size = .2,
-                   color = "darkgrey") +
-        geom_text(data = pp,
-                  aes(x = x + 0.1, y = ntip+2, label = label),
-                  size = 2,
-                  inherit.aes=FALSE)
-    }
+    ggg <-
+      tree_flip(
+        ggtree_object = ggg,
+        tree_layout = tree_layout,
+        tree_direction = tree_direction,
+        time_axis_ticks = time_axis_ticks,
+        agemax = agemax
+      )
 
     return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
   }
@@ -1917,90 +1604,123 @@ m_rate_recon <-
           name = parameter
         )
     }
-    if (tree_layout %in% c("rectangular", "slanted")) {
-      if (tree_direction == "up") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-      if (tree_direction == "down") {
-        ggg <- ggg + coord_flip() +
-          theme(
-            axis.line.y = element_line(),
-            axis.ticks.y = element_line(),
-            axis.text.y = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-
-      if (tree_direction == "left") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-
-      if (tree_direction == "right") {
-        ggg <- ggg +
-          theme(
-            axis.line.x = element_line(),
-            axis.ticks.x = element_line(),
-            axis.text.x = element_text()
-          ) +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0,agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0,agemax), n = time_axis_ticks))
-          )
-      }
-    }
-
-    if (tree_layout %in% c("circular", "fan", "radial")) {
-      maxx <- ggg$data %>%
-        top_n(n = 1, wt = x) %>%
-        select(x) %>%
-        unlist %>%
-        unname %>%
-        unique %>%
-        round(., 1)
-      ntip <- Ntip(tree) +10
-      pretty_points <- maxx - c(maxx, pretty(c(maxx,0), n = time_axis_ticks))
-
-      pp <- tibble(x = rev(pretty_points), y = 0) %>%
-        filter(x <= maxx, x > 0) %>%
-        mutate(label = rev(x) - min(x))
-
-      ggg <- ggg +
-        geom_vline(data = pp,
-                   aes(xintercept = x),
-                   size = .2,
-                   color = "darkgrey") +
-        geom_text(data = pp,
-                  aes(x = x + 0.1, y = ntip+2, label = label),
-                  size = 2,
-                  inherit.aes=FALSE)
-    }
+    ggg <-
+      tree_flip(
+        ggtree_object = ggg,
+        tree_layout = tree_layout,
+        tree_direction = tree_direction,
+        time_axis_ticks = time_axis_ticks,
+        agemax = agemax
+      )
 
     return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
   }
+
+
+##### --- Utility functions ------------------------- #####
+
+tree_flip <- function(ggtree_object,
+                      tree_layout,
+                      tree_direction,
+                      time_axis_ticks,
+                      agemax) {
+
+  if (tree_layout %in% c("rectangular", "slanted")) {
+    if (tree_direction == "up") {
+      ggtree_object <- ggtree_object + coord_flip() +
+        theme(
+          axis.line.y = element_line(),
+          axis.ticks.y = element_line(),
+          axis.text.y = element_text()
+        ) +
+        scale_x_continuous(
+          expand = c(0, 0.01),
+          breaks = pretty(c(0, agemax), n = time_axis_ticks),
+          labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
+        ) +
+        labs(x="Time (Ma)")
+    }
+    if (tree_direction == "down") {
+      ggtree_object <- ggtree_object + coord_flip() +
+        theme(
+          axis.line.y = element_line(),
+          axis.ticks.y = element_line(),
+          axis.text.y = element_text()
+        ) +
+        scale_x_continuous(
+          trans = "reverse",
+          expand = c(0, 0.01),
+          breaks = pretty(c(0, agemax), n = time_axis_ticks),
+          labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
+        ) +
+        labs(x="Time (Ma)")
+    }
+
+    if (tree_direction == "left") {
+      ggtree_object <- ggtree_object +
+        theme(
+          axis.line.x = element_line(),
+          axis.ticks.x = element_line(),
+          axis.text.x = element_text()
+        ) +
+        scale_x_continuous(
+          trans = "reverse",
+          expand = c(0, 0.01),
+          breaks = pretty(c(0, agemax), n = time_axis_ticks),
+          labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
+        ) +
+        labs(x="Time (Ma)")
+    }
+
+    if (tree_direction == "right") {
+      ggtree_object <- ggtree_object +
+        theme(
+          axis.line.x = element_line(),
+          axis.ticks.x = element_line(),
+          axis.text.x = element_text()
+        ) +
+        scale_x_continuous(
+          expand = c(0, 0.01),
+          breaks = pretty(c(0, agemax), n = time_axis_ticks),
+          labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
+        ) +
+        labs(x="Time (Ma)")
+    }
+  }
+
+  if (tree_layout %in% c("circular", "fan", "radial")) {
+    maxx <- ggtree_object$data %>%
+      top_n(n = 1, wt = x) %>%
+      select(x) %>%
+      unlist %>%
+      unname %>%
+      unique %>%
+      round(., 1)
+    ntip <- Ntip(tree) + 10
+    pretty_points <-
+      maxx - c(maxx, pretty(c(maxx:0), n = time_axis_ticks))
+
+    pp <- tibble(x = rev(pretty_points), y = 0) %>%
+      filter(x <= maxx, x > 0) %>%
+      mutate(label = rev(x) - min(x))
+
+    ggtree_object <- ggtree_object +
+      geom_vline(
+        data = pp,
+        aes(xintercept = x),
+        size = .2,
+        color = "darkgrey"
+      ) +
+      geom_text(
+        data = pp,
+        aes(
+          x = x + 0.1,
+          y = ntip + 2,
+          label = label
+        ),
+        size = 2,
+        inherit.aes = FALSE
+      )
+  }
+  return(ggtree_object)
+}
