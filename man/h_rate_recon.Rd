@@ -34,7 +34,7 @@ A function to plot a (model-averaged) marginal ancestral reconstruction for the 
 }
 \examples{
 
-asr <- get(load("data/hab.cid4.recon.Rdata"))
+asr <- get(load("data/cid4.recon.RData"))
 processed_hisse <- h_process_recon(hisse_recon=asr)
 
 map_continuous <-

@@ -27,7 +27,7 @@ A function to plot a scatterplot of (model-averaged) diversification rates in th
 }
 \examples{
 
-asr <- get(load("data/hab.cid4.recon.Rdata"))
+asr <- get(load("data/cid4.recon.RData"))
 processed_hisse <- h_process_recon(hisse_recon=asr)
 hisse_rates_plot <- h_scatterplot(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
 

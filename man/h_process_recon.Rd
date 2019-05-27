@@ -20,7 +20,7 @@ A function to process the output from \code{hisse::MarginRecon}. First we get mo
 }
 \examples{
 
-asr <- get(load("data/cid4.recon.Rdata"))
+asr <- get(load("data/cid4.recon.RData"))
 
 processed_hisse <- h_process_recon(hisse_recon=asr)
 processed_hisse$tip_rates

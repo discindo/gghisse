@@ -36,7 +36,7 @@ A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction 
 }
 \examples{
 
-asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+asr <- get(load("data/muhisse_relax_20_recon.RData"))
 processed_muhisse <- m_process_recon(muhisse_recon=asr)
 
 m_trait_recon_cp(

@@ -31,7 +31,7 @@ A function to plot a dotplot of (model-averaged) diversification rates in the al
 }
 \examples{
 
-asr <- get(load("data/hab.cid4.recon.Rdata"))
+asr <- get(load("data/cid4.recon.RData"))
 processed_hisse <- h_process_recon(hisse_recon=asr)
 paint_cols <- c("orange", "violet")
 

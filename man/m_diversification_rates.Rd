@@ -22,14 +22,14 @@ A helper function that formats \code{hisse::MuHiSSE}'s diversification parameter
 States <- c("mp", "mb", "fp", "fb")
 
 # muhisse model
-MH <- get(load("data/final.MuHiSSE2.Rdata"))
+MH <- get(load("data/final.MuHiSSE2.RData"))
 m_diversification_rates(model_fit = MH, states=States)
 
 # CID8 model
-C8 <- get(load("data/final.CID8relax.Rdata"))
+C8 <- get(load("data/final.CID8relax.RData"))
 m_diversification_rates(model_fit = C8, states=States)
 
 # musse model, no hidden states
-MU <- get(load("data/MuSSE.Rdata"))
+MU <- get(load("data/MuSSE.RData"))
 m_diversification_rates(model_fit = MU, states = States)
 }

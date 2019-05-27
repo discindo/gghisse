@@ -1,10 +1,11 @@
 ##### --- TO DO ----------------------------------- #####
 
-# 3. Data objects
+# 3. Data objects ??
 # 5. Support region functions. Making tables, plots, and contour plots?
 # 6. g_ functions for HiGeoSSE
 # 7. diagram functions
 # 8. shiny app
+# 9. test 3 state models
 
 ##### --- HiSSE functions ------------------------- #####
 
@@ -22,7 +23,7 @@
 #'
 #'@examples
 #'
-#'asr <- get(load("data/cid4.recon.Rdata"))
+#'asr <- get(load("data/cid4.recon.RData"))
 #'
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
 #'processed_hisse$tip_rates
@@ -74,7 +75,7 @@ h_process_recon <- function(hisse_recon) {
 #'
 #' @examples
 #'
-#'asr <- get(load("data/hab.cid4.recon.Rdata"))
+#'asr <- get(load("data/cid4.recon.RData"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
 #'hisse_rates_plot <- h_scatterplot(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
 #'
@@ -173,7 +174,7 @@ h_scatterplot <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/hab.cid4.recon.Rdata"))
+#'asr <- get(load("data/cid4.recon.RData"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
 #'paint_cols <- c("orange", "violet")
 #'
@@ -272,7 +273,7 @@ h_dotplot <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/hab.cid4.recon.Rdata"))
+#'asr <- get(load("data/cid4.recon.RData"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
 #'paint_cols <- c("orange", "violet")
 #'
@@ -369,7 +370,7 @@ h_ridgelines <- function(processed_hisse_recon,
 #'
 #' @examples
 #'
-#'asr <- get(load("data/hab.cid4.recon.Rdata"))
+#'asr <- get(load("data/cid4.recon.RData"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
 #'
 #'map_continuous <-
@@ -460,7 +461,7 @@ h_trait_recon <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/hab.cid4.recon.Rdata"))
+#'asr <- get(load("data/cid4.recon.RData"))
 #'processed_hisse <- h_process_recon(hisse_recon=asr)
 #'
 #'map_continuous <-
@@ -572,16 +573,16 @@ h_rate_recon <-
 #'    select(Name) %>% unlist %>% unname
 #'
 #'# muhisse model
-#'MH <- get(load("data/final.MuHiSSE2.Rdata"))
+#'MH <- get(load("data/final.MuHiSSE2.RData"))
 #'m_transitions_matrix(model_fit = MH, hidden_states = TRUE, states = States)
 #'
 #'# CID8 model
-#'C8 <- get(load("data/final.CID8relax.Rdata"))
+#'C8 <- get(load("data/final.CID8relax.RData"))
 #'# we have 8 hidden states, so the transition matrix is cumbersome
 #'m_transitions_matrix(model_fit = C8, hidden_states = TRUE, states = States)
 #'
 #'# musse model, no hidden states
-#'MU <- get(load("data/MuSSE.Rdata"))
+#'MU <- get(load("data/MuSSE.RData"))
 #'m_transitions_matrix(model_fit = MU, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
 #'
 
@@ -663,15 +664,15 @@ m_transition_matrix <-
 #'States <- c("mp", "mb", "fp", "fb")
 #'
 #'# muhisse model
-#'MH <- get(load("data/final.MuHiSSE2.Rdata"))
+#'MH <- get(load("data/final.MuHiSSE2.RData"))
 #'m_diversification_rates(model_fit = MH, states=States)
 #'
 #'# CID8 model
-#'C8 <- get(load("data/final.CID8relax.Rdata"))
+#'C8 <- get(load("data/final.CID8relax.RData"))
 #'m_diversification_rates(model_fit = C8, states=States)
 #'
 #'# musse model, no hidden states
-#'MU <- get(load("data/MuSSE.Rdata"))
+#'MU <- get(load("data/MuSSE.RData"))
 #'m_diversification_rates(model_fit = MU, states = States)
 
 m_diversification_rates <- function(model_fit, states) {
@@ -727,7 +728,7 @@ m_diversification_rates <- function(model_fit, states) {
 #'States <- c("mp", "mb", "fp", "fb")
 #'
 #'# muhisse model
-#'MH <- get(load("data/final.MuHiSSE2.Rdata"))
+#'MH <- get(load("data/final.MuHiSSE2.RData"))
 #'m_collect_rates(model_fit = MH, hidden_traits=TRUE, character_states=States)
 
 m_collect_rates <-
@@ -769,7 +770,7 @@ m_collect_rates <-
 #'
 #'@examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
 #'processed_muhisse$tip_rates
 #'processed_muhisse$node_rates
@@ -826,7 +827,7 @@ m_process_recon <- function(muhisse_recon) {
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
 #'m_scatterplot_cp(
 #'  processed_muhisse_recon = processed_muhisse,
@@ -948,7 +949,7 @@ m_scatterplot_cp <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
 #'processed_muhisse <- m_process_recon(hisse_recon=asr)
 #'
 #'m_ridgelines(
@@ -1058,7 +1059,7 @@ m_ridgelines <- function(processed_muhisse_recon,
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
 #'
 #'m_scatterplot(
@@ -1169,7 +1170,7 @@ m_scatterplot <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
 #'
 #'m_dotplot(
@@ -1287,7 +1288,7 @@ m_dotplot <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
 #'
 #'m_trait_recon_cp(
@@ -1385,7 +1386,7 @@ m_trait_recon_cp <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
 #'
 #'# eight categories after binning with a cutoff of 0.2
@@ -1507,7 +1508,7 @@ m_trait_recon <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.Rdata"))
+#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
 #'processed_muhisse <- m_process_recon(muhisse_recon=asr)
 #'
 #'map_continuous <-
