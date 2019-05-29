@@ -10,4 +10,4 @@ LazyData: true
 RoxygenNote: 6.1.1
 License: GPL(>= 2)
 Depends: hisse
-Imports: tidyverse, magrittr, treeio, ggtree, ggridges, colorplaner, viridis
+Imports: tidyverse, treeio, ggtree, ggridges, colorplaner, viridis
