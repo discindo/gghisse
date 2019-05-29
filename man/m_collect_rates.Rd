@@ -18,6 +18,6 @@ so rates can be extracted in one step
 States <- c("mp", "mb", "fp", "fb")
 
 # muhisse model
-MH <- get(load("data/final.MuHiSSE2.RData"))
-m_collect_rates(model_fit = MH, hidden_traits=TRUE, character_states=States)
+data("diatoms")
+m_collect_rates(model_fit = diatoms$muhisse, hidden_traits=TRUE, character_states=States)
 }

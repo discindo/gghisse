@@ -27,8 +27,8 @@ A function to plot a ridgeline of (model-averaged) diversification rates in the 
 }
 \examples{
 
-asr <- get(load("data/cid4.recon.RData"))
-processed_hisse <- h_process_recon(hisse_recon=asr)
+data("diatoms")
+processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 paint_cols <- c("orange", "violet")
 
 h_ridgelines(

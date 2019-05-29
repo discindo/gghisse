@@ -23,9 +23,8 @@
 #'
 #'@examples
 #'
-#'asr <- get(load("data/cid4.recon.RData"))
-#'
-#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'data("diatoms")
+#'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'processed_hisse$tip_rates
 #'processed_hisse$node_rates
 #'processed_hisse$tree_data
@@ -75,8 +74,8 @@ h_process_recon <- function(hisse_recon) {
 #'
 #' @examples
 #'
-#'asr <- get(load("data/cid4.recon.RData"))
-#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'data("diatoms")
+#'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'hisse_rates_plot <- h_scatterplot(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
 #'
 #'# modifications are easy with ggplot
@@ -174,8 +173,8 @@ h_scatterplot <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/cid4.recon.RData"))
-#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'data("diatoms")
+#'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'paint_cols <- c("orange", "violet")
 #'
 #' h_dotplot(
@@ -273,8 +272,8 @@ h_dotplot <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/cid4.recon.RData"))
-#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'data("diatoms")
+#'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'paint_cols <- c("orange", "violet")
 #'
 #'h_ridgelines(
@@ -370,8 +369,8 @@ h_ridgelines <- function(processed_hisse_recon,
 #'
 #' @examples
 #'
-#'asr <- get(load("data/cid4.recon.RData"))
-#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'data("diatoms")
+#'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'
 #'map_continuous <-
 #'  h_trait_recon(
@@ -461,8 +460,8 @@ h_trait_recon <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/cid4.recon.RData"))
-#'processed_hisse <- h_process_recon(hisse_recon=asr)
+#'data("diatoms")
+#'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'
 #'map_continuous <-
 #'  h_rate_recon(
@@ -573,17 +572,15 @@ h_rate_recon <-
 #'    select(Name) %>% unlist %>% unname
 #'
 #'# muhisse model
-#'MH <- get(load("data/final.MuHiSSE2.RData"))
-#'m_transitions_matrix(model_fit = MH, hidden_states = TRUE, states = States)
+#'data("diatoms")
+#'m_transitions_matrix(model_fit = diatoms$muhisse, hidden_states = TRUE, states = States)
 #'
 #'# CID8 model
-#'C8 <- get(load("data/final.CID8relax.RData"))
 #'# we have 8 hidden states, so the transition matrix is cumbersome
-#'m_transitions_matrix(model_fit = C8, hidden_states = TRUE, states = States)
+#'m_transitions_matrix(model_fit = data$cid8, hidden_states = TRUE, states = States)
 #'
 #'# musse model, no hidden states
-#'MU <- get(load("data/MuSSE.RData"))
-#'m_transitions_matrix(model_fit = MU, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
+#'m_transitions_matrix(model_fit = data$musse, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
 #'
 
 m_transition_matrix <-
@@ -664,16 +661,14 @@ m_transition_matrix <-
 #'States <- c("mp", "mb", "fp", "fb")
 #'
 #'# muhisse model
-#'MH <- get(load("data/final.MuHiSSE2.RData"))
-#'m_diversification_rates(model_fit = MH, states=States)
+#'data("diatoms)
+#'m_diversification_rates(model_fit = diatoms$muhisse, states=States)
 #'
 #'# CID8 model
-#'C8 <- get(load("data/final.CID8relax.RData"))
-#'m_diversification_rates(model_fit = C8, states=States)
+#'m_diversification_rates(model_fit = diatoms$cid8, states=States)
 #'
 #'# musse model, no hidden states
-#'MU <- get(load("data/MuSSE.RData"))
-#'m_diversification_rates(model_fit = MU, states = States)
+#'m_diversification_rates(model_fit = diatoms$musse, states = States)
 
 m_diversification_rates <- function(model_fit, states) {
   hidden_traits <-
@@ -728,8 +723,8 @@ m_diversification_rates <- function(model_fit, states) {
 #'States <- c("mp", "mb", "fp", "fb")
 #'
 #'# muhisse model
-#'MH <- get(load("data/final.MuHiSSE2.RData"))
-#'m_collect_rates(model_fit = MH, hidden_traits=TRUE, character_states=States)
+#'data("diatoms")
+#'m_collect_rates(model_fit = diatoms$muhisse, hidden_traits=TRUE, character_states=States)
 
 m_collect_rates <-
   function(model_fit,
@@ -770,8 +765,8 @@ m_collect_rates <-
 #'
 #'@examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
-#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'data("diatoms")
+#'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'processed_muhisse$tip_rates
 #'processed_muhisse$node_rates
 #'processed_muhisse$tree_data
@@ -827,8 +822,8 @@ m_process_recon <- function(muhisse_recon) {
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
-#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'data("diatoms")
+#'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'m_scatterplot_cp(
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "turnover",
@@ -949,8 +944,8 @@ m_scatterplot_cp <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
-#'processed_muhisse <- m_process_recon(hisse_recon=asr)
+#'data("diatoms")
+#'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'m_ridgelines(
 #'  processed_muhisse_recon = processed_muhisse,
@@ -1059,8 +1054,8 @@ m_ridgelines <- function(processed_muhisse_recon,
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
-#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'data("diatoms")
+#'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'m_scatterplot(
 #'  processed_muhisse_recon = processed_muhisse,
@@ -1170,8 +1165,8 @@ m_scatterplot <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
-#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'data("diatoms")
+#'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'m_dotplot(
 #'  processed_muhisse_recon = processed_muhisse,
@@ -1288,8 +1283,8 @@ m_dotplot <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
-#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'data("diatoms")
+#'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'m_trait_recon_cp(
 #'  processed_muhisse_recon = processed_muhisse,
@@ -1386,8 +1381,8 @@ m_trait_recon_cp <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
-#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'data("diatoms")
+#'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'# eight categories after binning with a cutoff of 0.2
 #'m_trait_recon(
@@ -1508,8 +1503,8 @@ m_trait_recon <-
 #'
 #' @examples
 #'
-#'asr <- get(load("data/muhisse_relax_20_recon.RData"))
-#'processed_muhisse <- m_process_recon(muhisse_recon=asr)
+#'data("diatoms")
+#'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'map_continuous <-
 #'  m_rate_recon(

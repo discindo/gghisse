@@ -36,8 +36,8 @@ A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction 
 }
 \examples{
 
-asr <- get(load("data/muhisse_relax_20_recon.RData"))
-processed_muhisse <- m_process_recon(muhisse_recon=asr)
+data("diatoms")
+processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 
 # eight categories after binning with a cutoff of 0.2
 m_trait_recon(

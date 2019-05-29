@@ -22,8 +22,8 @@ Internally, the probabilities for individual states (00, 01, 10, 11) are convert
 }
 \examples{
 
-asr <- get(load("data/muhisse_relax_20_recon.RData"))
-processed_muhisse <- m_process_recon(muhisse_recon=asr)
+data("diatoms")
+processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 processed_muhisse$tip_rates
 processed_muhisse$node_rates
 processed_muhisse$tree_data

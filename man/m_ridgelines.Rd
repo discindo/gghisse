@@ -29,8 +29,8 @@ A function to plot a ridgeline of (model-averaged) diversification rates in the 
 }
 \examples{
 
-asr <- get(load("data/muhisse_relax_20_recon.RData"))
-processed_muhisse <- m_process_recon(hisse_recon=asr)
+data("diatoms")
+processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 
 m_ridgelines(
  processed_muhisse_recon = processed_muhisse,

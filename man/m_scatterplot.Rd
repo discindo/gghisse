@@ -27,8 +27,8 @@ A function to plot a jittered scatterplot of (model-averaged) diversification ra
 }
 \examples{
 
-asr <- get(load("data/muhisse_relax_20_recon.RData"))
-processed_muhisse <- m_process_recon(muhisse_recon=asr)
+data("diatoms")
+processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 
 m_scatterplot(
  processed_muhisse_recon = processed_muhisse,
