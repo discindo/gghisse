@@ -35,6 +35,6 @@ processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 m_dotplot(
  processed_muhisse_recon = processed_muhisse,
  parameter = "extinction",
- colors = viridis::viridis(n = 4, option=1, end=.8))
+ colors = viridis(n = 4, option=1, end=.8))
 
 }

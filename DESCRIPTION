@@ -10,4 +10,4 @@ LazyData: true
 RoxygenNote: 6.1.1
 License: GPL(>= 2)
 Depends: R (>= 2.10), hisse, dplyr, ggplot2
-Imports: treeio, ggtree, ggridges, colorplaner, viridis, stringr, ape, purrr
+Imports: treeio, ggtree, ggridges, colorplaner, viridisLite, viridis, stringr, ape, purrr

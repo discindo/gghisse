@@ -9,7 +9,8 @@
 #' @importFrom ggtree ggtree
 #' @importFrom treeio as.treedata
 #' @importFrom ggridges geom_density_ridges
-#' @importFrom colorplaner scale_color_colorplane
+#' @importFrom colorplaner scale_color_colorplane interpolate_projection
+#' @importFrom viridisLite viridis
 #' @importFrom viridis viridis
 #' @importFrom ape branching.times
 #' @importFrom purrr map
@@ -59,7 +60,9 @@ h_process_recon <- function(hisse_recon) {
   nod.rates <-
     GetModelAveRates(x = hisse_recon, type = "nodes") %>%
     as_tibble()
+
   nod.rates$id <- as.character(nod.rates$id)
+  tip.rates$id <- as.character(tip.rates$id)
   both.rates <- bind_rows(tip.rates, nod.rates)
 
   if (class(hisse_recon) == "list") {
@@ -137,9 +140,12 @@ h_scatterplot <-
     tip.rates.sum <- tip.rates %>%
       group_by(f_state) %>%
       select(f_state, wanted) %>%
-      summarise_if(is.numeric, .funs = list(Mean = mean, SD = sd, Max =
-                                              max)) %>%
-      mutate(wanted = Mean) #to bypass warning in geom_errorbar
+      summarise_if(
+        .predicate = is.numeric,
+        .funs = list("Mean" = mean,
+                     "SD" = sd,
+                     "Max" = max)) %>%
+      mutate("wanted" = Mean) #to bypass warning in geom_errorbar
 
     result <-
       ggplot(data = tip.rates,
@@ -224,9 +230,9 @@ h_dotplot <-
     tip.rates$f_state <- as.factor(tip.rates$state)
 
     if (plot_as_waiting_time) {
-      tip.rates <- mutate(tip.rates, wanted = 1 / !!as.name(parameter))
+      tip.rates <- mutate(tip.rates, "wanted" = 1 / !!as.name(parameter))
     } else {
-      tip.rates <- mutate(tip.rates, wanted = !!as.name(parameter))
+      tip.rates <- mutate(tip.rates, "wanted" = !!as.name(parameter))
     }
 
     tip.rates.sum <- tip.rates %>%
@@ -234,10 +240,10 @@ h_dotplot <-
       select(f_state, wanted) %>%
       summarise_if(
         .predicate = is.numeric,
-        .funs = list(Mean = mean,
-                     SD = sd,
-                     Max =max)) %>%
-      mutate(wanted = Mean) #to bypass warning in geom_errorbar
+        .funs = list("Mean" = mean,
+                     "SD" = sd,
+                     "Max" =max)) %>%
+      mutate("wanted" = Mean) #to bypass warning in geom_errorbar
 
     sss <-
       ggplot(data = tip.rates,
@@ -324,33 +330,32 @@ h_ridgelines <- function(processed_hisse_recon,
                   states_names[1],
                   states_names[2]),
            levels = states_names)
-  wanted <- as.name(parameter)
 
   if (plot_as_waiting_time) {
-    tip.rates <- mutate(tip.rates, wt_wanted = 1 / !!wanted)
+    tip.rates <- mutate(tip.rates, "wanted" = 1/!!as.name(parameter))
   } else {
-    tip.rates <- mutate(tip.rates, wt_wanted = !!wanted)
+    tip.rates <- mutate(tip.rates, "wanted" = !!as.name(parameter))
   }
 
   tip.rates.sum <- tip.rates %>%
     group_by(f_state) %>%
-    select(f_state, wt_wanted) %>%
+    select(f_state, wanted) %>%
     summarise_at(
-      .vars = vars(wt_wanted),
+      .vars = vars(wanted),
       .funs = funs(
-        Mean = mean,
-        SD = sd,
-        Median = median,
-        q95 = quantile(., 0.95),
-        q05 = quantile(., 0.05),
-        Min = min,
-        Max = max
+        "Mean" = mean,
+        "SD" = sd,
+        "Median" = median,
+        # "q95" = quantile(., 0.95),
+        # "q05" = quantile(., 0.05),
+        "Min" = min,
+        "Max" = max
       )
     )
   print(tip.rates.sum)
 
   ggplot(data = tip.rates,
-         aes(x = wt_wanted,
+         aes(x = wanted,
              y = f_state,
              fill = f_state)) +
     geom_density_ridges(alpha = 0.75) +
@@ -534,20 +539,23 @@ h_rate_recon <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .45,
+        size = 0.45,
         open.angle = 10
       ) +
       theme(
         # legend.direction = "horizontal",
         # legend.position = "bottom",
-        legend.key.size = unit(x = .5, units = "cm"),
+        legend.key.size = unit(x = 0.5, units = "cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank()
       )
 
     if (discrete) {
-      param <-
-        datas %>% select(!!wanted) %>% unlist %>% unname %>% cut(., breaks = breaks)
+      param <- datas %>%
+        select(!!wanted) %>%
+        unlist %>%
+        unname %>%
+        cut(breaks = breaks)
       ggg <-
         ggg + aes(color = param) + scale_color_viridis_d(
           option = "B",
@@ -658,7 +666,7 @@ m_transition_matrix <-
         str_replace(regex("\\("), "") %>%
         str_replace(regex("\\)"), "") %>%
         expand.grid(., .) %>%
-        mutate(Names = paste("q", Var1, "_", Var2, sep = "")) %>%
+        mutate("Names" = paste("q", Var1, "_", Var2, sep = "")) %>%
         select(Names) %>% unlist %>% unname
     }
 
@@ -740,7 +748,7 @@ m_diversification_rates <- function(model_fit, states) {
     unname %>%
     zapsmall
   States <- expand.grid(states, hidden_traits) %>%
-    mutate(Name = paste(Var1, Var2, sep = "")) %>%
+    mutate("Name" = paste(Var1, Var2, sep = "")) %>%
     select(Name)
 
   # if (transform) {
@@ -831,17 +839,18 @@ m_process_recon <- function(muhisse_recon) {
   tip.rates <-
     GetModelAveRates(x = muhisse_recon, type = "tips") %>%
     as_tibble() %>%
-    mutate(prob_0x = state.00 + state.01,
-           prob_x0 = state.00 + state.10)
+    mutate("prob_0x" = state.00 + state.01,
+           "prob_x0" = state.00 + state.10)
   colnames(tip.rates)[1] <- "id"
 
   nod.rates <-
     GetModelAveRates(x = muhisse_recon, type = "nodes") %>%
     as_tibble() %>%
-    mutate(prob_0x = state.00 + state.01,
-           prob_x0 = state.00 + state.10)
+    mutate("prob_0x" = state.00 + state.01,
+           "prob_x0" = state.00 + state.10)
 
   nod.rates$id <- as.character(nod.rates$id)
+  tip.rates$id <- as.character(tip.rates$id)
   both.rates <- bind_rows(tip.rates, nod.rates)
 
   if (class(muhisse_recon) == "list") {
@@ -912,7 +921,7 @@ m_scatterplot_cp <-
       mutate(both_prob = interaction(prob_0x, prob_x0)) %>%
       group_by(both_prob) %>%
       select(both_prob, wanted) %>%
-      summarise_if(is_numeric, .funs = list(MN = mean, SD = sd)) %>%
+      summarise_if(is.numeric, .funs = list("MN" = mean, "SD" = sd)) %>%
       mutate(LB = MN - SD, UB = MN + SD) %>%
       mutate(prob_0x = str_extract(both_prob, regex("^\\d+")) %>% as.numeric()) %>%
       mutate(prob_x0 = str_extract(both_prob, regex("\\d+$")) %>% as.numeric())
@@ -1238,7 +1247,7 @@ m_scatterplot <-
 #'m_dotplot(
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "extinction",
-#'  colors = viridis::viridis(n = 4, option=1, end=.8))
+#'  colors = viridis(n = 4, option=1, end=.8))
 #'
 #'@export
 
@@ -1654,7 +1663,11 @@ m_rate_recon <-
       message("Cutting distribution of rate with these breaks:\n")
       print(breaks)
       param <-
-        datas %>% select(!!wanted) %>% unlist %>% unname %>% cut(., breaks = breaks)
+        datas %>%
+        select(!!wanted) %>%
+        unlist %>%
+        unname %>%
+        cut(breaks = breaks)
       ggg <-
         ggg + aes(color = param) + scale_color_viridis_d(
           option = "B",
@@ -1761,8 +1774,8 @@ tree_flip <- function(ggtree_object,
       select(x) %>%
       unlist %>%
       unname %>%
-      unique %>%
-      round(., 1)
+      unique
+    maxx <- round(maxx, 1)
     ntip <- ggtree_object$data %>% filter(isTip==TRUE) %>% nrow()
     ntip <- ntip+10
     pretty_points <-
