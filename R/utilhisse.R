@@ -1,6 +1,5 @@
 ##### --- TO DO ----------------------------------- #####
 
-# 3. Data objects ??
 # 5. Support region functions. Making tables, plots, and contour plots?
 # 6. g_ functions for HiGeoSSE
 # 7. diagram functions
@@ -29,6 +28,7 @@
 #'processed_hisse$node_rates
 #'processed_hisse$tree_data
 #'
+#'@export
 
 h_process_recon <- function(hisse_recon) {
   tip.rates <-
@@ -67,7 +67,7 @@ h_process_recon <- function(hisse_recon) {
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param x_label Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.
-#' @param state_names A character vector of length two giving the translation for states 0 and 1.
+#' @param states_names A character vector of length two giving the translation for states 0 and 1.
 #' @param plot_as_waiting_time Logical. Whether to plot the rates or their inverse (waiting times)
 #'
 #' @return A jittered scatterplot of (model averaged) tip-associated rates.
@@ -76,7 +76,10 @@ h_process_recon <- function(hisse_recon) {
 #'
 #'data("diatoms")
 #'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
-#'hisse_rates_plot <- h_scatterplot(processed_hisse_recon=processed_hisse, parameter="turnover", x_label="habitat")
+#'hisse_rates_plot <- h_scatterplot(
+#'  processed_hisse_recon=processed_hisse,
+#'  parameter="turnover",
+#'  x_label="habitat")
 #'
 #'# modifications are easy with ggplot
 #'# change x axis tick labels
@@ -95,19 +98,19 @@ h_process_recon <- function(hisse_recon) {
 #'  labs(y=expression(paste(tau, "=", lambda, "+", mu))) +
 #'  theme(axis.text.y=element_text(size=15))
 #'
+#'@export
 
 h_scatterplot <-
   function(processed_hisse_recon,
            parameter = "turnover",
-           x_label="",
-           state_names=c("0", "1"),
-           plot_as_waiting_time=FALSE) {
-
+           x_label = "",
+           states_names = c("0", "1"),
+           plot_as_waiting_time = FALSE) {
     tip.rates <- processed_hisse_recon$tip_rates
     tip.rates$f_state <- as.factor(tip.rates$state)
 
     if (plot_as_waiting_time) {
-      tip.rates <- mutate(tip.rates, wanted = 1/!!as.name(parameter))
+      tip.rates <- mutate(tip.rates, wanted = 1 / !!as.name(parameter))
     } else {
       tip.rates <- mutate(tip.rates, wanted = !!as.name(parameter))
     }
@@ -115,16 +118,15 @@ h_scatterplot <-
     tip.rates.sum <- tip.rates %>%
       group_by(f_state) %>%
       select(f_state, wanted) %>%
-      summarise_if(is.numeric, .funs=list(Mean=mean, SD=sd, Max=max)) %>%
-      mutate(wanted=Mean) #to bypass warning in geom_errorbar
+      summarise_if(is.numeric, .funs = list(Mean = mean, SD = sd, Max =
+                                              max)) %>%
+      mutate(wanted = Mean) #to bypass warning in geom_errorbar
 
     result <-
       ggplot(data = tip.rates,
-             aes(
-               x = f_state,
-               y = wanted,
-               color = f_state
-             )) +
+             aes(x = f_state,
+                 y = wanted,
+                 color = f_state)) +
       geom_point(alpha = .7,
                  size = 0.75,
                  position = position_jitter(width = .15)) +
@@ -148,8 +150,10 @@ h_scatterplot <-
       scale_color_viridis(name = x_label,
                           end = 0.6,
                           discrete = TRUE) +
-      scale_y_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
-      scale_x_discrete(breaks=c(0,1), labels=state_names) +
+      scale_y_continuous(breaks = pretty(c(0, max(
+        tip.rates.sum$Max
+      )), n = 8)) +
+      scale_x_discrete(breaks = c(0, 1), labels = states_names) +
       theme_classic() +
       theme(legend.position = "right",
             legend.key.size = unit(x = .6, units = "cm")) +
@@ -164,7 +168,7 @@ h_scatterplot <-
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param x_label Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.
-#' @param state_names A character vector of length two giving the translation for states 0 and 1.
+#' @param states_names A character vector of length two giving the translation for states 0 and 1.
 #' @param bin_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
 #' @param colors Colors for the points in the two alternate states
 #' @param plot_as_waiting_time Whether to plot the rates or their inverse (waiting times)
@@ -180,27 +184,29 @@ h_scatterplot <-
 #' h_dotplot(
 #'   processed_hisse_recon = processed_hisse,
 #'   parameter = "turnover",
-#'   x_labels = c("Plankton", "Benthos"),
+#'   states_names = c("Plankton", "Benthos"),
 #'   bin_width = 0.2,
 #'   colors=paint_cols[1:2],
 #'   plot_as_waiting_time = TRUE
 #' ) + labs(x = "", y = "waiting time (My)", title = "Turnover")
 #'
 #'# see ?h_plot_rates_states for examples for modifying the graph using ggplot2
+#'
+#'@export
 
 h_dotplot <-
   function(processed_hisse_recon,
            parameter = "turnover",
-           x_labels = c("Marine", "Freshwater"),
+           states_names = c("Marine", "Freshwater"),
+           x_label = "",
            bin_width = 0.1,
            colors,
-           plot_as_waiting_time=TRUE) {
-
+           plot_as_waiting_time = TRUE) {
     tip.rates <- processed_hisse_recon$tip_rates
     tip.rates$f_state <- as.factor(tip.rates$state)
 
     if (plot_as_waiting_time) {
-      tip.rates <- mutate(tip.rates, wanted = 1/!!as.name(parameter))
+      tip.rates <- mutate(tip.rates, wanted = 1 / !!as.name(parameter))
     } else {
       tip.rates <- mutate(tip.rates, wanted = !!as.name(parameter))
     }
@@ -208,16 +214,18 @@ h_dotplot <-
     tip.rates.sum <- tip.rates %>%
       group_by(f_state) %>%
       select(f_state, wanted) %>%
-      summarise_if(is.numeric, .funs=list(Mean=mean, SD=sd, Max=max)) %>%
-      mutate(wanted=Mean) #to bypass warning in geom_errorbar
+      summarise_if(
+        .predicate = is.numeric,
+        .funs = list(Mean = mean,
+                     SD = sd,
+                     Max =max)) %>%
+      mutate(wanted = Mean) #to bypass warning in geom_errorbar
 
     sss <-
       ggplot(data = tip.rates,
-             aes(
-               x = f_state,
-               y = wanted,
-               fill = f_state
-             )) +
+             aes(x = f_state,
+                 y = wanted,
+                 fill = f_state)) +
       geom_dotplot(
         alpha = .75,
         colour = "white",
@@ -247,8 +255,10 @@ h_dotplot <-
       ) +
       scale_color_manual(values = colors, name = "") +
       scale_fill_manual(values = colors, name = "") +
-      scale_x_discrete(breaks = c(0,1), labels = x_labels) +
-      scale_y_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
+      scale_x_discrete(breaks = c(0, 1), labels = x_labels) +
+      scale_y_continuous(breaks = pretty(c(0, max(
+        tip.rates.sum$Max
+      )), n = 8)) +
       theme_classic() +
       theme(
         legend.position = "none",
@@ -264,7 +274,7 @@ h_dotplot <-
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
-#' @param state_names The names for character states
+#' @param states_names The names for character states
 #' @param colors Colors for the points in the two alternate states
 #' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
 #'
@@ -278,29 +288,27 @@ h_dotplot <-
 #'
 #'h_ridgelines(
 #'  processed_hisse_recon = processed_hisse,
-#'  state_names = c("Plankton", "Benthos"),
+#'  states_names = c("Plankton", "Benthos"),
 #'  parameter = "extinction",
 #'  colors = c("yellow", "red"))
+#'
+#'@export
 
 h_ridgelines <- function(processed_hisse_recon,
                          parameter = "turnover",
-                         state_names = c("Marine", "Freshwater"),
+                         states_names = c("Marine", "Freshwater"),
                          colors = c("yellow", "red"),
                          plot_as_waiting_time = FALSE) {
   tip.rates <- processed_hisse_recon$tip_rates
   tip.rates$f_state <-
-    factor(
-      ifelse(
-        tip.rates$state == 0,
-        state_names[1],
-        state_names[2]
-      ),
-      levels = state_names
-    )
+    factor(ifelse(tip.rates$state == 0,
+                  states_names[1],
+                  states_names[2]),
+           levels = states_names)
   wanted <- as.name(parameter)
 
   if (plot_as_waiting_time) {
-    tip.rates <- mutate(tip.rates, wt_wanted = 1/ !!wanted)
+    tip.rates <- mutate(tip.rates, wt_wanted = 1 / !!wanted)
   } else {
     tip.rates <- mutate(tip.rates, wt_wanted = !!wanted)
   }
@@ -322,11 +330,10 @@ h_ridgelines <- function(processed_hisse_recon,
     )
   print(tip.rates.sum)
 
-  ggplot(data = tip.rates, aes(
-    x = wt_wanted,
-    y = f_state,
-    fill = f_state
-  )) +
+  ggplot(data = tip.rates,
+         aes(x = wt_wanted,
+             y = f_state,
+             fill = f_state)) +
     geom_density_ridges(alpha = 0.75) +
     geom_point(
       data = tip.rates.sum,
@@ -346,8 +353,8 @@ h_ridgelines <- function(processed_hisse_recon,
       inherit.aes = FALSE
     ) +
     scale_fill_manual(values = colors) +
-    scale_x_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8))+
-    labs(y = "", x=parameter) +
+    scale_x_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8)) +
+    labs(y = "", x = parameter) +
     theme_classic() +
     theme(legend.position = "none")
 }
@@ -387,6 +394,8 @@ h_ridgelines <- function(processed_hisse_recon,
 #'
 #'# change colors
 #'map_discrete + scale_color_manual(name="", values = c("red", "blue"))
+#'
+#'@export
 
 h_trait_recon <-
   function(processed_hisse_recon,
@@ -396,8 +405,7 @@ h_trait_recon <-
            tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
-           open_angle=10) {
-
+           open_angle = 10) {
     if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
       stop("The selected tree layout is not supported.")
     }
@@ -424,11 +432,15 @@ h_trait_recon <-
 
     if (discrete) {
       d_state <- ifelse(state > cutoff, 1, 0) %>% as.factor()
-      ggg <- ggg + aes(color = d_state) + scale_color_viridis_d(name = x_label, end = 0.6) +
+      ggg <- ggg +
+        aes(color = d_state) +
+        scale_color_viridis_d(name = x_label, end = 0.6) +
         guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       d_state <- state
-      ggg <- ggg + aes(color = d_state) + scale_color_viridis_c(name = x_label, end = 0.6)
+      ggg <- ggg +
+        aes(color = d_state) +
+        scale_color_viridis_c(name = x_label, end = 0.6)
     }
 
     ggg <-
@@ -478,17 +490,18 @@ h_trait_recon <-
 #'
 #'# change colors
 #'map_discrete + scale_color_manual(name="", values = c("red", "blue", "orange", "green"))
+#'
+#'@export
 
 h_rate_recon <-
   function(processed_hisse_recon,
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
-           tree_layout="rectangular",
+           tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
            open_angle = 10) {
-
     if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
       stop("The selected tree layout is not supported.")
     }
@@ -499,10 +512,12 @@ h_rate_recon <-
     wanted <- as.name(parameter)
 
     ggg <-
-      ggtree(tr = tree,
-             layout = tree_layout,
-             size = .45,
-             open.angle = 10) +
+      ggtree(
+        tr = tree,
+        layout = tree_layout,
+        size = .45,
+        open.angle = 10
+      ) +
       theme(
         # legend.direction = "horizontal",
         # legend.position = "bottom",
@@ -573,15 +588,25 @@ h_rate_recon <-
 #'
 #'# muhisse model
 #'data("diatoms")
-#'m_transitions_matrix(model_fit = diatoms$muhisse, hidden_states = TRUE, states = States)
+#'m_transition_matrix(
+#'  model_fit = diatoms$muhisse,
+#'  hidden_states = TRUE,
+#'  states = States)
 #'
 #'# CID8 model
 #'# we have 8 hidden states, so the transition matrix is cumbersome
-#'m_transitions_matrix(model_fit = data$cid8, hidden_states = TRUE, states = States)
+#'m_transition_matrix(
+#'  model_fit = diatoms$cid8,
+#'  hidden_states = TRUE,
+#'  states = States)
 #'
 #'# musse model, no hidden states
-#'m_transitions_matrix(model_fit = data$musse, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
+#'m_transition_matrix(
+#'  model_fit = diatoms$musse,
+#'  hidden_states = FALSE,
+#'  states = c("mp", "mb", "fp", "fb"))
 #'
+#'@export
 
 m_transition_matrix <-
   function(model_fit,
@@ -640,10 +665,9 @@ m_transition_matrix <-
 
     Col_names <-
       colnames(model_fit$trans.matrix) %>% str_replace(regex("\\("), "") %>% str_replace(regex("\\)"), "")
-    translation <- data.frame(Col_names, State_names = states)
+    translation <- data.frame(Col_names, states_names = states)
     colnames(Rate_matrix) <-
-      rownames(Rate_matrix) <- translation$State_names
-    knitr::kable(Rate_matrix)
+      rownames(Rate_matrix) <- translation$states_names
     return(Rate_matrix)
   }
 
@@ -661,7 +685,7 @@ m_transition_matrix <-
 #'States <- c("mp", "mb", "fp", "fb")
 #'
 #'# muhisse model
-#'data("diatoms)
+#'data("diatoms")
 #'m_diversification_rates(model_fit = diatoms$muhisse, states=States)
 #'
 #'# CID8 model
@@ -669,6 +693,8 @@ m_transition_matrix <-
 #'
 #'# musse model, no hidden states
 #'m_diversification_rates(model_fit = diatoms$musse, states = States)
+#'
+#'@export
 
 m_diversification_rates <- function(model_fit, states) {
   hidden_traits <-
@@ -677,7 +703,7 @@ m_diversification_rates <- function(model_fit, states) {
   hidden_traits <- ifelse(hidden_traits == "A", 1, 2)
   num_hidden_traits <- length(hidden_traits)
   num_hidden_traits <- num_hidden_traits * 4
-  tur <-model_fit$solution %>%
+  tur <- model_fit$solution %>%
     t %>%
     data.frame %>%
     select(starts_with("turnover")) %>%
@@ -716,6 +742,10 @@ m_diversification_rates <- function(model_fit, states) {
 #'@description This is a function that wraps \code{m_transition_matrix} and \code{m_diversification_rates}
 #' so rates can be extracted in one step
 #'
+#'@param model_fit A muhisse.fit object
+#'@param hidden_traits Logical indicating whether the model has hidden states
+#'@param character_states A translation for the character states in the model in the order 00, 01, 10, 11
+#'
 #'@return A list with two components, the transition rates formatted as a rate matrix and a data frame of diversification rates
 #'
 #'@examples
@@ -725,6 +755,8 @@ m_diversification_rates <- function(model_fit, states) {
 #'# muhisse model
 #'data("diatoms")
 #'m_collect_rates(model_fit = diatoms$muhisse, hidden_traits=TRUE, character_states=States)
+#'
+#'@export
 
 m_collect_rates <-
   function(model_fit,
@@ -733,15 +765,15 @@ m_collect_rates <-
     mat_size <- model_fit$trans.matrix %>% ncol
     states <-
       expand.grid(character_states, 1:(mat_size / 4)) %>%
-      mutate(Name = paste(Var1, Var2, sep ="")) %>%
+      mutate(Name = paste(Var1, Var2, sep = "")) %>%
       select(Name) %>% unlist %>% unname
 
     trans_rates <-
-      get_transitions_matrix_muhisse(model_fit = model_fit,
-                                     hidden_states = hidden_traits,
-                                     states = states)
+      m_transition_matrix(model_fit = model_fit,
+                          hidden_states = hidden_traits,
+                          states = states)
     div_rates <-
-      get_diversification_rates_muhisse(model_fit = model_fit, states = character_states)
+      m_diversification_rates(model_fit = model_fit, states = character_states)
 
     return(list(
       Transition_rates = trans_rates,
@@ -771,6 +803,7 @@ m_collect_rates <-
 #'processed_muhisse$node_rates
 #'processed_muhisse$tree_data
 #'
+#'@export
 
 m_process_recon <- function(muhisse_recon) {
   tip.rates <-
@@ -789,11 +822,11 @@ m_process_recon <- function(muhisse_recon) {
   nod.rates$id <- as.character(nod.rates$id)
   both.rates <- bind_rows(tip.rates, nod.rates)
 
-  if (class(muhisse_recon)=="list") {
+  if (class(muhisse_recon) == "list") {
     tree <- as.treedata(muhisse_recon[[1]]$phy)
   }
 
-  if (class(muhisse_recon)=="muhisse.states") {
+  if (class(muhisse_recon) == "muhisse.states") {
     tree <- as.treedata(muhisse_recon$phy)
   }
 
@@ -812,7 +845,7 @@ m_process_recon <- function(muhisse_recon) {
 #'
 #' @param processed_muhisse_recon An object produced with \code{m_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
-#' @param focal_probability Specifies the x axis. Either \code{prob_0x} to plot the probability of state 0 for the first character, or \code{prob_x0} to plot the probability for state 0 for the second character.
+#' @param focal_character Specifies the x axis. Either \code{prob_0x} to plot the probability of state 0 for the first character, or \code{prob_x0} to plot the probability for state 0 for the second character.
 #' @param focal_character_label Label for the x axis of the scatterplot and two-dimensional color gradient. This should match the focal probability.
 #' @param second_character_label Label for the y axis of the scatterplot and two-dimensional color gradient.
 #' @param colors A vector of three colors in the order: (1) zero color (color when the two traits are in state 0), (2) horizontal_color (color to interpolate towards state 1 of the focal character) and (2) vertical_color (color to interpolate towards state 1 of the second character). See \code{?colorplaner::color_projections} for details.
@@ -833,6 +866,8 @@ m_process_recon <- function(muhisse_recon) {
 #'  colors = viridis(n = 9)[c(5, 1, 9)],
 #'  plot_as_waiting_time = TRUE) +
 #'  labs(y="Net turnover\n(waiting time in millions of years)")
+#'
+#'@export
 
 m_scatterplot_cp <-
   function(processed_muhisse_recon,
@@ -841,29 +876,28 @@ m_scatterplot_cp <-
            focal_character_label,
            second_character_label,
            colors,
-           plot_as_waiting_time=FALSE) {
-
+           plot_as_waiting_time = FALSE) {
     if (plot_as_waiting_time) {
       tip_rates <- processed_muhisse_recon$tip_rates %>%
-        mutate(wanted=1/!!as.name(parameter))
-    } else (
-      tip_rates <- processed_muhisse_recon$tip_rates %>%
-        mutate(wanted=!!as.name(parameter))
-    )
+        mutate(wanted = 1 / !!as.name(parameter))
+    } else
+      (tip_rates <- processed_muhisse_recon$tip_rates %>%
+         mutate(wanted = !!as.name(parameter)))
 
     max_rate <- tip_rates %>% select(wanted) %>% unlist %>% max
 
     sum_tip_rates <- tip_rates %>%
-      mutate(both_prob=interaction(prob_0x, prob_x0)) %>%
+      mutate(both_prob = interaction(prob_0x, prob_x0)) %>%
       group_by(both_prob) %>%
       select(both_prob, wanted) %>%
-      summarise_if(is_numeric, .funs = list(MN=mean, SD=sd)) %>%
-      mutate(LB=MN-SD, UB=MN+SD) %>%
-      mutate(prob_0x=str_extract(both_prob, regex("^\\d+")) %>% as.numeric()) %>%
-      mutate(prob_x0=str_extract(both_prob, regex("\\d+$")) %>% as.numeric())
+      summarise_if(is_numeric, .funs = list(MN = mean, SD = sd)) %>%
+      mutate(LB = MN - SD, UB = MN + SD) %>%
+      mutate(prob_0x = str_extract(both_prob, regex("^\\d+")) %>% as.numeric()) %>%
+      mutate(prob_x0 = str_extract(both_prob, regex("\\d+$")) %>% as.numeric())
 
     if (focal_character == "prob_0x") {
-      sum_tip_rates <- mutate(sum_tip_rates, focal_character = factor(prob_0x))
+      sum_tip_rates <-
+        mutate(sum_tip_rates, focal_character = factor(prob_0x))
       print(sum_tip_rates)
       sss <-
         ggplot(tip_rates,
@@ -873,11 +907,12 @@ m_scatterplot_cp <-
                  color = prob_0x,
                  color2 = prob_x0
                ))
-      nudgex <- c(-0.3,-0.3, 0.3, 0.3)
+      nudgex <- c(-0.3, -0.3, 0.3, 0.3)
     }
 
     if (focal_character == "prob_x0") {
-      sum_tip_rates <- mutate(sum_tip_rates, focal_character = factor(prob_x0))
+      sum_tip_rates <-
+        mutate(sum_tip_rates, focal_character = factor(prob_x0))
       print(sum_tip_rates)
       sss <-
         ggplot(tip_rates,
@@ -887,26 +922,33 @@ m_scatterplot_cp <-
                  color = prob_x0,
                  color2 = prob_0x
                ))
-      nudgex <- c(-0.3, 0.3,-0.3, 0.3)
+      nudgex <- c(-0.3, 0.3, -0.3, 0.3)
     }
 
     sss <- sss +
       geom_point(alpha = .7,
                  size = 1.25,
                  position = position_jitter(width = .15)) +
-      geom_errorbar(data=sum_tip_rates,
-                    aes(x=focal_character, y=MN, ymin=LB, ymax=UB),
-                    position = position_nudge(x=nudgex, y=0),
-                    inherit.aes = TRUE,
-                    width=.04
+      geom_errorbar(
+        data = sum_tip_rates,
+        aes(
+          x = focal_character,
+          y = MN,
+          ymin = LB,
+          ymax = UB
+        ),
+        position = position_nudge(x = nudgex, y = 0),
+        inherit.aes = TRUE,
+        width = .04
       ) +
-      geom_point(data=sum_tip_rates,
-                 aes(x=focal_character, y=MN),
-                 position = position_nudge(x= nudgex, y=0),
-                 inherit.aes = TRUE,
-                 pch=21,
-                 stroke=1,
-                 size=2
+      geom_point(
+        data = sum_tip_rates,
+        aes(x = focal_character, y = MN),
+        position = position_nudge(x = nudgex, y = 0),
+        inherit.aes = TRUE,
+        pch = 21,
+        stroke = 1,
+        size = 2
       ) +
       scale_color_colorplane(
         color_projection = interpolate_projection,
@@ -920,7 +962,7 @@ m_scatterplot_cp <-
         labels = as.character(c(0, 0.5, 1)),
         labels_y = as.character(c(0, 0.5, 1))
       ) +
-      scale_y_continuous(breaks = pretty(x=c(0,max_rate), n = 10)) +
+      scale_y_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
       theme_classic() +
       theme(legend.position = "right",
             legend.key.size = unit(x = .6, units = "cm")) +
@@ -934,7 +976,7 @@ m_scatterplot_cp <-
 #' @description A function to plot a ridgeline of (model-averaged) diversification rates in the alternative states.
 #'
 #' @param processed_muhisse_recon An object produced by \code{m_process_recon}
-#' @param state_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
+#' @param states_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param fill_colors Colors for the density polygons
 #' @param line_colors Colors for the lines and points
@@ -951,9 +993,11 @@ m_scatterplot_cp <-
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "extinction",
 #'  line_colors = viridis(n = 4, option=1))
+#'
+#'@export
 
 m_ridgelines <- function(processed_muhisse_recon,
-                         states_names =c("00","01","10","11"),
+                         states_names = c("00", "01", "10", "11"),
                          parameter = "turnover",
                          plot_as_waiting_time = FALSE,
                          fill_colors = rep(NA, 4),
@@ -988,7 +1032,8 @@ m_ridgelines <- function(processed_muhisse_recon,
     ss.sum <- ss %>% group_by(four_state) %>%
       summ(.)
   }
-  max_rate <- ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
+  max_rate <-
+    ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
   print(ss.sum)
 
   message("\nPlotting\n\n")
@@ -1032,7 +1077,7 @@ m_ridgelines <- function(processed_muhisse_recon,
       size = 3,
       inherit.aes = FALSE
     ) +
-    scale_x_continuous(breaks = pretty(x=c(0,max_rate), n = 10))+
+    scale_x_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
     scale_fill_manual(values = fill_colors) +
     scale_colour_manual(values = line_colors) +
     labs(y = "", x = parameter) +
@@ -1045,7 +1090,7 @@ m_ridgelines <- function(processed_muhisse_recon,
 #' @description A function to plot a jittered scatterplot of (model-averaged) diversification rates and summary statistics in the alternative states.
 #'
 #' @param processed_muhisse_recon An object produced by \code{m_process_recon}
-#' @param state_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
+#' @param states_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param colors Colors for the lines and points
 #' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
@@ -1061,12 +1106,14 @@ m_ridgelines <- function(processed_muhisse_recon,
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "extinction",
 #'  colors = viridis(n = 4, option=1, end=.8))
+#'
+#'@export
 
 m_scatterplot <-
   function(processed_muhisse_recon,
            states_names = c("00", "01", "10", "11"),
            parameter = "turnover",
-           colors = viridis(n = 4, option=2, end=0.7),
+           colors = viridis(n = 4, option = 2, end = 0.7),
            plot_as_waiting_time = FALSE) {
     message(
       "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n"
@@ -1088,7 +1135,7 @@ m_scatterplot <-
                                  Median = median,
                                  SD = sd
                                )) %>%
-      mutate(wanted=Mean) # to bypass warning in geom_errorbar
+      mutate(wanted = Mean) # to bypass warning in geom_errorbar
 
     if (plot_as_waiting_time) {
       ss <- mutate(ss, wanted = 1 / !!wanted)
@@ -1101,17 +1148,15 @@ m_scatterplot <-
     }
     max_rate <-
       ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
-    print(select(ss.sum, -wanted))
+    print(select(ss.sum,-wanted))
 
     message("\nPlotting\n")
 
     pl <-
       ggplot(data = ss,
-             aes(
-               x = four_state,
-               y = wanted,
-               fill = four_state
-             )) +
+             aes(x = four_state,
+                 y = wanted,
+                 fill = four_state)) +
       geom_point(
         pch = 21,
         position = position_jitter(0.2),
@@ -1142,7 +1187,7 @@ m_scatterplot <-
       ) +
       scale_fill_manual(name = "", values = colors) +
       scale_colour_manual(name = "", values = colors) +
-      scale_y_continuous(breaks = pretty(x=c(0,max_rate), n = 10)) +
+      scale_y_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
       theme_classic() +
       labs(x = "",
            y = parameter) +
@@ -1155,7 +1200,7 @@ m_scatterplot <-
 #' @description A function to plot a stacked dotplot of (model-averaged) diversification rates and summary statistics in the alternative states.
 #'
 #' @param processed_muhisse_recon An object produced by \code{m_process_recon}
-#' @param state_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
+#' @param states_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param colors Colors for the lines and points
 #' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
@@ -1172,6 +1217,8 @@ m_scatterplot <-
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "extinction",
 #'  colors = viridis(n = 4, option=1, end=.8))
+#'
+#'@export
 
 m_dotplot <-
   function(processed_muhisse_recon,
@@ -1218,11 +1265,9 @@ m_dotplot <-
     cat ("\nPlotting\n\n")
 
     pl <- ggplot(data = ss,
-                 aes(
-                   x = four_state,
-                   y = wanted,
-                   fill = four_state
-                 )) +
+                 aes(x = four_state,
+                     y = wanted,
+                     fill = four_state)) +
       geom_dotplot(
         alpha = .75,
         colour = "white",
@@ -1258,7 +1303,7 @@ m_dotplot <-
       ) +
       scale_fill_manual(name = "", values = colors) +
       scale_colour_manual(name = "", values = colors) +
-      scale_y_continuous(breaks = pretty(x=c(0,max_rate), n = 10)) +
+      scale_y_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
       labs(x = "", y = parameter) +
       theme_classic() +
       theme(legend.position = "none")
@@ -1294,6 +1339,8 @@ m_dotplot <-
 #'  second_character_label = "p(plankton)",
 #'  colors = viridis(9)[c(5,1,9)]
 #'  )
+#'
+#'@export
 
 m_trait_recon_cp <-
   function(processed_muhisse_recon,
@@ -1305,7 +1352,6 @@ m_trait_recon_cp <-
            focal_character_label,
            second_character_label,
            colors = viridis(9)[c(5, 1, 9)]) {
-
     if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
       stop("The selected tree layout is not supported.")
     }
@@ -1391,7 +1437,7 @@ m_trait_recon_cp <-
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
-#'  colors = RColorBrewer::brewer.pal(name="Paired", n=10))
+#'  colors = viridis(7,option = "E", direction = 1, end=.9))
 #'
 #'# three of these eight have < 3 nodes, so we could try to avoid plotting some of them
 #'# adjust the cutoff for the second variable
@@ -1402,7 +1448,7 @@ m_trait_recon_cp <-
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
-#'  colors = RColorBrewer::brewer.pal(name="Paired", n=10))
+#'  colors = viridis(7,option = "E", direction = 1, end=.9))
 #'
 #'# ignoring uncertainty
 #'m_trait_recon(
@@ -1413,18 +1459,18 @@ m_trait_recon_cp <-
 #'  tree_layout = "radial",
 #'  colors = viridis(7,option = "E", direction = 1, end=.9)[c(1,3,5,7)])
 #'
+#'@export
 
 m_trait_recon <-
   function(processed_muhisse_recon,
-           cutoff = c(.2,.2),
+           cutoff = c(.2, .2),
            states_of_first_character,
            states_of_second_character,
            tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
-           open_angle=10,
-           colors=viridis(n=9)) {
-
+           open_angle = 10,
+           colors = viridis(n = 9)) {
     if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
       stop("The selected tree layout is not supported.")
     }
@@ -1438,7 +1484,13 @@ m_trait_recon <-
           case_when(
             prob_0x >= 1 - cutoff[1] ~ states_of_first_character[1],
             prob_0x <= cutoff[1] ~ states_of_first_character[2],
-            TRUE ~ paste(states_of_first_character[1], "/", states_of_first_character[2], " uncertain", sep="")
+            TRUE ~ paste(
+              states_of_first_character[1],
+              "/",
+              states_of_first_character[2],
+              " uncertain",
+              sep = ""
+            )
           )
       ) %>%
       mutate(
@@ -1446,14 +1498,27 @@ m_trait_recon <-
           case_when(
             prob_x0 >= 1 - cutoff[2] ~ states_of_second_character[1],
             prob_x0 <= cutoff[2] ~ states_of_second_character[2],
-            TRUE ~ paste(states_of_second_character[1], "/", states_of_second_character[2], " uncertain", sep="")
+            TRUE ~ paste(
+              states_of_second_character[1],
+              "/",
+              states_of_second_character[2],
+              " uncertain",
+              sep = ""
+            )
           )
       ) %>%
       mutate(four_state = paste(prob_0x_named, prob_x0_named, sep = "-"))
 
     message("Categories after discretizing with the provided cutoff:\n")
-    ss.cnt <- ss %>% ungroup %>% group_by(four_state) %>% add_tally() %>% select(four_state, n) %>% distinct
+    ss.cnt <- ss %>%
+      ungroup %>%
+      group_by(four_state) %>%
+      add_tally() %>%
+      select(four_state, n) %>%
+      distinct
+
     print(ss.cnt)
+
     nstat <- ss %>% select(four_state) %>% distinct %>% nrow
 
     ggg <-
@@ -1462,9 +1527,9 @@ m_trait_recon <-
         layout = tree_layout,
         size = .45,
         open.angle = open_angle,
-        aes(color=ss$four_state)
+        aes(color = ss$four_state)
       ) +
-      scale_color_manual(name="", values = colors[1:nstat]) +
+      scale_color_manual(name = "", values = colors[1:nstat]) +
       theme(
         legend.position = "right",
         legend.key.size = unit(x = .5, units = "cm"),
@@ -1508,7 +1573,7 @@ m_trait_recon <-
 #'
 #'map_continuous <-
 #'  m_rate_recon(
-#'    processed_muhisse_recon = processed_hisse,
+#'    processed_muhisse_recon = processed_muhisse,
 #'    parameter = "extinction", discrete=FALSE)
 #'
 #'# change colors, your can pass the trait name to `name=` to title the colorbar
@@ -1516,22 +1581,23 @@ m_trait_recon <-
 #'
 #'map_discrete <-
 #'  m_rate_recon(
-#'    processed_muhisse_recon = processed_hisse,
+#'    processed_muhisse_recon = processed_muhisse,
 #'    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
 #'
 #'# change colors
 #'map_discrete + scale_color_manual(name="", values = c("red", "blue", "orange", "green"))
+#'
+#'@export
 
 m_rate_recon <-
   function(processed_muhisse_recon,
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
-           tree_layout="rectangular",
+           tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
            open_angle = 10) {
-
     if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
       stop("The selected tree layout is not supported.")
     }
@@ -1542,10 +1608,12 @@ m_rate_recon <-
     wanted <- as.name(parameter)
 
     ggg <-
-      ggtree(tr = tree,
-             layout = tree_layout,
-             size = .45,
-             open.angle = 10) +
+      ggtree(
+        tr = tree,
+        layout = tree_layout,
+        size = .45,
+        open.angle = 10
+      ) +
       theme(
         legend.position = "right",
         legend.key.size = unit(x = .5, units = "cm"),
@@ -1555,11 +1623,16 @@ m_rate_recon <-
 
     if (discrete) {
       max_rate <- datas %>% select(!!wanted) %>% unlist %>% unname %>% max
-      if (!0%in% breaks) {breaks <- c(0, breaks)}
-      if(all(max_rate > breaks)) {breaks <- c(breaks, max_rate)}
+      if (!0 %in% breaks) {
+        breaks <- c(0, breaks)
+      }
+      if (all(max_rate > breaks)) {
+        breaks <- c(breaks, max_rate)
+      }
       message("Cutting distribution of rate with these breaks:\n")
       print(breaks)
-      param <- datas %>% select(!!wanted) %>% unlist %>% unname %>% cut(., breaks = breaks)
+      param <-
+        datas %>% select(!!wanted) %>% unlist %>% unname %>% cut(., breaks = breaks)
       ggg <-
         ggg + aes(color = param) + scale_color_viridis_d(
           option = "B",
@@ -1597,7 +1670,6 @@ tree_flip <- function(ggtree_object,
                       tree_direction,
                       time_axis_ticks,
                       agemax) {
-
   if (tree_layout %in% c("rectangular", "slanted")) {
     if (tree_direction == "up") {
       ggtree_object <- ggtree_object + coord_flip() +
@@ -1611,7 +1683,7 @@ tree_flip <- function(ggtree_object,
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
-        labs(x="Time (Ma)")
+        labs(x = "Time (Ma)")
     }
     if (tree_direction == "down") {
       ggtree_object <- ggtree_object + coord_flip() +
@@ -1626,7 +1698,7 @@ tree_flip <- function(ggtree_object,
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
-        labs(x="Time (Ma)")
+        labs(x = "Time (Ma)")
     }
 
     if (tree_direction == "left") {
@@ -1642,7 +1714,7 @@ tree_flip <- function(ggtree_object,
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
-        labs(x="Time (Ma)")
+        labs(x = "Time (Ma)")
     }
 
     if (tree_direction == "right") {
@@ -1657,7 +1729,7 @@ tree_flip <- function(ggtree_object,
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
-        labs(x="Time (Ma)")
+        labs(x = "Time (Ma)")
     }
   }
 
@@ -1669,7 +1741,8 @@ tree_flip <- function(ggtree_object,
       unname %>%
       unique %>%
       round(., 1)
-    ntip <- Ntip(tree) + 10
+    ntip <- ggtree_object$data %>% filter(isTip==TRUE) %>% nrow()
+    ntip <- ntip+10
     pretty_points <-
       maxx - c(maxx, pretty(c(maxx:0), n = time_axis_ticks))
 

@@ -13,6 +13,8 @@ m_scatterplot_cp(processed_muhisse_recon, parameter = "turnover",
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
+\item{focal_character}{Specifies the x axis. Either \code{prob_0x} to plot the probability of state 0 for the first character, or \code{prob_x0} to plot the probability for state 0 for the second character.}
+
 \item{focal_character_label}{Label for the x axis of the scatterplot and two-dimensional color gradient. This should match the focal probability.}
 
 \item{second_character_label}{Label for the y axis of the scatterplot and two-dimensional color gradient.}
@@ -20,8 +22,6 @@ m_scatterplot_cp(processed_muhisse_recon, parameter = "turnover",
 \item{colors}{A vector of three colors in the order: (1) zero color (color when the two traits are in state 0), (2) horizontal_color (color to interpolate towards state 1 of the focal character) and (2) vertical_color (color to interpolate towards state 1 of the second character). See \code{?colorplaner::color_projections} for details.}
 
 \item{plot_as_waiting_time}{Logical, whether to convert the rate to waiting time (1/rate)}
-
-\item{focal_probability}{Specifies the x axis. Either \code{prob_0x} to plot the probability of state 0 for the first character, or \code{prob_x0} to plot the probability for state 0 for the second character.}
 }
 \value{
 A scatterplot with focal probability (0 or 1) on the x axis and the chosen diversification parameter on the y axis with means and error bars (mean +/- SD) for each state color coded with in two-dimensional colorplane.
@@ -42,4 +42,5 @@ m_scatterplot_cp(
  colors = viridis(n = 9)[c(5, 1, 9)],
  plot_as_waiting_time = TRUE) +
  labs(y="Net turnover\\n(waiting time in millions of years)")
+
 }

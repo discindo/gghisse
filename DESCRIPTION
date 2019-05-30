@@ -9,5 +9,5 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 License: GPL(>= 2)
-Depends: hisse
+Depends: R (>= 2.10), hisse
 Imports: tidyverse, treeio, ggtree, ggridges, colorplaner, viridis

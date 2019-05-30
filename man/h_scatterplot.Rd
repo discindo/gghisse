@@ -5,7 +5,7 @@
 \title{Plot diversification rates estimated by a HiSSE model (HiSSE, BiSSE, CID2, CID4)}
 \usage{
 h_scatterplot(processed_hisse_recon, parameter = "turnover",
-  x_label = "", state_names = c("0", "1"),
+  x_label = "", states_names = c("0", "1"),
   plot_as_waiting_time = FALSE)
 }
 \arguments{
@@ -15,7 +15,7 @@ h_scatterplot(processed_hisse_recon, parameter = "turnover",
 
 \item{x_label}{Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.}
 
-\item{state_names}{A character vector of length two giving the translation for states 0 and 1.}
+\item{states_names}{A character vector of length two giving the translation for states 0 and 1.}
 
 \item{plot_as_waiting_time}{Logical. Whether to plot the rates or their inverse (waiting times)}
 }

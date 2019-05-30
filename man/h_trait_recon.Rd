@@ -51,4 +51,5 @@ map_discrete <-
 
 # change colors
 map_discrete + scale_color_manual(name="", values = c("red", "blue"))
+
 }

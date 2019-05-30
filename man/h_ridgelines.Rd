@@ -5,15 +5,15 @@
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
 h_ridgelines(processed_hisse_recon, parameter = "turnover",
-  state_names = c("Marine", "Freshwater"), colors = c("yellow", "red"),
-  plot_as_waiting_time = FALSE)
+  states_names = c("Marine", "Freshwater"), colors = c("yellow",
+  "red"), plot_as_waiting_time = FALSE)
 }
 \arguments{
 \item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
-\item{state_names}{The names for character states}
+\item{states_names}{The names for character states}
 
 \item{colors}{Colors for the points in the two alternate states}
 
@@ -33,7 +33,8 @@ paint_cols <- c("orange", "violet")
 
 h_ridgelines(
  processed_hisse_recon = processed_hisse,
- state_names = c("Plankton", "Benthos"),
+ states_names = c("Plankton", "Benthos"),
  parameter = "extinction",
  colors = c("yellow", "red"))
+
 }

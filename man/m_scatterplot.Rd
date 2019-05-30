@@ -11,13 +11,13 @@ m_scatterplot(processed_muhisse_recon, states_names = c("00", "01", "10",
 \arguments{
 \item{processed_muhisse_recon}{An object produced by \code{m_process_recon}}
 
+\item{states_names}{Translation for the character states in the order 00, 01, 10, 11 (if wanted)}
+
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
 \item{colors}{Colors for the lines and points}
 
 \item{plot_as_waiting_time}{Whether to plot the rates (FALSE, default) or their inverse (waiting times)}
-
-\item{state_names}{Translation for the character states in the order 00, 01, 10, 11 (if wanted)}
 }
 \value{
 A jittered scatterplot of tip-associated rates (possibly model averaged) with summary statistics (mean +/- sd)
@@ -34,4 +34,5 @@ m_scatterplot(
  processed_muhisse_recon = processed_muhisse,
  parameter = "extinction",
  colors = viridis(n = 4, option=1, end=.8))
+
 }

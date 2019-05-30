@@ -39,7 +39,7 @@ processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 
 map_continuous <-
  m_rate_recon(
-   processed_muhisse_recon = processed_hisse,
+   processed_muhisse_recon = processed_muhisse,
    parameter = "extinction", discrete=FALSE)
 
 # change colors, your can pass the trait name to `name=` to title the colorbar
@@ -47,9 +47,10 @@ map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7"
 
 map_discrete <-
  m_rate_recon(
-   processed_muhisse_recon = processed_hisse,
+   processed_muhisse_recon = processed_muhisse,
    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
 
 # change colors
 map_discrete + scale_color_manual(name="", values = c("red", "blue", "orange", "green"))
+
 }

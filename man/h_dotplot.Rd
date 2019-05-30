@@ -5,23 +5,23 @@
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
 h_dotplot(processed_hisse_recon, parameter = "turnover",
-  x_labels = c("Marine", "Freshwater"), bin_width = 0.1, colors,
-  plot_as_waiting_time = TRUE)
+  states_names = c("Marine", "Freshwater"), x_label = "",
+  bin_width = 0.1, colors, plot_as_waiting_time = TRUE)
 }
 \arguments{
 \item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
+\item{states_names}{A character vector of length two giving the translation for states 0 and 1.}
+
+\item{x_label}{Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.}
+
 \item{bin_width}{The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.}
 
 \item{colors}{Colors for the points in the two alternate states}
 
 \item{plot_as_waiting_time}{Whether to plot the rates or their inverse (waiting times)}
-
-\item{x_label}{Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.}
-
-\item{state_names}{A character vector of length two giving the translation for states 0 and 1.}
 }
 \value{
 A dotplot of tip-associated rates (possibly model averaged).
@@ -38,11 +38,12 @@ paint_cols <- c("orange", "violet")
 h_dotplot(
   processed_hisse_recon = processed_hisse,
   parameter = "turnover",
-  x_labels = c("Plankton", "Benthos"),
+  states_names = c("Plankton", "Benthos"),
   bin_width = 0.2,
   colors=paint_cols[1:2],
   plot_as_waiting_time = TRUE
 ) + labs(x = "", y = "waiting time (My)", title = "Turnover")
 
 # see ?h_plot_rates_states for examples for modifying the graph using ggplot2
+
 }

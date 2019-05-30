@@ -46,7 +46,7 @@ m_trait_recon(
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
- colors = RColorBrewer::brewer.pal(name="Paired", n=10))
+ colors = viridis(7,option = "E", direction = 1, end=.9))
 
 # three of these eight have < 3 nodes, so we could try to avoid plotting some of them
 # adjust the cutoff for the second variable
@@ -57,7 +57,7 @@ m_trait_recon(
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
- colors = RColorBrewer::brewer.pal(name="Paired", n=10))
+ colors = viridis(7,option = "E", direction = 1, end=.9))
 
 # ignoring uncertainty
 m_trait_recon(

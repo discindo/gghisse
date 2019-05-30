@@ -36,13 +36,13 @@ States <-
 
 # muhisse model
 data("diatoms")
-m_transitions_matrix(model_fit = diatoms$muhisse, hidden_states = TRUE, states = States)
+m_transition_matrix(model_fit = diatoms$muhisse, hidden_states = TRUE, states = States)
 
 # CID8 model
 # we have 8 hidden states, so the transition matrix is cumbersome
-m_transitions_matrix(model_fit = data$cid8, hidden_states = TRUE, states = States)
+m_transition_matrix(model_fit = diatoms$cid8, hidden_states = TRUE, states = States)
 
 # musse model, no hidden states
-m_transitions_matrix(model_fit = data$musse, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
+m_transition_matrix(model_fit = diatoms$musse, hidden_states = FALSE, states = c("mp", "mb", "fp", "fb"))
 
 }

@@ -17,3 +17,18 @@ The estimated diversification rates formatted in a data.frame
 \description{
 A helper function that formats \code{hisse::MuHiSSE}'s diversification parameter estimates into a data frame
 }
+\examples{
+
+States <- c("mp", "mb", "fp", "fb")
+
+# muhisse model
+data("diatoms")
+m_diversification_rates(model_fit = diatoms$muhisse, states=States)
+
+# CID8 model
+m_diversification_rates(model_fit = diatoms$cid8, states=States)
+
+# musse model, no hidden states
+m_diversification_rates(model_fit = diatoms$musse, states = States)
+
+}

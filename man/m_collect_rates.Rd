@@ -6,6 +6,13 @@
 \usage{
 m_collect_rates(model_fit, hidden_traits, character_states)
 }
+\arguments{
+\item{model_fit}{A muhisse.fit object}
+
+\item{hidden_traits}{Logical indicating whether the model has hidden states}
+
+\item{character_states}{A translation for the character states in the model in the order 00, 01, 10, 11}
+}
 \value{
 A list with two components, the transition rates formatted as a rate matrix and a data frame of diversification rates
 }
@@ -20,4 +27,5 @@ States <- c("mp", "mb", "fp", "fb")
 # muhisse model
 data("diatoms")
 m_collect_rates(model_fit = diatoms$muhisse, hidden_traits=TRUE, character_states=States)
+
 }
