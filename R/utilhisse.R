@@ -1,3 +1,22 @@
+#' @name utilhisse
+#' @docType package
+#' @keywords package
+#'
+#' @import hisse dplyr ggplot2
+#'
+#' @importFrom stats median quantile sd
+#' @importFrom stringr str_replace str_extract regex
+#' @importFrom ggtree ggtree
+#' @importFrom treeio as.treedata
+#' @importFrom ggridges geom_density_ridges
+#' @importFrom colorplaner scale_color_colorplane
+#' @importFrom viridis viridis
+#' @importFrom ape branching.times
+#' @importFrom purrr map
+#'
+NULL
+
+
 ##### --- TO DO ----------------------------------- #####
 
 # 5. Support region functions. Making tables, plots, and contour plots?
@@ -147,9 +166,8 @@ h_scatterplot <-
         aes(x = f_state, y = Mean),
         pch = 21
       ) +
-      scale_color_viridis(name = x_label,
-                          end = 0.6,
-                          discrete = TRUE) +
+      scale_color_viridis_d(name = x_label,
+                          end = 0.6) +
       scale_y_continuous(breaks = pretty(c(0, max(
         tip.rates.sum$Max
       )), n = 8)) +
@@ -255,7 +273,7 @@ h_dotplot <-
       ) +
       scale_color_manual(values = colors, name = "") +
       scale_fill_manual(values = colors, name = "") +
-      scale_x_discrete(breaks = c(0, 1), labels = x_labels) +
+      scale_x_discrete(breaks = c(0, 1), labels = states_names) +
       scale_y_continuous(breaks = pretty(c(0, max(
         tip.rates.sum$Max
       )), n = 8)) +
@@ -264,7 +282,8 @@ h_dotplot <-
         legend.position = "none",
         legend.background = element_blank(),
         legend.key.size = unit(x = .6, units = "cm")
-      )
+      ) +
+      labs(x = x_label, y = parameter)
     return(sss)
   }
 
@@ -412,7 +431,7 @@ h_trait_recon <-
 
     tree <- processed_hisse_recon$tree_data@phylo
     state <- processed_hisse_recon$tree_data@data$state
-    agemax <- tree %>% ape::branching.times() %>% max()
+    agemax <- tree %>% branching.times() %>% max()
 
     ggg <-
       ggtree(
@@ -508,7 +527,7 @@ h_rate_recon <-
 
     tree <- processed_hisse_recon$tree_data@phylo
     datas <- processed_hisse_recon$tree_data@data
-    agemax <- tree %>% ape::branching.times() %>% max()
+    agemax <- tree %>% branching.times() %>% max()
     wanted <- as.name(parameter)
 
     ggg <-
@@ -664,7 +683,10 @@ m_transition_matrix <-
       unlist %>% zapsmall(x = ., digits = 8) %>% matrix(ncol = Dim)
 
     Col_names <-
-      colnames(model_fit$trans.matrix) %>% str_replace(regex("\\("), "") %>% str_replace(regex("\\)"), "")
+      colnames(model_fit$trans.matrix) %>%
+      str_replace(regex("\\("), "") %>%
+      str_replace(regex("\\)"), "")
+
     translation <- data.frame(Col_names, states_names = states)
     colnames(Rate_matrix) <-
       rownames(Rate_matrix) <- translation$states_names
@@ -1018,9 +1040,9 @@ m_ridgelines <- function(processed_muhisse_recon,
 
   summ <- . %>% summarise_at(.vars = vars(wanted),
                              .funs = list(
-                               Mean = mean,
-                               Median = median,
-                               SD = sd
+                               "Mean" = mean,
+                               "Median" = median,
+                               "SD" = sd
                              ))
 
   if (plot_as_waiting_time) {
@@ -1216,7 +1238,7 @@ m_scatterplot <-
 #'m_dotplot(
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "extinction",
-#'  colors = viridis(n = 4, option=1, end=.8))
+#'  colors = viridis::viridis(n = 4, option=1, end=.8))
 #'
 #'@export
 
@@ -1259,7 +1281,7 @@ m_dotplot <-
     }
     max_rate <-
       ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
-    print(ss %>% head)
+    # print(ss)
     print(ss.sum)
 
     cat ("\nPlotting\n\n")
@@ -1358,7 +1380,7 @@ m_trait_recon_cp <-
 
     tree <- processed_muhisse_recon$tree_data@phylo
     datas <- processed_muhisse_recon$tree_data@data
-    agemax <- tree %>% ape::branching.times() %>% max()
+    agemax <- tree %>% branching.times() %>% max()
 
     ggg <-
       ggtree(
@@ -1476,7 +1498,7 @@ m_trait_recon <-
     }
 
     tree <- processed_muhisse_recon$tree_data@phylo
-    agemax <- tree %>% ape::branching.times() %>% max()
+    agemax <- tree %>% branching.times() %>% max()
 
     ss <- processed_muhisse_recon$tree_data@data %>%
       mutate(
@@ -1604,7 +1626,7 @@ m_rate_recon <-
 
     tree <- processed_muhisse_recon$tree_data@phylo
     datas <- processed_muhisse_recon$tree_data@data
-    agemax <- tree %>% ape::branching.times() %>% max()
+    agemax <- tree %>% branching.times() %>% max()
     wanted <- as.name(parameter)
 
     ggg <-
@@ -1787,7 +1809,6 @@ m_prep_df <-
         levels = states_names
       )) %>%
       mutate(wanted = !!as.name(parameter))
-    print(ss %>% head)
 
     return(ss)
   }
