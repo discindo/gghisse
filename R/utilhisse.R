@@ -25,6 +25,7 @@ NULL
 # 7. diagram functions
 # 8. shiny app
 # 9. test 3 state models
+# 10. remove viridis dependency
 
 ##### --- HiSSE functions ------------------------- #####
 

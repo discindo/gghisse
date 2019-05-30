@@ -9,5 +9,7 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 License: GPL(>= 2)
+biocViews:
 Depends: R (>= 2.10), hisse, dplyr, ggplot2
 Imports: treeio, ggtree, ggridges, colorplaner, viridisLite, viridis, stringr, ape, purrr
+Remotes: wmurphyrd/colorplaner
