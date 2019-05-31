@@ -5,7 +5,7 @@
 #' @import hisse dplyr ggplot2
 #'
 #' @importFrom stats median quantile sd
-#' @importFrom stringr str_replace str_extract regex
+#' @importFrom stringr str_replace str_extract str_detect regex
 #' @importFrom ggtree ggtree
 #' @importFrom treeio as.treedata
 #' @importFrom ggridges geom_density_ridges
@@ -26,6 +26,12 @@ NULL
 # 8. shiny app
 # 9. test 3 state models
 # 10. remove viridis dependency
+# 11. ladderize trees by default
+# 12. enable tip labels
+# 15. add lambda, mu, r to m_diversification_rates output table
+# 16. m_ridgelines axis ticks with 3 state model
+# 17. m_scatterplot_cp a bunch of warnings for 3 state model
+
 
 ##### --- HiSSE functions ------------------------- #####
 
@@ -699,6 +705,9 @@ m_transition_matrix <-
     translation <- data.frame(Col_names, states_names = states)
     colnames(Rate_matrix) <-
       rownames(Rate_matrix) <- translation$states_names
+    row_ind <- is.na(rownames(Rate_matrix))
+    col_ind <- is.na(colnames(Rate_matrix))
+    Rate_matrix <- Rate_matrix[!row_ind, !col_ind]
     return(Rate_matrix)
   }
 
@@ -731,40 +740,44 @@ m_diversification_rates <- function(model_fit, states) {
   hidden_traits <-
     str_extract(string = colnames(model_fit$trans.matrix),
                 pattern = regex("[A-Z]")) %>% unique
-  hidden_traits <- ifelse(hidden_traits == "A", 1, 2)
-  num_hidden_traits <- length(hidden_traits)
-  num_hidden_traits <- num_hidden_traits * 4
-  tur <- model_fit$solution %>%
-    t %>%
-    data.frame %>%
-    select(starts_with("turnover")) %>%
-    .[, 1:num_hidden_traits] %>%
-    unname %>%
-    zapsmall
-  eps <- model_fit$solution %>%
-    t %>%
-    data.frame %>%
-    select(starts_with("eps")) %>%
-    .[, 1:num_hidden_traits] %>%
-    unname %>%
-    zapsmall
+  hidden_traits <- ifelse(hidden_traits %in% c(NA, "A"), 1, 2)
+  num_hidden_traits <- length(unique(hidden_traits))
+  num_states <- length(hidden_traits)
+  num_states <- num_hidden_traits * 4
+
+  tur <-
+    tibble("par_name" = names(model_fit$solution),
+           "par_value" = model_fit$solution) %>%
+    filter(stringr::str_detect(par_name, "turnover")) %>%
+    slice(1:num_states) %>%
+    select(par_value) %>% unlist %>% unname
+
+  eps <-
+    tibble("par_name" = names(model_fit$solution),
+           "par_value" = model_fit$solution) %>%
+    filter(stringr::str_detect(par_name, "eps")) %>%
+    slice(1:num_states) %>%
+    select(par_value) %>% unlist %>% unname
+
   States <- expand.grid(states, hidden_traits) %>%
     mutate("Name" = paste(Var1, Var2, sep = "")) %>%
-    select(Name)
-
-  # if (transform) {
-  #   spec_ext <- hisse:::ParameterTransform(x = tur, y = eps)
-  #   res <- data.frame(State=States, Speciation=t(spec_ext[1:length(tur)]), Extinction=t(spec_ext[(length(tur)+1):length(spec_ext)]))
-  # } else {
-  #   res <- data.frame(State=States, Turnover=t(tur), Extinction_fraction=t(eps))
-  # }
+    select(Name) %>% unlist %>% unname
 
   res <-
-    data.frame(
+    tibble(
       State = States,
-      Turnover = t(tur),
-      Extinction_fraction = t(eps)
+      Turnover = tur,
+      Extinction_fraction = eps
     )
+
+  na_index <- rep(states, num_hidden_traits) %>% is.na() %>% as.numeric()
+  res <- res %>% mutate(na_index=na_index) %>% filter(na_index==0) %>% select(-na_index)
+
+  res <- res %>%
+    mutate(Speciation=hisse:::ParameterTransform(Turnover, Extinction_fraction)[1:nrow(.)]) %>%
+    mutate(Extinction=hisse:::ParameterTransform(Turnover, Extinction_fraction)[(nrow(.)+1):(nrow(.)+nrow(.))]) %>%
+    mutate(Net_diversification=Speciation - Extinction)
+
   return(res)
 }
 
