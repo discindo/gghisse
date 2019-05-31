@@ -25,14 +25,7 @@ A helper function that formats \code{hisse::MuHiSSE}'s output into a matrix so t
 # In this example, hisse's 00, 01, 10, and 11 states correspond to
 # marine-plankton, marine-benthos, freshwater-plankton, and freshwater-benthos
 
-States <-
-   expand.grid(observed=c("marine-plankton",
-                          "marine-benthos",
-                          "freshwater-plankton",
-                          "freshwater-benthos"),
-              hidden=LETTERS[1:2]) \%>\%
-   mutate(Name=paste(observed, hidden, sep="_")) \%>\%
-   select(Name) \%>\% unlist \%>\% unname
+States <- c("mp", "mb", "fp", "fb")
 
 # muhisse model
 data("diatoms")

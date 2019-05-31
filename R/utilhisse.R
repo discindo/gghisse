@@ -5,7 +5,7 @@
 #' @import hisse dplyr ggplot2
 #'
 #' @importFrom stats median quantile sd
-#' @importFrom stringr str_replace str_extract str_detect regex
+#' @importFrom stringr str_replace str_extract str_detect str_remove regex
 #' @importFrom ggtree ggtree
 #' @importFrom treeio as.treedata
 #' @importFrom ggridges geom_density_ridges
@@ -24,11 +24,9 @@ NULL
 # 6. g_ functions for HiGeoSSE
 # 7. diagram functions
 # 8. shiny app
-# 9. test 3 state models
 # 10. remove viridis dependency
 # 11. ladderize trees by default
 # 12. enable tip labels
-# 15. add lambda, mu, r to m_diversification_rates output table
 # 16. m_ridgelines axis ticks with 3 state model
 # 17. m_scatterplot_cp a bunch of warnings for 3 state model
 
@@ -611,14 +609,7 @@ h_rate_recon <-
 #'# In this example, hisse's 00, 01, 10, and 11 states correspond to
 #'# marine-plankton, marine-benthos, freshwater-plankton, and freshwater-benthos
 #'
-#'States <-
-#'    expand.grid(observed=c("marine-plankton",
-#'                           "marine-benthos",
-#'                           "freshwater-plankton",
-#'                           "freshwater-benthos"),
-#'               hidden=LETTERS[1:2]) %>%
-#'    mutate(Name=paste(observed, hidden, sep="_")) %>%
-#'    select(Name) %>% unlist %>% unname
+#'States <- c("mp", "mb", "fp", "fb")
 #'
 #'# muhisse model
 #'data("diatoms")
@@ -646,7 +637,12 @@ m_transition_matrix <-
   function(model_fit,
            hidden_states = TRUE,
            states) {
-    Dim <- dim(model_fit$trans.matrix)[1]
+
+    mat_size <- model_fit$trans.matrix %>% ncol
+    all_states <-
+      expand.grid(states, 1:(mat_size / 4)) %>%
+      mutate(Name = paste(Var1, Var2, sep = "")) %>%
+      select(Name) %>% unlist %>% unname
 
     if (!hidden_states) {
       wanted <- c(
@@ -695,19 +691,21 @@ m_transition_matrix <-
     Rate_matrix <-
       map(1:length(Rates), function(x)
         get_rate(name = names(Rates)[x], named_rates = model_fit$solution)) %>%
-      unlist %>% zapsmall(x = ., digits = 8) %>% matrix(ncol = Dim)
+      unlist %>% zapsmall(x = ., digits = 8) %>% matrix(ncol = mat_size)
 
     Col_names <-
       colnames(model_fit$trans.matrix) %>%
       str_replace(regex("\\("), "") %>%
       str_replace(regex("\\)"), "")
 
-    translation <- data.frame(Col_names, states_names = states)
-    colnames(Rate_matrix) <-
-      rownames(Rate_matrix) <- translation$states_names
-    row_ind <- is.na(rownames(Rate_matrix))
-    col_ind <- is.na(colnames(Rate_matrix))
+    translation <- data.frame(Col_names, states_names = all_states)
+    colnames(Rate_matrix) <- rownames(Rate_matrix) <- translation$states_names
+    row_ind <- is.na(rep(states, (mat_size / 4)))
+    col_ind <- is.na(rep(states, (mat_size / 4)))
     Rate_matrix <- Rate_matrix[!row_ind, !col_ind]
+    if (!hidden_states) {
+      colnames(Rate_matrix) <- rownames(Rate_matrix) <- str_remove(colnames(Rate_matrix), regex("\\d+"))
+    }
     return(Rate_matrix)
   }
 
@@ -740,10 +738,12 @@ m_diversification_rates <- function(model_fit, states) {
   hidden_traits <-
     str_extract(string = colnames(model_fit$trans.matrix),
                 pattern = regex("[A-Z]")) %>% unique
-  hidden_traits <- ifelse(hidden_traits %in% c(NA, "A"), 1, 2)
+  hidden_traits <- as.numeric(as.factor(hidden_traits))
+  hidden_traits <- ifelse(is.na(hidden_traits), 1, hidden_traits)
   num_hidden_traits <- length(unique(hidden_traits))
+
   num_states <- length(hidden_traits)
-  num_states <- num_hidden_traits * 4
+  num_states <- num_states * 4
 
   tur <-
     tibble("par_name" = names(model_fit$solution),
@@ -806,16 +806,11 @@ m_collect_rates <-
   function(model_fit,
            hidden_traits,
            character_states) {
-    mat_size <- model_fit$trans.matrix %>% ncol
-    states <-
-      expand.grid(character_states, 1:(mat_size / 4)) %>%
-      mutate(Name = paste(Var1, Var2, sep = "")) %>%
-      select(Name) %>% unlist %>% unname
 
     trans_rates <-
       m_transition_matrix(model_fit = model_fit,
                           hidden_states = hidden_traits,
-                          states = states)
+                          states = character_states)
     div_rates <-
       m_diversification_rates(model_fit = model_fit, states = character_states)
 
