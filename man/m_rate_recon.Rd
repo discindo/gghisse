@@ -4,8 +4,8 @@
 \alias{m_rate_recon}
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for diversification rates}
 \usage{
-m_rate_recon(processed_muhisse_recon, parameter = "turnover",
-  discrete = FALSE, breaks = seq(0, 1, 0.2),
+m_rate_recon(processed_muhisse_recon, show_tip_label = FALSE,
+  parameter = "turnover", discrete = FALSE, breaks = seq(0, 1, 0.2),
   tree_layout = "rectangular", tree_direction = "right",
   time_axis_ticks = 10, open_angle = 10)
 }
@@ -25,6 +25,8 @@ m_rate_recon(processed_muhisse_recon, parameter = "turnover",
 \item{time_axis_ticks}{numeric giving the number of ticks for the time axis (default=10)}
 
 \item{open_angle}{The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.}
+
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See \code{?m_trait_recon} for a good manual solution.}
 }
 \value{
 A plot of the phylogeny with branches colored by hisse-inferred marginal ancestral states.

@@ -4,10 +4,11 @@
 \alias{m_trait_recon}
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with discretized probabilities}
 \usage{
-m_trait_recon(processed_muhisse_recon, cutoff = c(0.2, 0.2),
-  states_of_first_character, states_of_second_character,
-  tree_layout = "rectangular", tree_direction = "right",
-  time_axis_ticks = 10, open_angle = 10, colors = viridis(n = 9))
+m_trait_recon(processed_muhisse_recon, show_tip_label = FALSE,
+  cutoff = c(0.2, 0.2), states_of_first_character,
+  states_of_second_character, tree_layout = "rectangular",
+  tree_direction = "right", time_axis_ticks = 10, open_angle = 10,
+  colors = viridis(n = 9))
 }
 \arguments{
 \item{processed_muhisse_recon}{An object produced by \code{m_process_recon}}
@@ -27,6 +28,8 @@ m_trait_recon(processed_muhisse_recon, cutoff = c(0.2, 0.2),
 \item{open_angle}{The degrees of empty space between the first and last tip. Only works for \code{tree_layout = 'fan'} and allows for a little more space around axis tick labels.}
 
 \item{colors}{A vector of colors for the character states. Note that the number of categories depends on the cutoff value. Internally this vector of colors is subset to \code{colors[1:number of states]}, so some tinkering might be necessary to get colors that work well together.}
+
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See the example below for a good manual solution.}
 }
 \value{
 A plot of the phylogeny with branches colored by muhisse-inferred marginal ancestral states.
@@ -67,5 +70,53 @@ m_trait_recon(
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
  colors = viridis(7,option = "E", direction = 1, end=.9)[c(1,3,5,7)])
+
+
+
+#'# Plotting tip labels
+# most likely you would need to use show_tip_label = FALSE
+# and add the tip labels manually
+# for better control over font size, justification, alignment, and offset
+# for example
+
+require("ape")
+data("diatoms")
+x <- m_process_recon(diatoms$`3state_musse_recon`)
+
+# the defaults work poorly
+m_trait_recon(processed_muhisse_recon = x,
+ show_tip_label = TRUE,
+ states_of_first_character = c("0", "1"),
+ states_of_second_character = c("0", "1"))
+
+# manual setup is better
+basic_plot <-
+ m_trait_recon(
+ processed_muhisse_recon = x,
+ show_tip_label = FALSE,
+ states_of_first_character = c("0", "1"),
+ states_of_second_character = c("0", "1"),
+ time_axis_ticks = 8
+)
+
+# extract the data component from the ggplot object
+# we'll need it to order the tip labels
+plot_data <- basic_plot$data \%>\%
+ filter(isTip == TRUE) \%>\% # we need the tips only, no nodes
+ arrange(y) # sort numerically
+
+basic_plot +
+ #now add an axis to the right
+ scale_y_continuous(position = "right",
+                    breaks = plot_data$y,
+                    labels = plot_data$label) +
+ # enable the axis text, but disable the line and ticks marks
+ # move the legend out of the way
+ theme(
+   legend.position = "top",
+   axis.ticks.y = element_blank(),
+   axis.line.y = element_blank(),
+   axis.text.y = element_text(face = "italic")
+ )
 
 }

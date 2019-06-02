@@ -4,12 +4,14 @@
 \alias{h_trait_recon}
 \title{Plot HiSSE model-averaged marginal ancestral state reconstruction for the trait}
 \usage{
-h_trait_recon(processed_hisse_recon, x_label, discrete = FALSE,
-  cutoff = 0.5, tree_layout = "rectangular",
+h_trait_recon(processed_hisse_recon, show_tip_labels = FALSE, x_label,
+  discrete = FALSE, cutoff = 0.5, tree_layout = "rectangular",
   tree_direction = "right", time_axis_ticks = 10, open_angle = 10)
 }
 \arguments{
 \item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
+
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See \code{?m_trait_recon} for a good manual solution.}
 
 \item{x_label}{The name of the trait to be used for guide title}
 

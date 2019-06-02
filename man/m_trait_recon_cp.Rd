@@ -4,8 +4,9 @@
 \alias{m_trait_recon_cp}
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with a two-dimensional colorplane}
 \usage{
-m_trait_recon_cp(processed_muhisse_recon, tree_layout = "rectangular",
-  tree_direction = "right", time_axis_ticks = 10, open_angle = 10,
+m_trait_recon_cp(processed_muhisse_recon, show_tip_label = FALSE,
+  tree_layout = "rectangular", tree_direction = "right",
+  time_axis_ticks = 10, open_angle = 10,
   focal_character = c("prob_0x", "prob_x0"), focal_character_label,
   second_character_label, colors = viridis(9)[c(5, 1, 9)])
 }
@@ -27,6 +28,8 @@ m_trait_recon_cp(processed_muhisse_recon, tree_layout = "rectangular",
 \item{second_character_label}{Label for the y axis of the two-dimensional color gradient.}
 
 \item{colors}{A vector of three colors in the order: (1) zero color (color when the two traits are in state 0), (2) horizontal_color (color to interpolate towards state 1 of the focal character) and (2) vertical_color (color to interpolate towards state 1 of the second character). See \code{?colorplaner::color_projections} for details.}
+
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See \code{?m_trait_recon} for a good manual solution.}
 }
 \value{
 A plot of the phylogeny with branches colored by muhisse-inferred marginal ancestral states.
