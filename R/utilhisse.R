@@ -1043,7 +1043,7 @@ m_ridgelines <- function(processed_muhisse_recon,
                          fill_colors = rep(NA, 4),
                          line_colors = viridis(n = 4)) {
   message(
-    "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n\n"
+    "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n"
   )
 
   ss <-
@@ -1053,8 +1053,14 @@ m_ridgelines <- function(processed_muhisse_recon,
       parameter = parameter
     )
 
-  message("Summarising grouped by character state\n\n")
+  message("Summarising grouped by character state\n")
   wanted <- as.name(parameter)
+
+  ss_var <- ss %>% group_by(four_state) %>% select(four_state, wanted) %>% distinct()
+  if(nrow(ss_var) == length(states_names) ) {
+    print(ss_var)
+    stop("Looks like there is no variation within the observed states. Probably because the model has no hidden states (e.g. MuSSE?). No point in calculating densities for point estimates.")
+  }
 
   summ <- . %>% summarise_at(.vars = vars(wanted),
                              .funs = list(
@@ -1073,7 +1079,8 @@ m_ridgelines <- function(processed_muhisse_recon,
       summ(.)
   }
   max_rate <-
-    ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
+    ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname %>% unique
+  # print(max_rate)
   print(ss.sum)
 
   message("\nPlotting\n\n")
@@ -1281,12 +1288,19 @@ m_dotplot <-
     message("Summarising grouped by character state\n\n")
     wanted <- as.name(parameter)
 
+    ss_var <- ss %>% group_by(four_state) %>% select(four_state, wanted) %>% distinct()
+    if(nrow(ss_var) == length(states_names) ) {
+      print(ss_var)
+      stop("Looks like there is no variation within the observed states. Probably because the model has no hidden states (e.g. MuSSE?). No point in calculating histograms for point estimates.")
+    }
+
     summ <- . %>% summarise_at(.vars = vars(wanted),
                                .funs = list(
                                  Mean = mean,
                                  Median = median,
                                  SD = sd
-                               ))
+                               ))%>%
+      mutate(wanted = Mean) # to bypass warning in geom_errorbar
 
     if (plot_as_waiting_time) {
       ss <- mutate(ss, wanted = 1 / !!wanted)
@@ -1300,9 +1314,9 @@ m_dotplot <-
     max_rate <-
       ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
     # print(ss)
-    print(ss.sum)
+    print(select(ss.sum, -wanted))
 
-    cat ("\nPlotting\n\n")
+    message("Plotting")
 
     pl <- ggplot(data = ss,
                  aes(x = four_state,
@@ -1323,7 +1337,6 @@ m_dotplot <-
         data = ss.sum,
         aes(
           x = four_state,
-          y = Mean,
           colour = four_state,
           ymin = Mean - SD,
           ymax = Mean + SD
