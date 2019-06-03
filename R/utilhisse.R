@@ -9,7 +9,7 @@
 #' @importFrom ggtree ggtree geom_tiplab geom_tiplab2
 #' @importFrom treeio as.treedata
 #' @importFrom ggridges geom_density_ridges
-#' @importFrom colorplaner scale_color_colorplane interpolate_projection
+#' @importFrom colorplaner scale_color_colorplane interpolate_projection guide_colorplane
 #' @importFrom viridisLite viridis
 #' @importFrom viridis viridis
 #' @importFrom ape branching.times
@@ -158,7 +158,7 @@ h_scatterplot <-
                  color = f_state)) +
       geom_point(alpha = .7,
                  size = 0.75,
-                 position = position_jitter(width = .15)) +
+                 position = position_jitter(width = .15, height = 0)) +
       geom_errorbar(
         data = tip.rates.sum,
         width = .05,
@@ -926,8 +926,8 @@ m_scatterplot_cp <-
       tip_rates <- processed_muhisse_recon$tip_rates %>%
         mutate(wanted = 1 / !!as.name(parameter))
     } else
-      (tip_rates <- processed_muhisse_recon$tip_rates %>%
-         mutate(wanted = !!as.name(parameter)))
+      tip_rates <- processed_muhisse_recon$tip_rates %>%
+         mutate(wanted = !!as.name(parameter))
 
     max_rate <- tip_rates %>% select(wanted) %>% unlist %>% max
 
@@ -973,7 +973,8 @@ m_scatterplot_cp <-
     sss <- sss +
       geom_point(alpha = .7,
                  size = 1.25,
-                 position = position_jitter(width = .15)) +
+                 position = position_jitter(width = .15, height = 0)
+                 ) +
       geom_errorbar(
         data = sum_tip_rates,
         aes(
@@ -1211,7 +1212,7 @@ m_scatterplot <-
                  fill = four_state)) +
       geom_point(
         pch = 21,
-        position = position_jitter(0.2),
+        position = position_jitter(width = 0.2, height = 0),
         size = 2,
         stroke = .3
       ) +
