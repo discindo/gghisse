@@ -922,6 +922,7 @@ m_scatterplot_cp <-
            second_character_label,
            colors,
            plot_as_waiting_time = FALSE) {
+
     if (plot_as_waiting_time) {
       tip_rates <- processed_muhisse_recon$tip_rates %>%
         mutate(wanted = 1 / !!as.name(parameter))
@@ -935,7 +936,7 @@ m_scatterplot_cp <-
       mutate(both_prob = interaction(prob_0x, prob_x0)) %>%
       group_by(both_prob) %>%
       select(both_prob, wanted) %>%
-      summarise_if(is.numeric, .funs = list("MN" = mean, "SD" = sd)) %>%
+      summarise_at(.vars=vars("wanted"), .funs = list("MN" = mean, "SD" = sd)) %>%
       mutate(LB = MN - SD, UB = MN + SD) %>%
       mutate(prob_0x = str_extract(both_prob, regex("^\\d+")) %>% as.numeric()) %>%
       mutate(prob_x0 = str_extract(both_prob, regex("\\d+$")) %>% as.numeric())
@@ -968,6 +969,10 @@ m_scatterplot_cp <-
                  color2 = prob_0x
                ))
       nudgex <- c(-0.3, 0.3, -0.3, 0.3)
+    }
+
+    if (nrow(sum_tip_rates) == 3) {
+      nudgex <- rep(.3, 3)
     }
 
     sss <- sss +
