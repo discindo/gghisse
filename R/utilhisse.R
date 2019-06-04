@@ -25,10 +25,6 @@ NULL
 # 7. diagram functions
 # 8. shiny app
 # 10. remove viridis dependency
-# 12. enable tip labels
-# 16. m_ridgelines axis ticks with 3 state model
-# 17. m_scatterplot_cp a bunch of warnings for 3 state model
-
 
 ##### --- HiSSE functions ------------------------- #####
 
@@ -392,7 +388,7 @@ h_ridgelines <- function(processed_hisse_recon,
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param x_label The name of the trait to be used for guide title
 #' @param discrete Logical. Whether to discretize the probabilities of ancestral states into binary (0/1)
 #' @param cutoff A decimal to be used as a threshold for discretizing
@@ -491,7 +487,7 @@ h_trait_recon <-
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
 #' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}
@@ -1379,7 +1375,7 @@ m_dotplot <-
 #' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
 #' @param processed_muhisse_recon An object produced by \code{m_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
 #' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10). Passed on to \code{pretty} internally, so the number of plotted ticks might not be exactly the same.
@@ -1481,7 +1477,7 @@ m_trait_recon_cp <-
 #' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
 #' @param processed_muhisse_recon An object produced by \code{m_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See the example below for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
 #' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10). Passed on to \code{pretty} internally, so the number of plotted ticks might not be exactly the same.
@@ -1530,9 +1526,9 @@ m_trait_recon_cp <-
 #'
 #'
 #'#'# Plotting tip labels
-#'# most likely you would need to use show_tip_label = FALSE
-#'# and add the tip labels manually
 #'# for better control over font size, justification, alignment, and offset
+#'# use show_tip_label = FALSE and add the tip labels manually
+#'#
 #'# for example
 #'
 #'require("ape")
@@ -1674,7 +1670,7 @@ m_trait_recon <-
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
 #'
 #' @param processed_muhisse_recon An object produced by \code{h_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
 #' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether max(rate) is in this vector and adds it if not.
@@ -1790,6 +1786,7 @@ m_rate_recon <-
 
 ##### --- Utility functions ------------------------- #####
 
+
 tree_flip <- function(ggtree_object,
                       show_tip_labels,
                       tree_layout,
@@ -1797,122 +1794,154 @@ tree_flip <- function(ggtree_object,
                       time_axis_ticks,
                       agemax) {
   if (tree_layout %in% c("rectangular", "slanted")) {
-
     if (tree_direction == "up") {
-      if (show_tip_labels) {
-        ggtree_object <- ggtree_object +
-          coord_flip() +
-          geom_tiplab(inherit.aes = FALSE, size = .4, offset=1, angle=90, align=TRUE, hjust=0) +
-          scale_x_continuous(
-            expand = c(0, 20),
-            breaks = pretty(c(0, agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
-          )
-      } else {
-        ggtree_object <- ggtree_object +
-          coord_flip() +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0, agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
-          )
-      }
-      ggtree_object <-
-        ggtree_object +
+      ggtree_object <- ggtree_object +
+        coord_flip() +
+        scale_x_continuous(
+          expand = c(add=c(.0, .01)),
+          breaks = pretty(c(0, agemax), n = time_axis_ticks),
+          labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
+        ) +
         theme(
           axis.line.y = element_line(),
           axis.ticks.y = element_line(),
           axis.text.y = element_text()
         ) +
         labs(x = "Time (Ma)")
+
+      if (show_tip_labels) {
+        plot_data <- ggtree_object$data %>%
+          filter(isTip == TRUE)
+        ggtree_object <-
+          ggtree_object +
+          scale_y_continuous(
+            expand = c(add=c(.02, .02)),
+            position = "right",
+            breaks = plot_data$y,
+            labels = plot_data$label
+          ) +
+          theme(
+            legend.position = "bottom",
+            axis.ticks.x = element_blank(),
+            axis.line.x = element_blank(),
+            axis.text.x = element_text(
+              angle = 90,
+              hjust = 0,
+              size = 3
+            )
+          )
+      }
     }
 
     if (tree_direction == "down") {
-      if (show_tip_labels) {
-        ggtree_object <- ggtree_object +
-          coord_flip() +
-          geom_tiplab(inherit.aes = FALSE, size = .4, offset=-1, angle=90, align=TRUE, hjust=1) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 20),
-            breaks = pretty(c(0, agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
-          )
-      } else {
-        ggtree_object <- ggtree_object +
-          coord_flip() +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0, agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
-          )
-      }
-      ggtree_object <-
-        ggtree_object +
+      ggtree_object <- ggtree_object +
+        coord_flip() +
+        scale_x_continuous(
+          trans = "reverse",
+          expand = c(add=c(.0, .01)),
+          breaks = pretty(c(0, agemax), n = time_axis_ticks),
+          labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
+        ) +
         theme(
           axis.line.y = element_line(),
           axis.ticks.y = element_line(),
           axis.text.y = element_text()
         ) +
         labs(x = "Time (Ma)")
+
+      if (show_tip_labels) {
+        plot_data <- ggtree_object$data %>%
+          filter(isTip == TRUE)
+        ggtree_object <-
+          ggtree_object +
+          scale_y_continuous(
+            expand = c(add=c(.02, .02)),
+            position = "left",
+            breaks = plot_data$y,
+            labels = plot_data$label
+          ) +
+          theme(
+            legend.position = "top",
+            axis.ticks.x = element_blank(),
+            axis.line.x = element_blank(),
+            axis.text.x = element_text(
+              angle = 270,
+              hjust = 0,
+              size = 3
+            )
+          )
+      }
     }
 
     if (tree_direction == "left") {
-      if (show_tip_labels) {
-        ggtree_object <- ggtree_object +
-          geom_tiplab(inherit.aes = FALSE, size = .4, hjust = 1, align = TRUE, offset = -1) +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 20),
-            breaks = pretty(c(0, agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
-          )
-      } else {
-        ggtree_object <- ggtree_object +
-          scale_x_continuous(
-            trans = "reverse",
-            expand = c(0, 0.01),
-            breaks = pretty(c(0, agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
-          )
-      }
-      ggtree_object <-
-        ggtree_object +
+      ggtree_object <- ggtree_object +
+        scale_x_continuous(
+          trans = "reverse",
+          expand = c(add=c(.0, .01)),
+          breaks = pretty(c(0, agemax), n = time_axis_ticks),
+          labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
+        ) +
         theme(
           axis.line.x = element_line(),
           axis.ticks.x = element_line(),
           axis.text.x = element_text()
         ) +
         labs(x = "Time (Ma)")
+
+      if (show_tip_labels) {
+        plot_data <- ggtree_object$data %>%
+          filter(isTip == TRUE)
+        ggtree_object <-
+          ggtree_object +
+          scale_y_continuous(
+            expand = c(add=c(.02, .02)),
+            position = "left",
+            breaks = plot_data$y,
+            labels = plot_data$label
+          ) +
+          theme(
+            legend.position = "top",
+            axis.ticks.y = element_blank(),
+            axis.line.y = element_blank(),
+            axis.text.y = element_text(hjust = 1, size = 3)
+          )
+      }
     }
 
     if (tree_direction == "right") {
-      if (show_tip_labels) {
-        ggtree_object <- ggtree_object +
-          geom_tiplab(inherit.aes = FALSE, size = .4, offset=1) +
-          scale_x_continuous(
-            expand = c(0, 20),
-            breaks = pretty(c(0, agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
-          )
-      } else {
-        ggtree_object <- ggtree_object +
-          scale_x_continuous(
-            expand = c(0, 0.01),
-            breaks = pretty(c(0, agemax), n = time_axis_ticks),
-            labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
-          )
-      }
-      ggtree_object <-
-        ggtree_object +
+      ggtree_object <- ggtree_object +
+        scale_x_continuous(
+          expand = c(add=c(.0, .01)),
+          breaks = pretty(c(0, agemax), n = time_axis_ticks),
+          labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
+        ) +
         theme(
           axis.line.x = element_line(),
           axis.ticks.x = element_line(),
           axis.text.x = element_text()
         ) +
         labs(x = "Time (Ma)")
+
+      if (show_tip_labels) {
+        plot_data <- ggtree_object$data %>%
+          filter(isTip == TRUE)
+        ggtree_object <-
+          ggtree_object +
+          scale_y_continuous(
+            expand = c(add=c(.02, .02)),
+            position = "right",
+            breaks = plot_data$y,
+            labels = plot_data$label
+          ) +
+          theme(
+            legend.position = "top",
+            axis.ticks.y = element_blank(),
+            axis.line.y = element_blank(),
+            axis.text.y = element_text(hjust = 0, size = 3)
+          )
+      }
     }
+
   }
 
   if (tree_layout %in% c("circular", "fan", "radial")) {
@@ -1923,8 +1952,8 @@ tree_flip <- function(ggtree_object,
       unname %>%
       unique
     maxx <- round(maxx, 1)
-    ntip <- ggtree_object$data %>% filter(isTip==TRUE) %>% nrow()
-    ntip <- ntip+10
+    ntip <- ggtree_object$data %>% filter(isTip == TRUE) %>% nrow()
+    ntip <- ntip + 10
     pretty_points <-
       maxx - c(maxx, pretty(c(maxx:0), n = time_axis_ticks))
 
@@ -1950,7 +1979,8 @@ tree_flip <- function(ggtree_object,
         inherit.aes = FALSE
       )
     if (show_tip_labels) {
-      ggtree_object <- ggtree_object + geom_tiplab2(inherit.aes=FALSE, size=.4)
+      ggtree_object <-
+        ggtree_object + geom_tiplab2(inherit.aes = FALSE, size = .4)
     }
   }
 

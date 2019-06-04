@@ -29,7 +29,7 @@ m_trait_recon(processed_muhisse_recon, show_tip_label = FALSE,
 
 \item{colors}{A vector of colors for the character states. Note that the number of categories depends on the cutoff value. Internally this vector of colors is subset to \code{colors[1:number of states]}, so some tinkering might be necessary to get colors that work well together.}
 
-\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See the example below for a good manual solution.}
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 }
 \value{
 A plot of the phylogeny with branches colored by muhisse-inferred marginal ancestral states.
@@ -74,9 +74,9 @@ m_trait_recon(
 
 
 #'# Plotting tip labels
-# most likely you would need to use show_tip_label = FALSE
-# and add the tip labels manually
 # for better control over font size, justification, alignment, and offset
+# use show_tip_label = FALSE and add the tip labels manually
+#
 # for example
 
 require("ape")

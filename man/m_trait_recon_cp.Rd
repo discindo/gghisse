@@ -29,7 +29,7 @@ m_trait_recon_cp(processed_muhisse_recon, show_tip_label = FALSE,
 
 \item{colors}{A vector of three colors in the order: (1) zero color (color when the two traits are in state 0), (2) horizontal_color (color to interpolate towards state 1 of the focal character) and (2) vertical_color (color to interpolate towards state 1 of the second character). See \code{?colorplaner::color_projections} for details.}
 
-\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for trees with more than a 100 species. See \code{?m_trait_recon} for a good manual solution.}
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 }
 \value{
 A plot of the phylogeny with branches colored by muhisse-inferred marginal ancestral states.
