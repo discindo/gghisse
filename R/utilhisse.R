@@ -14,6 +14,7 @@
 #' @importFrom viridis viridis
 #' @importFrom ape branching.times
 #' @importFrom purrr map
+#' @importFrom rlang .data
 #'
 NULL
 
@@ -149,9 +150,9 @@ h_scatterplot <-
 
     result <-
       ggplot(data = tip.rates,
-             aes(x = f_state,
-                 y = wanted,
-                 color = f_state)) +
+             aes(x = .data$f_state,
+                 y = .data$wanted,
+                 color = .data$f_state)) +
       geom_point(alpha = .7,
                  size = 0.75,
                  position = position_jitter(width = .15, height = 0)) +
@@ -159,9 +160,9 @@ h_scatterplot <-
         data = tip.rates.sum,
         width = .05,
         aes(
-          x = f_state,
-          ymax = Mean + SD,
-          ymin = Mean - SD
+          x = .data$f_state,
+          ymax = .data$Mean + .data$SD,
+          ymin = .data$Mean - .data$SD
         ),
         position = position_nudge(x = 0.3, y = 0)
       ) +
@@ -169,7 +170,7 @@ h_scatterplot <-
         data = tip.rates.sum,
         size = 2.5,
         position = position_nudge(x = 0.3, y = 0),
-        aes(x = f_state, y = Mean),
+        aes(x = .data$f_state, y = .data$Mean),
         pch = 21
       ) +
       scale_color_viridis_d(name = x_label,
@@ -247,9 +248,9 @@ h_dotplot <-
 
     sss <-
       ggplot(data = tip.rates,
-             aes(x = f_state,
-                 y = wanted,
-                 fill = f_state)) +
+             aes(x = .data$f_state,
+                 y = .data$wanted,
+                 fill = .data$f_state)) +
       geom_dotplot(
         alpha = .75,
         colour = "white",
@@ -264,9 +265,9 @@ h_dotplot <-
         data = tip.rates.sum,
         width = .05,
         aes(
-          x = f_state,
-          ymax = Mean + SD,
-          ymin = Mean - SD
+          x = .data$f_state,
+          ymax = .data$Mean + .data$SD,
+          ymin = .data$Mean - .data$SD
         ),
         position = position_nudge(x = -0.1, y = 0)
       ) +
@@ -274,7 +275,7 @@ h_dotplot <-
         data = tip.rates.sum,
         size = 2.5,
         position = position_nudge(x = -0.1, y = 0),
-        aes(x = f_state, y = Mean),
+        aes(x = .data$f_state, y = .data$Mean),
         pch = 21
       ) +
       scale_color_manual(values = colors, name = "") +
@@ -355,22 +356,22 @@ h_ridgelines <- function(processed_hisse_recon,
   print(tip.rates.sum)
 
   ggplot(data = tip.rates,
-         aes(x = wanted,
-             y = f_state,
-             fill = f_state)) +
+         aes(x = .data$wanted,
+             y = .data$f_state,
+             fill = .data$f_state)) +
     geom_density_ridges(alpha = 0.75) +
     geom_point(
       data = tip.rates.sum,
       pch = 21,
-      aes(y = c(1.2, 2.2), x = Mean),
+      aes(y = c(1.2, 2.2), x = .data$Mean),
       size = 3,
       inherit.aes = FALSE
     ) +
     geom_errorbarh(
       data = tip.rates.sum,
       aes(
-        xmin = Mean - SD,
-        xmax = Mean + SD,
+        xmin = .data$Mean - .data$SD,
+        xmax = .data$Mean + .data$SD,
         y = c(1.2, 2.2)
       ),
       height = 0.05,
@@ -459,13 +460,13 @@ h_trait_recon <-
     if (discrete) {
       d_state <- ifelse(state > cutoff, 1, 0) %>% as.factor()
       ggg <- ggg +
-        aes(color = d_state) +
+        aes(color = .data$d_state) +
         scale_color_viridis_d(name = x_label, end = 0.6) +
         guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       d_state <- state
       ggg <- ggg +
-        aes(color = d_state) +
+        aes(color = .data$d_state) +
         scale_color_viridis_c(name = x_label, end = 0.6)
     }
 
@@ -523,7 +524,7 @@ h_trait_recon <-
 
 h_rate_recon <-
   function(processed_hisse_recon,
-           show_tip_label = FALSE,
+           show_tip_labels= FALSE,
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
@@ -562,7 +563,8 @@ h_rate_recon <-
         unname %>%
         cut(breaks = breaks)
       ggg <-
-        ggg + aes(color = param) + scale_color_viridis_d(
+        ggg + aes(color = .data$param) +
+        scale_color_viridis_d(
           option = "B",
           begin = 0.25,
           end = 0.8,
@@ -571,7 +573,8 @@ h_rate_recon <-
     } else {
       param <- datas %>% select(!!wanted) %>% unlist %>% unname
       ggg <-
-        ggg + aes(color = param) + scale_color_viridis_c(
+        ggg + aes(color = .data$param) +
+        scale_color_viridis_c(
           option = "B",
           begin = 0.25,
           end = 0.8,
@@ -582,7 +585,7 @@ h_rate_recon <-
     ggg <-
       tree_flip(
         ggtree_object = ggg,
-        show_tip_label = show_tip_label,
+        show_tip_labels= show_tip_labels,
         tree_layout = tree_layout,
         tree_direction = tree_direction,
         time_axis_ticks = time_axis_ticks,
@@ -945,9 +948,9 @@ m_scatterplot_cp <-
         ggplot(tip_rates,
                aes(
                  x = factor(!!as.name(focal_character)),
-                 y = wanted,
-                 color = prob_0x,
-                 color2 = prob_x0
+                 y = .data$wanted,
+                 color = .data$prob_0x,
+                 color2 = .data$prob_x0
                ))
       nudgex <- c(-0.3, -0.3, 0.3, 0.3)
     }
@@ -960,9 +963,9 @@ m_scatterplot_cp <-
         ggplot(tip_rates,
                aes(
                  x = factor(!!as.name(focal_character)),
-                 y = wanted,
-                 color = prob_x0,
-                 color2 = prob_0x
+                 y = .data$wanted,
+                 color = .data$prob_x0,
+                 color2 = .data$prob_0x
                ))
       nudgex <- c(-0.3, 0.3, -0.3, 0.3)
     }
@@ -979,10 +982,10 @@ m_scatterplot_cp <-
       geom_errorbar(
         data = sum_tip_rates,
         aes(
-          x = focal_character,
-          y = MN,
-          ymin = LB,
-          ymax = UB
+          x = .data$focal_character,
+          y = .data$MN,
+          ymin = .data$LB,
+          ymax = .data$UB
         ),
         position = position_nudge(x = nudgex, y = 0),
         inherit.aes = TRUE,
@@ -990,7 +993,7 @@ m_scatterplot_cp <-
       ) +
       geom_point(
         data = sum_tip_rates,
-        aes(x = focal_character, y = MN),
+        aes(x = .data$focal_character, y = .data$MN),
         position = position_nudge(x = nudgex, y = 0),
         inherit.aes = TRUE,
         pch = 21,
@@ -1094,10 +1097,10 @@ m_ridgelines <- function(processed_muhisse_recon,
 
   ggplot(data = ss,
          aes(
-           x = wanted,
-           y = four_state,
-           fill = four_state,
-           colour = four_state
+           x = .data$wanted,
+           y = .data$four_state,
+           fill = .data$four_state,
+           colour = .data$four_state
          )) +
     geom_density_ridges(
       alpha = 0.75,
@@ -1113,10 +1116,10 @@ m_ridgelines <- function(processed_muhisse_recon,
       data = ss.sum,
       position = position_nudge(y = rep(-0.35, 4)),
       aes(
-        xmin = Mean - SD,
-        xmax = Mean + SD,
-        y = four_state,
-        colour = four_state
+        xmin = .data$Mean - .data$SD,
+        xmax = .data$Mean + .data$SD,
+        y = .data$four_state,
+        colour = .data$four_state
       ),
       height = 0.05,
       inherit.aes = FALSE
@@ -1125,9 +1128,9 @@ m_ridgelines <- function(processed_muhisse_recon,
       data = ss.sum,
       pch = 21,
       position = position_nudge(y = rep(-0.3, 4)),
-      aes(y = four_state,
-          x = Mean,
-          colour = four_state),
+      aes(y = .data$four_state,
+          x = .data$Mean,
+          colour = .data$four_state),
       size = 3,
       inherit.aes = FALSE
     ) +
@@ -1208,9 +1211,9 @@ m_scatterplot <-
 
     pl <-
       ggplot(data = ss,
-             aes(x = four_state,
-                 y = wanted,
-                 fill = four_state)) +
+             aes(x = .data$four_state,
+                 y = .data$wanted,
+                 fill = .data$four_state)) +
       geom_point(
         pch = 21,
         position = position_jitter(width = 0.2, height = 0),
@@ -1221,10 +1224,10 @@ m_scatterplot <-
         inherit.aes = FALSE,
         data = ss.sum,
         aes(
-          x = four_state,
-          colour = four_state,
-          ymin = Mean - SD,
-          ymax = Mean + SD
+          x = .data$four_state,
+          colour = .data$four_state,
+          ymin = .data$Mean - .data$SD,
+          ymax = .data$Mean + .data$SD
         ),
         width = .05,
         position = position_nudge(x = .35)
@@ -1232,7 +1235,7 @@ m_scatterplot <-
       geom_point(
         inherit.aes = FALSE,
         data = ss.sum,
-        aes(x = four_state, y = Mean, colour = four_state),
+        aes(x = .data$four_state, y = .data$Mean, colour = .data$four_state),
         pch = 21,
         fill = "white",
         size = 3,
@@ -1326,9 +1329,9 @@ m_dotplot <-
     message("Plotting")
 
     pl <- ggplot(data = ss,
-                 aes(x = four_state,
-                     y = wanted,
-                     fill = four_state)) +
+                 aes(x = .data$four_state,
+                     y = .data$wanted,
+                     fill = .data$four_state)) +
       geom_dotplot(
         alpha = .75,
         colour = "white",
@@ -1343,10 +1346,10 @@ m_dotplot <-
         inherit.aes = FALSE,
         data = ss.sum,
         aes(
-          x = four_state,
-          colour = four_state,
-          ymin = Mean - SD,
-          ymax = Mean + SD
+          x = .data$four_state,
+          colour = .data$four_state,
+          ymin = .data$Mean - .data$SD,
+          ymax = .data$Mean + .data$SD
         ),
         width = .05,
         position = position_nudge(x = -.1)
@@ -1354,7 +1357,7 @@ m_dotplot <-
       geom_point(
         inherit.aes = FALSE,
         data = ss.sum,
-        aes(x = four_state, y = Mean, colour = four_state),
+        aes(x = .data$four_state, y = .data$Mean, colour = .data$four_state),
         pch = 21,
         fill = "white",
         size = 3,
@@ -1405,7 +1408,7 @@ m_dotplot <-
 
 m_trait_recon_cp <-
   function(processed_muhisse_recon,
-           show_tip_label = FALSE,
+           show_tip_labels= FALSE,
            tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
@@ -1461,7 +1464,7 @@ m_trait_recon_cp <-
     ggg <-
       tree_flip(
         ggtree_object = ggg,
-        show_tip_label = show_tip_label,
+        show_tip_labels= show_tip_labels,
         tree_layout = tree_layout,
         tree_direction = tree_direction,
         time_axis_ticks = time_axis_ticks,
@@ -1527,7 +1530,7 @@ m_trait_recon_cp <-
 #'
 #'#'# Plotting tip labels
 #'# for better control over font size, justification, alignment, and offset
-#'# use show_tip_label = FALSE and add the tip labels manually
+#'# use show_tip_labels= FALSE and add the tip labels manually
 #'#
 #'# for example
 #'
@@ -1537,7 +1540,7 @@ m_trait_recon_cp <-
 #'
 #'# the defaults work poorly
 #'m_trait_recon(processed_muhisse_recon = x,
-#'  show_tip_label = TRUE,
+#'  show_tip_labels= TRUE,
 #'  states_of_first_character = c("0", "1"),
 #'  states_of_second_character = c("0", "1"))
 #'
@@ -1545,7 +1548,7 @@ m_trait_recon_cp <-
 #'basic_plot <-
 #'  m_trait_recon(
 #'  processed_muhisse_recon = x,
-#'  show_tip_label = FALSE,
+#'  show_tip_labels= FALSE,
 #'  states_of_first_character = c("0", "1"),
 #'  states_of_second_character = c("0", "1"),
 #'  time_axis_ticks = 8
@@ -1575,7 +1578,7 @@ m_trait_recon_cp <-
 
 m_trait_recon <-
   function(processed_muhisse_recon,
-           show_tip_label = FALSE,
+           show_tip_labels= FALSE,
            cutoff = c(.2, .2),
            states_of_first_character,
            states_of_second_character,
@@ -1655,7 +1658,7 @@ m_trait_recon <-
     ggg <-
       tree_flip(
         ggtree_object = ggg,
-        show_tip_label = show_tip_label,
+        show_tip_labels= show_tip_labels,
         tree_layout = tree_layout,
         tree_direction = tree_direction,
         time_axis_ticks = time_axis_ticks,
@@ -1706,7 +1709,7 @@ m_trait_recon <-
 
 m_rate_recon <-
   function(processed_muhisse_recon,
-           show_tip_label = FALSE,
+           show_tip_labels= FALSE,
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
@@ -1754,7 +1757,7 @@ m_rate_recon <-
         unname %>%
         cut(breaks = breaks)
       ggg <-
-        ggg + aes(color = param) + scale_color_viridis_d(
+        ggg + aes(color = .data$param) + scale_color_viridis_d(
           option = "B",
           begin = 0.25,
           end = 0.8,
@@ -1763,7 +1766,7 @@ m_rate_recon <-
     } else {
       param <- datas %>% select(!!wanted) %>% unlist %>% unname
       ggg <-
-        ggg + aes(color = param) + scale_color_viridis_c(
+        ggg + aes(color = .data$param) + scale_color_viridis_c(
           option = "B",
           begin = 0.25,
           end = 0.8,
@@ -1773,7 +1776,7 @@ m_rate_recon <-
     ggg <-
       tree_flip(
         ggtree_object = ggg,
-        show_tip_label = show_tip_label,
+        show_tip_labels= show_tip_labels,
         tree_layout = tree_layout,
         tree_direction = tree_direction,
         time_axis_ticks = time_axis_ticks,
@@ -1964,16 +1967,16 @@ tree_flip <- function(ggtree_object,
     ggtree_object <- ggtree_object +
       geom_vline(
         data = pp,
-        aes(xintercept = x),
+        aes(xintercept = .data$x),
         size = .2,
         color = "darkgrey"
       ) +
       geom_text(
         data = pp,
         aes(
-          x = x + 0.1,
+          x = .data$x + 0.1,
           y = ntip + 2,
-          label = label
+          label = .data$label
         ),
         size = 2,
         inherit.aes = FALSE
