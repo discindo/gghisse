@@ -10,7 +10,6 @@
 #' @importFrom treeio as.treedata
 #' @importFrom ggridges geom_density_ridges
 #' @importFrom colorplaner scale_color_colorplane interpolate_projection guide_colorplane
-#' @importFrom viridisLite viridis
 #' @importFrom viridis viridis
 #' @importFrom ape branching.times
 #' @importFrom purrr map
@@ -25,7 +24,6 @@ NULL
 # 6. g_ functions for HiGeoSSE
 # 7. diagram functions
 # 8. shiny app
-# 10. remove viridis dependency
 
 ##### --- HiSSE functions ------------------------- #####
 
@@ -139,23 +137,28 @@ h_scatterplot <-
     }
 
     tip.rates.sum <- tip.rates %>%
-      group_by(f_state) %>%
-      select(f_state, wanted) %>%
-      summarise_if(
-        .predicate = is.numeric,
-        .funs = list("Mean" = mean,
+      group_by(.data$f_state) %>%
+      select(.data$f_state, .data$wanted) %>%
+      summarise_if(.predicate = is.numeric,
+                   .funs = list(
+                     "Mean" = mean,
                      "SD" = sd,
-                     "Max" = max)) %>%
-      mutate("wanted" = Mean) #to bypass warning in geom_errorbar
+                     "Max" = max
+                   )) %>%
+      mutate("wanted" = .data$Mean) #to bypass warning in geom_errorbar
 
     result <-
       ggplot(data = tip.rates,
-             aes(x = .data$f_state,
-                 y = .data$wanted,
-                 color = .data$f_state)) +
-      geom_point(alpha = .7,
-                 size = 0.75,
-                 position = position_jitter(width = .15, height = 0)) +
+             aes(
+               x = .data$f_state,
+               y = .data$wanted,
+               color = .data$f_state
+             )) +
+      geom_point(
+        alpha = .7,
+        size = 0.75,
+        position = position_jitter(width = .15, height = 0)
+      ) +
       geom_errorbar(
         data = tip.rates.sum,
         width = .05,
@@ -174,7 +177,7 @@ h_scatterplot <-
         pch = 21
       ) +
       scale_color_viridis_d(name = x_label,
-                          end = 0.6) +
+                            end = 0.6) +
       scale_y_continuous(breaks = pretty(c(0, max(
         tip.rates.sum$Max
       )), n = 8)) +
@@ -237,20 +240,23 @@ h_dotplot <-
     }
 
     tip.rates.sum <- tip.rates %>%
-      group_by(f_state) %>%
-      select(f_state, wanted) %>%
-      summarise_if(
-        .predicate = is.numeric,
-        .funs = list("Mean" = mean,
+      group_by(.data$f_state) %>%
+      select(.data$f_state, .data$wanted) %>%
+      summarise_if(.predicate = is.numeric,
+                   .funs = list(
+                     "Mean" = mean,
                      "SD" = sd,
-                     "Max" =max)) %>%
-      mutate("wanted" = Mean) #to bypass warning in geom_errorbar
+                     "Max" = max
+                   )) %>%
+      mutate("wanted" = .data$Mean) #to bypass warning in geom_errorbar
 
     sss <-
       ggplot(data = tip.rates,
-             aes(x = .data$f_state,
-                 y = .data$wanted,
-                 fill = .data$f_state)) +
+             aes(
+               x = .data$f_state,
+               y = .data$wanted,
+               fill = .data$f_state
+             )) +
       geom_dotplot(
         alpha = .75,
         colour = "white",
@@ -333,16 +339,16 @@ h_ridgelines <- function(processed_hisse_recon,
            levels = states_names)
 
   if (plot_as_waiting_time) {
-    tip.rates <- mutate(tip.rates, "wanted" = 1/!!as.name(parameter))
+    tip.rates <- mutate(tip.rates, "wanted" = 1 / !!as.name(parameter))
   } else {
     tip.rates <- mutate(tip.rates, "wanted" = !!as.name(parameter))
   }
 
   tip.rates.sum <- tip.rates %>%
-    group_by(f_state) %>%
-    select(f_state, wanted) %>%
+    group_by(.data$f_state) %>%
+    select(.data$f_state, .data$wanted) %>%
     summarise_at(
-      .vars = vars(wanted),
+      .vars = vars(.data$wanted),
       .funs = funs(
         "Mean" = mean,
         "SD" = sd,
@@ -356,9 +362,11 @@ h_ridgelines <- function(processed_hisse_recon,
   print(tip.rates.sum)
 
   ggplot(data = tip.rates,
-         aes(x = .data$wanted,
-             y = .data$f_state,
-             fill = .data$f_state)) +
+         aes(
+           x = .data$wanted,
+           y = .data$f_state,
+           fill = .data$f_state
+         )) +
     geom_density_ridges(alpha = 0.75) +
     geom_point(
       data = tip.rates.sum,
@@ -378,7 +386,9 @@ h_ridgelines <- function(processed_hisse_recon,
       inherit.aes = FALSE
     ) +
     scale_fill_manual(values = colors) +
-    scale_x_continuous(breaks = pretty(c(0, max(tip.rates.sum$Max)), n = 8)) +
+    scale_x_continuous(breaks = pretty(c(0, max(
+      tip.rates.sum$Max
+    )), n = 8)) +
     labs(y = "", x = parameter) +
     theme_classic() +
     theme(legend.position = "none")
@@ -460,13 +470,13 @@ h_trait_recon <-
     if (discrete) {
       d_state <- ifelse(state > cutoff, 1, 0) %>% as.factor()
       ggg <- ggg +
-        aes(color = .data$d_state) +
+        aes(color = d_state) +
         scale_color_viridis_d(name = x_label, end = 0.6) +
         guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       d_state <- state
       ggg <- ggg +
-        aes(color = .data$d_state) +
+        aes(color = d_state) +
         scale_color_viridis_c(name = x_label, end = 0.6)
     }
 
@@ -524,7 +534,7 @@ h_trait_recon <-
 
 h_rate_recon <-
   function(processed_hisse_recon,
-           show_tip_labels= FALSE,
+           show_tip_labels = FALSE,
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
@@ -563,7 +573,7 @@ h_rate_recon <-
         unname %>%
         cut(breaks = breaks)
       ggg <-
-        ggg + aes(color = .data$param) +
+        ggg + aes(color = param) +
         scale_color_viridis_d(
           option = "B",
           begin = 0.25,
@@ -573,7 +583,7 @@ h_rate_recon <-
     } else {
       param <- datas %>% select(!!wanted) %>% unlist %>% unname
       ggg <-
-        ggg + aes(color = .data$param) +
+        ggg + aes(color = param) +
         scale_color_viridis_c(
           option = "B",
           begin = 0.25,
@@ -585,7 +595,7 @@ h_rate_recon <-
     ggg <-
       tree_flip(
         ggtree_object = ggg,
-        show_tip_labels= show_tip_labels,
+        show_tip_labels = show_tip_labels,
         tree_layout = tree_layout,
         tree_direction = tree_direction,
         time_axis_ticks = time_axis_ticks,
@@ -641,12 +651,11 @@ m_transition_matrix <-
   function(model_fit,
            hidden_states = TRUE,
            states) {
-
     mat_size <- model_fit$trans.matrix %>% ncol
     all_states <-
       expand.grid(states, 1:(mat_size / 4)) %>%
-      mutate(Name = paste(Var1, Var2, sep = "")) %>%
-      select(Name) %>% unlist %>% unname
+      mutate(Name = paste(.data$Var1, .data$Var2, sep = "")) %>%
+      select(.data$Name) %>% unlist %>% unname
 
     if (!hidden_states) {
       wanted <- c(
@@ -673,8 +682,8 @@ m_transition_matrix <-
         str_replace(regex("\\("), "") %>%
         str_replace(regex("\\)"), "") %>%
         expand.grid(., .) %>%
-        mutate("Names" = paste("q", Var1, "_", Var2, sep = "")) %>%
-        select(Names) %>% unlist %>% unname
+        mutate("Names" = paste("q", .data$Var1, "_", .data$Var2, sep = "")) %>%
+        select(.data$Names) %>% unlist %>% unname
     }
 
     Rates <- numeric(length = length(wanted))
@@ -703,12 +712,15 @@ m_transition_matrix <-
       str_replace(regex("\\)"), "")
 
     translation <- data.frame(Col_names, states_names = all_states)
-    colnames(Rate_matrix) <- rownames(Rate_matrix) <- translation$states_names
+    colnames(Rate_matrix) <-
+      rownames(Rate_matrix) <- translation$states_names
     row_ind <- is.na(rep(states, (mat_size / 4)))
     col_ind <- is.na(rep(states, (mat_size / 4)))
-    Rate_matrix <- Rate_matrix[!row_ind, !col_ind]
+    Rate_matrix <- Rate_matrix[!row_ind,!col_ind]
     if (!hidden_states) {
-      colnames(Rate_matrix) <- rownames(Rate_matrix) <- str_remove(colnames(Rate_matrix), regex("\\d+"))
+      colnames(Rate_matrix) <-
+        rownames(Rate_matrix) <-
+        str_remove(colnames(Rate_matrix), regex("\\d+"))
     }
     return(Rate_matrix)
   }
@@ -752,35 +764,45 @@ m_diversification_rates <- function(model_fit, states) {
   tur <-
     tibble("par_name" = names(model_fit$solution),
            "par_value" = model_fit$solution) %>%
-    filter(stringr::str_detect(par_name, "turnover")) %>%
+    filter(stringr::str_detect(.data$par_name, "turnover")) %>%
     slice(1:num_states) %>%
-    select(par_value) %>% unlist %>% unname
+    select(.data$par_value) %>% unlist %>% unname
 
   eps <-
     tibble("par_name" = names(model_fit$solution),
            "par_value" = model_fit$solution) %>%
-    filter(stringr::str_detect(par_name, "eps")) %>%
+    filter(stringr::str_detect(.data$par_name, "eps")) %>%
     slice(1:num_states) %>%
-    select(par_value) %>% unlist %>% unname
+    select(.data$par_value) %>% unlist %>% unname
 
   States <- expand.grid(states, hidden_traits) %>%
-    mutate("Name" = paste(Var1, Var2, sep = "")) %>%
-    select(Name) %>% unlist %>% unname
+    mutate("Name" = paste(.data$Var1, .data$Var2, sep = "")) %>%
+    select(.data$Name) %>% unlist %>% unname
 
   res <-
     tibble(
-      State = States,
-      Turnover = tur,
-      Extinction_fraction = eps
+      "State" = States,
+      "Turnover" = tur,
+      "Extinction_fraction" = eps
     )
 
-  na_index <- rep(states, num_hidden_traits) %>% is.na() %>% as.numeric()
-  res <- res %>% mutate(na_index=na_index) %>% filter(na_index==0) %>% select(-na_index)
-
+  na_index <-
+    rep(states, num_hidden_traits) %>% is.na() %>% as.numeric()
+  res <-
+    res %>% mutate(na_index = na_index) %>% filter(na_index == 0) %>% select(-na_index)
+  res_len <- nrow(res)
   res <- res %>%
-    mutate(Speciation=hisse:::ParameterTransform(Turnover, Extinction_fraction)[1:nrow(.)]) %>%
-    mutate(Extinction=hisse:::ParameterTransform(Turnover, Extinction_fraction)[(nrow(.)+1):(nrow(.)+nrow(.))]) %>%
-    mutate(Net_diversification=Speciation - Extinction)
+    mutate(Speciation =
+             ParameterTransform(
+               .data$Turnover,
+               .data$Extinction_fraction)[1:res_len]
+           ) %>%
+    mutate(Extinction =
+             ParameterTransform(
+               .data$Turnover,
+               .data$Extinction_fraction)[(res_len +1):(res_len + res_len)]
+           ) %>%
+    mutate(Net_diversification = .data$Speciation - .data$Extinction)
 
   return(res)
 }
@@ -810,7 +832,6 @@ m_collect_rates <-
   function(model_fit,
            hidden_traits,
            character_states) {
-
     trans_rates <-
       m_transition_matrix(model_fit = model_fit,
                           hidden_states = hidden_traits,
@@ -852,15 +873,15 @@ m_process_recon <- function(muhisse_recon) {
   tip.rates <-
     GetModelAveRates(x = muhisse_recon, type = "tips") %>%
     as_tibble() %>%
-    mutate("prob_0x" = state.00 + state.01,
-           "prob_x0" = state.00 + state.10)
+    mutate("prob_0x" = .data$state.00 + .data$state.01,
+           "prob_x0" = .data$state.00 + .data$state.10)
   colnames(tip.rates)[1] <- "id"
 
   nod.rates <-
     GetModelAveRates(x = muhisse_recon, type = "nodes") %>%
     as_tibble() %>%
-    mutate("prob_0x" = state.00 + state.01,
-           "prob_x0" = state.00 + state.10)
+    mutate("prob_0x" = .data$state.00 + .data$state.01,
+           "prob_x0" = .data$state.00 + .data$state.10)
 
   nod.rates$id <- as.character(nod.rates$id)
   tip.rates$id <- as.character(tip.rates$id)
@@ -907,7 +928,7 @@ m_process_recon <- function(muhisse_recon) {
 #'  focal_character = "prob_0x",
 #'  focal_character_label = "p(mar)",
 #'  second_character_label = "p(pla)",
-#'  colors = viridis(n = 9)[c(5, 1, 9)],
+#'  colors = c("#21908CFF", "#440154FF", "#FDE725FF"),
 #'  plot_as_waiting_time = TRUE) +
 #'  labs(y="Net turnover\n(waiting time in millions of years)")
 #'
@@ -921,53 +942,57 @@ m_scatterplot_cp <-
            second_character_label,
            colors,
            plot_as_waiting_time = FALSE) {
-
     if (plot_as_waiting_time) {
       tip_rates <- processed_muhisse_recon$tip_rates %>%
         mutate(wanted = 1 / !!as.name(parameter))
     } else
       tip_rates <- processed_muhisse_recon$tip_rates %>%
-         mutate(wanted = !!as.name(parameter))
+        mutate(wanted = !!as.name(parameter))
 
-    max_rate <- tip_rates %>% select(wanted) %>% unlist %>% max
+    max_rate <- tip_rates %>% select(.data$wanted) %>% unlist %>% max
 
     sum_tip_rates <- tip_rates %>%
-      mutate(both_prob = interaction(prob_0x, prob_x0)) %>%
-      group_by(both_prob) %>%
-      select(both_prob, wanted) %>%
-      summarise_at(.vars=vars("wanted"), .funs = list("MN" = mean, "SD" = sd)) %>%
-      mutate(LB = MN - SD, UB = MN + SD) %>%
-      mutate(prob_0x = str_extract(both_prob, regex("^\\d+")) %>% as.numeric()) %>%
-      mutate(prob_x0 = str_extract(both_prob, regex("\\d+$")) %>% as.numeric())
+      mutate(both_prob = interaction(.data$prob_0x, .data$prob_x0)) %>%
+      group_by(.data$both_prob) %>%
+      select(.data$both_prob, .data$wanted) %>%
+      summarise_at(.vars = vars("wanted"),
+                   .funs = list("MN" = mean, "SD" = sd)) %>%
+      mutate(LB = .data$MN - .data$SD, UB = .data$MN + .data$SD, wanted=.data$MN) %>%
+      mutate(prob_0x = str_extract(.data$both_prob, regex("^\\d+")) %>% as.numeric()) %>%
+      mutate(prob_x0 = str_extract(.data$both_prob, regex("\\d+$")) %>% as.numeric())
 
     if (focal_character == "prob_0x") {
       sum_tip_rates <-
-        mutate(sum_tip_rates, focal_character = factor(prob_0x))
+        mutate(sum_tip_rates, focal_character = factor(.data$prob_0x))
       print(sum_tip_rates)
       sss <-
-        ggplot(tip_rates,
-               aes(
-                 x = factor(!!as.name(focal_character)),
-                 y = .data$wanted,
-                 color = .data$prob_0x,
-                 color2 = .data$prob_x0
-               ))
-      nudgex <- c(-0.3, -0.3, 0.3, 0.3)
+        ggplot(
+          tip_rates,
+          aes(
+            x = factor(!!as.name(focal_character)),
+            y = .data$wanted,
+            color = .data$prob_0x,
+            color2 = .data$prob_x0
+          )
+        )
+      nudgex <- c(-0.3,-0.3, 0.3, 0.3)
     }
 
     if (focal_character == "prob_x0") {
       sum_tip_rates <-
-        mutate(sum_tip_rates, focal_character = factor(prob_x0))
+        mutate(sum_tip_rates, focal_character = factor(.data$prob_x0))
       print(sum_tip_rates)
       sss <-
-        ggplot(tip_rates,
-               aes(
-                 x = factor(!!as.name(focal_character)),
-                 y = .data$wanted,
-                 color = .data$prob_x0,
-                 color2 = .data$prob_0x
-               ))
-      nudgex <- c(-0.3, 0.3, -0.3, 0.3)
+        ggplot(
+          tip_rates,
+          aes(
+            x = factor(!!as.name(focal_character)),
+            y = .data$wanted,
+            color = .data$prob_x0,
+            color2 = .data$prob_0x
+          )
+        )
+      nudgex <- c(-0.3, 0.3,-0.3, 0.3)
     }
 
     if (nrow(sum_tip_rates) == 3) {
@@ -975,15 +1000,15 @@ m_scatterplot_cp <-
     }
 
     sss <- sss +
-      geom_point(alpha = .7,
-                 size = 1.25,
-                 position = position_jitter(width = .15, height = 0)
-                 ) +
+      geom_point(
+        alpha = .7,
+        size = 1.25,
+        position = position_jitter(width = .15, height = 0)
+      ) +
       geom_errorbar(
         data = sum_tip_rates,
         aes(
           x = .data$focal_character,
-          y = .data$MN,
           ymin = .data$LB,
           ymax = .data$UB
         ),
@@ -1042,7 +1067,7 @@ m_scatterplot_cp <-
 #'m_ridgelines(
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "extinction",
-#'  line_colors = viridis(n = 4, option=1))
+#'  line_colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 #'
 #'@export
 
@@ -1066,42 +1091,40 @@ m_ridgelines <- function(processed_muhisse_recon,
   message("Summarising grouped by character state\n")
   wanted <- as.name(parameter)
 
-  ss_var <- ss %>% group_by(four_state) %>% select(four_state, wanted) %>% distinct()
-  if(nrow(ss_var) == length(states_names) ) {
+  ss_var <-
+    ss %>% group_by(.data$four_state) %>% select(.data$four_state, .data$wanted) %>% distinct()
+  if (nrow(ss_var) == length(states_names)) {
     print(ss_var)
-    stop("Looks like there is no variation within the observed states. Probably because the model has no hidden states (e.g. MuSSE?). No point in calculating densities for point estimates.")
+    stop(
+      "Looks like there is no variation within the observed states. Probably because the model has no hidden states (e.g. MuSSE?). No point in calculating densities for point estimates."
+    )
   }
-
-  summ <- . %>% summarise_at(.vars = vars(wanted),
-                             .funs = list(
-                               "Mean" = mean,
-                               "Median" = median,
-                               "SD" = sd
-                             ))
 
   if (plot_as_waiting_time) {
     ss <- mutate(ss, wanted = 1 / !!wanted)
-    ss.sum <- ss %>% group_by(four_state) %>%
-      summ(.)
+    ss.sum <- ss %>% group_by(.data$four_state) %>%
+      summ()
   } else {
     ss <- mutate(ss, wanted = !!wanted)
-    ss.sum <- ss %>% group_by(four_state) %>%
-      summ(.)
+    ss.sum <- ss %>% group_by(.data$four_state) %>%
+      summ()
   }
   max_rate <-
-    ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname %>% unique
+    ss %>% select(.data$wanted) %>% top_n(1, wt = .data$wanted) %>% unlist %>% unname %>% unique
   # print(max_rate)
   print(ss.sum)
 
   message("\nPlotting\n\n")
 
-  ggplot(data = ss,
-         aes(
-           x = .data$wanted,
-           y = .data$four_state,
-           fill = .data$four_state,
-           colour = .data$four_state
-         )) +
+  ggplot(
+    data = ss,
+    aes(
+      x = .data$wanted,
+      y = .data$four_state,
+      fill = .data$four_state,
+      colour = .data$four_state
+    )
+  ) +
     geom_density_ridges(
       alpha = 0.75,
       size = 0.75,
@@ -1128,9 +1151,11 @@ m_ridgelines <- function(processed_muhisse_recon,
       data = ss.sum,
       pch = 21,
       position = position_nudge(y = rep(-0.3, 4)),
-      aes(y = .data$four_state,
-          x = .data$Mean,
-          colour = .data$four_state),
+      aes(
+        y = .data$four_state,
+        x = .data$Mean,
+        colour = .data$four_state
+      ),
       size = 3,
       inherit.aes = FALSE
     ) +
@@ -1162,7 +1187,7 @@ m_ridgelines <- function(processed_muhisse_recon,
 #'m_scatterplot(
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "extinction",
-#'  colors = viridis(n = 4, option=1, end=.8))
+#'  colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 #'
 #'@export
 
@@ -1186,34 +1211,28 @@ m_scatterplot <-
     message("Summarising grouped by character state\n")
     wanted <- as.name(parameter)
 
-    summ <- . %>% summarise_at(.vars = vars(wanted),
-                               .funs = list(
-                                 Mean = mean,
-                                 Median = median,
-                                 SD = sd
-                               )) %>%
-      mutate(wanted = Mean) # to bypass warning in geom_errorbar
-
     if (plot_as_waiting_time) {
       ss <- mutate(ss, wanted = 1 / !!wanted)
-      ss.sum <- ss %>% group_by(four_state) %>%
-        summ(.)
+      ss.sum <- ss %>% group_by(.data$four_state) %>%
+        summ()
     } else {
       ss <- mutate(ss, wanted = !!wanted)
-      ss.sum <- ss %>% group_by(four_state) %>%
-        summ(.)
+      ss.sum <- ss %>% group_by(.data$four_state) %>%
+        summ()
     }
     max_rate <-
-      ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
-    print(select(ss.sum,-wanted))
+      ss %>% select(.data$wanted) %>% top_n(1, wt = .data$wanted) %>% unlist %>% unname
+    print(select(ss.sum, -.data$wanted))
 
     message("\nPlotting\n")
 
     pl <-
       ggplot(data = ss,
-             aes(x = .data$four_state,
-                 y = .data$wanted,
-                 fill = .data$four_state)) +
+             aes(
+               x = .data$four_state,
+               y = .data$wanted,
+               fill = .data$four_state
+             )) +
       geom_point(
         pch = 21,
         position = position_jitter(width = 0.2, height = 0),
@@ -1235,7 +1254,11 @@ m_scatterplot <-
       geom_point(
         inherit.aes = FALSE,
         data = ss.sum,
-        aes(x = .data$four_state, y = .data$Mean, colour = .data$four_state),
+        aes(
+          x = .data$four_state,
+          y = .data$Mean,
+          colour = .data$four_state
+        ),
         pch = 21,
         fill = "white",
         size = 3,
@@ -1273,7 +1296,7 @@ m_scatterplot <-
 #'m_dotplot(
 #'  processed_muhisse_recon = processed_muhisse,
 #'  parameter = "extinction",
-#'  colors = viridis(n = 4, option=1, end=.8))
+#'  colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 #'
 #'@export
 
@@ -1298,40 +1321,37 @@ m_dotplot <-
     message("Summarising grouped by character state\n\n")
     wanted <- as.name(parameter)
 
-    ss_var <- ss %>% group_by(four_state) %>% select(four_state, wanted) %>% distinct()
-    if(nrow(ss_var) == length(states_names) ) {
+    ss_var <-
+      ss %>% group_by(.data$four_state) %>% select(.data$four_state, .data$wanted) %>% distinct()
+    if (nrow(ss_var) == length(states_names)) {
       print(ss_var)
-      stop("Looks like there is no variation within the observed states. Probably because the model has no hidden states (e.g. MuSSE?). No point in calculating histograms for point estimates.")
+      stop(
+        "Looks like there is no variation within the observed states. Probably because the model has no hidden states (e.g. MuSSE?). No point in calculating histograms for point estimates."
+      )
     }
-
-    summ <- . %>% summarise_at(.vars = vars(wanted),
-                               .funs = list(
-                                 Mean = mean,
-                                 Median = median,
-                                 SD = sd
-                               ))%>%
-      mutate(wanted = Mean) # to bypass warning in geom_errorbar
 
     if (plot_as_waiting_time) {
       ss <- mutate(ss, wanted = 1 / !!wanted)
-      ss.sum <- ss %>% group_by(four_state) %>%
-        summ(.)
+      ss.sum <- ss %>% group_by(.data$four_state) %>%
+        summ()
     } else {
       ss <- mutate(ss, wanted = !!wanted)
-      ss.sum <- ss %>% group_by(four_state) %>%
-        summ(.)
+      ss.sum <- ss %>% group_by(.data$four_state) %>%
+        summ()
     }
     max_rate <-
-      ss %>% select(wanted) %>% top_n(1, wt = wanted) %>% unlist %>% unname
+      ss %>% select(.data$wanted) %>% top_n(1, wt = .data$wanted) %>% unlist %>% unname
     # print(ss)
-    print(select(ss.sum, -wanted))
+    print(select(ss.sum,-.data$wanted))
 
     message("Plotting")
 
     pl <- ggplot(data = ss,
-                 aes(x = .data$four_state,
-                     y = .data$wanted,
-                     fill = .data$four_state)) +
+                 aes(
+                   x = .data$four_state,
+                   y = .data$wanted,
+                   fill = .data$four_state
+                 )) +
       geom_dotplot(
         alpha = .75,
         colour = "white",
@@ -1357,7 +1377,11 @@ m_dotplot <-
       geom_point(
         inherit.aes = FALSE,
         data = ss.sum,
-        aes(x = .data$four_state, y = .data$Mean, colour = .data$four_state),
+        aes(
+          x = .data$four_state,
+          y = .data$Mean,
+          colour = .data$four_state
+        ),
         pch = 21,
         fill = "white",
         size = 3,
@@ -1401,14 +1425,14 @@ m_dotplot <-
 #'  focal_character = "prob_0x",
 #'  focal_character_label = "p(marine)",
 #'  second_character_label = "p(plankton)",
-#'  colors = viridis(9)[c(5,1,9)]
+#'  colors = c("#21908CFF", "#440154FF", "#FDE725FF")
 #'  )
 #'
 #'@export
 
 m_trait_recon_cp <-
   function(processed_muhisse_recon,
-           show_tip_labels= FALSE,
+           show_tip_labels = FALSE,
            tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
@@ -1464,7 +1488,7 @@ m_trait_recon_cp <-
     ggg <-
       tree_flip(
         ggtree_object = ggg,
-        show_tip_labels= show_tip_labels,
+        show_tip_labels = show_tip_labels,
         tree_layout = tree_layout,
         tree_direction = tree_direction,
         time_axis_ticks = time_axis_ticks,
@@ -1496,7 +1520,7 @@ m_trait_recon_cp <-
 #'
 #'data("diatoms")
 #'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
-#'
+#'cols = c("#00204DFF", "#1B3B6DFF", "#4E576CFF", "#727274FF", "#958F78FF", "#BCAF6FFF", "#E7D159FF")
 #'# eight categories after binning with a cutoff of 0.2
 #'m_trait_recon(
 #'  processed_muhisse_recon = processed_muhisse,
@@ -1504,7 +1528,7 @@ m_trait_recon_cp <-
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
-#'  colors = viridis(7,option = "E", direction = 1, end=.9))
+#'  colors = cols)
 #'
 #'# three of these eight have < 3 nodes, so we could try to avoid plotting some of them
 #'# adjust the cutoff for the second variable
@@ -1515,7 +1539,7 @@ m_trait_recon_cp <-
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
-#'  colors = viridis(7,option = "E", direction = 1, end=.9))
+#'  colors = cols)
 #'
 #'# ignoring uncertainty
 #'m_trait_recon(
@@ -1524,7 +1548,7 @@ m_trait_recon_cp <-
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
-#'  colors = viridis(7,option = "E", direction = 1, end=.9)[c(1,3,5,7)])
+#'  colors = cols)
 #'
 #'
 #'
@@ -1578,7 +1602,7 @@ m_trait_recon_cp <-
 
 m_trait_recon <-
   function(processed_muhisse_recon,
-           show_tip_labels= FALSE,
+           show_tip_labels = FALSE,
            cutoff = c(.2, .2),
            states_of_first_character,
            states_of_second_character,
@@ -1623,19 +1647,19 @@ m_trait_recon <-
             )
           )
       ) %>%
-      mutate(four_state = paste(prob_0x_named, prob_x0_named, sep = "-"))
+      mutate(four_state = paste(.data$prob_0x_named, .data$prob_x0_named, sep = "-"))
 
     message("Categories after discretizing with the provided cutoff:\n")
     ss.cnt <- ss %>%
       ungroup %>%
-      group_by(four_state) %>%
+      group_by(.data$four_state) %>%
       add_tally() %>%
-      select(four_state, n) %>%
+      select(.data$four_state, n) %>%
       distinct
 
     print(ss.cnt)
 
-    nstat <- ss %>% select(four_state) %>% distinct %>% nrow
+    nstat <- ss %>% select(.data$four_state) %>% distinct %>% nrow
 
     ggg <-
       ggtree(
@@ -1658,7 +1682,7 @@ m_trait_recon <-
     ggg <-
       tree_flip(
         ggtree_object = ggg,
-        show_tip_labels= show_tip_labels,
+        show_tip_labels = show_tip_labels,
         tree_layout = tree_layout,
         tree_direction = tree_direction,
         time_axis_ticks = time_axis_ticks,
@@ -1709,7 +1733,7 @@ m_trait_recon <-
 
 m_rate_recon <-
   function(processed_muhisse_recon,
-           show_tip_labels= FALSE,
+           show_tip_labels = FALSE,
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
@@ -1757,7 +1781,7 @@ m_rate_recon <-
         unname %>%
         cut(breaks = breaks)
       ggg <-
-        ggg + aes(color = .data$param) + scale_color_viridis_d(
+        ggg + aes(color = param) + scale_color_viridis_d(
           option = "B",
           begin = 0.25,
           end = 0.8,
@@ -1766,7 +1790,7 @@ m_rate_recon <-
     } else {
       param <- datas %>% select(!!wanted) %>% unlist %>% unname
       ggg <-
-        ggg + aes(color = .data$param) + scale_color_viridis_c(
+        ggg + aes(color = param) + scale_color_viridis_c(
           option = "B",
           begin = 0.25,
           end = 0.8,
@@ -1776,7 +1800,7 @@ m_rate_recon <-
     ggg <-
       tree_flip(
         ggtree_object = ggg,
-        show_tip_labels= show_tip_labels,
+        show_tip_labels = show_tip_labels,
         tree_layout = tree_layout,
         tree_direction = tree_direction,
         time_axis_ticks = time_axis_ticks,
@@ -1801,7 +1825,7 @@ tree_flip <- function(ggtree_object,
       ggtree_object <- ggtree_object +
         coord_flip() +
         scale_x_continuous(
-          expand = c(add=c(.0, .01)),
+          expand = c(add = c(.0, .01)),
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
@@ -1814,11 +1838,11 @@ tree_flip <- function(ggtree_object,
 
       if (show_tip_labels) {
         plot_data <- ggtree_object$data %>%
-          filter(isTip == TRUE)
+          filter(.data$isTip == TRUE)
         ggtree_object <-
           ggtree_object +
           scale_y_continuous(
-            expand = c(add=c(.02, .02)),
+            expand = c(add = c(.02, .02)),
             position = "right",
             breaks = plot_data$y,
             labels = plot_data$label
@@ -1841,7 +1865,7 @@ tree_flip <- function(ggtree_object,
         coord_flip() +
         scale_x_continuous(
           trans = "reverse",
-          expand = c(add=c(.0, .01)),
+          expand = c(add = c(.0, .01)),
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
@@ -1854,11 +1878,11 @@ tree_flip <- function(ggtree_object,
 
       if (show_tip_labels) {
         plot_data <- ggtree_object$data %>%
-          filter(isTip == TRUE)
+          filter(.data$isTip == TRUE)
         ggtree_object <-
           ggtree_object +
           scale_y_continuous(
-            expand = c(add=c(.02, .02)),
+            expand = c(add = c(.02, .02)),
             position = "left",
             breaks = plot_data$y,
             labels = plot_data$label
@@ -1880,7 +1904,7 @@ tree_flip <- function(ggtree_object,
       ggtree_object <- ggtree_object +
         scale_x_continuous(
           trans = "reverse",
-          expand = c(add=c(.0, .01)),
+          expand = c(add = c(.0, .01)),
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
@@ -1893,11 +1917,11 @@ tree_flip <- function(ggtree_object,
 
       if (show_tip_labels) {
         plot_data <- ggtree_object$data %>%
-          filter(isTip == TRUE)
+          filter(.data$isTip == TRUE)
         ggtree_object <-
           ggtree_object +
           scale_y_continuous(
-            expand = c(add=c(.02, .02)),
+            expand = c(add = c(.02, .02)),
             position = "left",
             breaks = plot_data$y,
             labels = plot_data$label
@@ -1914,7 +1938,7 @@ tree_flip <- function(ggtree_object,
     if (tree_direction == "right") {
       ggtree_object <- ggtree_object +
         scale_x_continuous(
-          expand = c(add=c(.0, .01)),
+          expand = c(add = c(.0, .01)),
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
@@ -1927,11 +1951,11 @@ tree_flip <- function(ggtree_object,
 
       if (show_tip_labels) {
         plot_data <- ggtree_object$data %>%
-          filter(isTip == TRUE)
+          filter(.data$isTip == TRUE)
         ggtree_object <-
           ggtree_object +
           scale_y_continuous(
-            expand = c(add=c(.02, .02)),
+            expand = c(add = c(.02, .02)),
             position = "right",
             breaks = plot_data$y,
             labels = plot_data$label
@@ -1949,20 +1973,21 @@ tree_flip <- function(ggtree_object,
 
   if (tree_layout %in% c("circular", "fan", "radial")) {
     maxx <- ggtree_object$data %>%
-      top_n(n = 1, wt = x) %>%
-      select(x) %>%
+      top_n(n = 1, wt = .data$x) %>%
+      select(.data$x) %>%
       unlist %>%
       unname %>%
       unique
     maxx <- round(maxx, 1)
-    ntip <- ggtree_object$data %>% filter(isTip == TRUE) %>% nrow()
+    ntip <-
+      ggtree_object$data %>% filter(.data$isTip == TRUE) %>% nrow()
     ntip <- ntip + 10
     pretty_points <-
       maxx - c(maxx, pretty(c(maxx:0), n = time_axis_ticks))
 
     pp <- tibble(x = rev(pretty_points), y = 0) %>%
-      filter(x <= maxx, x > 0) %>%
-      mutate(label = rev(x) - min(x))
+      filter(.data$x <= maxx, .data$x > 0) %>%
+      mutate(label = rev(.data$x) - min(.data$x))
 
     ggtree_object <- ggtree_object +
       geom_vline(
@@ -1995,7 +2020,15 @@ m_prep_df <-
            states_names,
            parameter) {
     ss <- processed_muhisse_recon$tip_rates %>%
-      mutate(what_state = paste(state.00, state.01, state.10, state.11, sep = "")) %>%
+      mutate(
+        what_state = paste(
+          .data$state.00,
+          .data$state.01,
+          .data$state.10,
+          .data$state.11,
+          sep = ""
+        )
+      ) %>%
       mutate(four_state = factor(
         case_when(
           what_state == "1000" ~ states_names[1],
@@ -2009,3 +2042,23 @@ m_prep_df <-
 
     return(ss)
   }
+
+
+summ <- function(x) {
+  y <- x %>% summarise_at(.vars = vars(.data$wanted),
+                          .funs = list(
+                            "Mean" = mean,
+                            "Median" = median,
+                            "SD" = sd
+                          )) %>%
+    mutate(wanted = .data$Mean) # to bypass warning in geom_errorbar
+  return(y)
+}
+
+# not exported from hisse, not exported here
+ParameterTransform <- function (x, y)
+{
+  speciation <- x / (1 + y)
+  extinction <- (x * y) / (1 + y)
+  return(c(speciation, extinction))
+}

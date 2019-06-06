@@ -33,6 +33,6 @@ processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 m_scatterplot(
  processed_muhisse_recon = processed_muhisse,
  parameter = "extinction",
- colors = viridis(n = 4, option=1, end=.8))
+ colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 
 }

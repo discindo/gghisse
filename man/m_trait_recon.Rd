@@ -41,7 +41,7 @@ A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction 
 
 data("diatoms")
 processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
-
+cols = c("#00204DFF", "#1B3B6DFF", "#4E576CFF", "#727274FF", "#958F78FF", "#BCAF6FFF", "#E7D159FF")
 # eight categories after binning with a cutoff of 0.2
 m_trait_recon(
  processed_muhisse_recon = processed_muhisse,
@@ -49,7 +49,7 @@ m_trait_recon(
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
- colors = viridis(7,option = "E", direction = 1, end=.9))
+ colors = cols)
 
 # three of these eight have < 3 nodes, so we could try to avoid plotting some of them
 # adjust the cutoff for the second variable
@@ -60,7 +60,7 @@ m_trait_recon(
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
- colors = viridis(7,option = "E", direction = 1, end=.9))
+ colors = cols)
 
 # ignoring uncertainty
 m_trait_recon(
@@ -69,7 +69,7 @@ m_trait_recon(
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
- colors = viridis(7,option = "E", direction = 1, end=.9)[c(1,3,5,7)])
+ colors = cols)
 
 
 

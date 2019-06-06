@@ -35,6 +35,6 @@ processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 m_ridgelines(
  processed_muhisse_recon = processed_muhisse,
  parameter = "extinction",
- line_colors = viridis(n = 4, option=1))
+ line_colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 
 }

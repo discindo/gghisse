@@ -39,7 +39,7 @@ m_scatterplot_cp(
  focal_character = "prob_0x",
  focal_character_label = "p(mar)",
  second_character_label = "p(pla)",
- colors = viridis(n = 9)[c(5, 1, 9)],
+ colors = c("#21908CFF", "#440154FF", "#FDE725FF"),
  plot_as_waiting_time = TRUE) +
  labs(y="Net turnover\\n(waiting time in millions of years)")
 

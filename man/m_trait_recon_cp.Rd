@@ -48,7 +48,7 @@ m_trait_recon_cp(
  focal_character = "prob_0x",
  focal_character_label = "p(marine)",
  second_character_label = "p(plankton)",
- colors = viridis(9)[c(5,1,9)]
+ colors = c("#21908CFF", "#440154FF", "#FDE725FF")
  )
 
 }
