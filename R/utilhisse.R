@@ -23,7 +23,6 @@ NULL
 # 5. Support region functions. Making tables, plots, and contour plots?
 # 6. g_ functions for HiGeoSSE
 # 7. diagram functions
-# 8. shiny app
 
 ##### --- HiSSE functions ------------------------- #####
 
@@ -87,7 +86,8 @@ h_process_recon <- function(hisse_recon) {
 #'
 #' @param processed_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
-#' @param states_names A character vector of length two giving the translation for states 0 and 1.
+#' @param states_names A character vector of length two giving the translation for states 0 and 1
+#' @param colors Colors for the points in the two alternate states
 #' @param plot_as_waiting_time Logical. Whether to plot the rates or their inverse (waiting times)
 #'
 #' @return A jittered scatterplot of (model averaged) tip-associated rates.
@@ -123,13 +123,12 @@ h_scatterplot <-
   function(processed_recon,
            parameter = "turnover",
            states_names = c("0", "1"),
+           colors = c("yellow", "violet"),
            plot_as_waiting_time = FALSE) {
     tip.rates <- processed_recon$tip_rates
     tip.rates <- tip.rates %>%
       mutate("f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])) %>%
       mutate("f_state" = factor(.data$f_state))
-
-    # tip.rates$f_state <- as.factor(tip.rates$state)
 
     if (plot_as_waiting_time) {
       tip.rates <- mutate(tip.rates, wanted = 1 / !!as.name(parameter))
@@ -153,12 +152,14 @@ h_scatterplot <-
              aes(
                x = .data$f_state,
                y = .data$wanted,
-               color = .data$f_state
+               # color = .data$f_state,
+               fill = .data$f_state
              )) +
       geom_point(
         alpha = .7,
         size = 2,
-        position = position_jitter(width = .15, height = 0)
+        position = position_jitter(width = .15, height = 0),
+        pch=21
       ) +
       geom_errorbar(
         data = tip.rates.sum,
@@ -177,8 +178,8 @@ h_scatterplot <-
         aes(x = .data$f_state, y = .data$Mean),
         pch = 21
       ) +
-      scale_color_viridis_d(name = "",
-                            end = 0.6) +
+      scale_color_manual(values = colors, name = "") +
+      scale_fill_manual(values = colors, name = "") +
       scale_y_continuous(breaks = pretty(c(0, max(
         tip.rates.sum$Max
       )), n = 8)) +
@@ -219,7 +220,7 @@ h_scatterplot <-
 #'
 #'# see ?h_plot_rates_states for examples for modifying the graph using ggplot2
 #'
-#'@export
+#' @export
 
 h_dotplot <-
   function(processed_recon,
@@ -420,9 +421,10 @@ h_ridgelines <- function(processed_recon,
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
 #' @param processed_recon An object produced by \code{h_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param trait_name The name of the trait to be used for guide title
 #' @param states_names The names for character states
+#' @param colors Colors for the two character states. If \code{discrete=FALSE} these colors will be used as the min/max of a color gradient.
 #' @param discrete Logical. Whether to discretize the probabilities of ancestral states into binary (0/1)
 #' @param cutoff A decimal to be used as a threshold for discretizing
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
@@ -460,6 +462,7 @@ h_trait_recon <-
            show_tip_labels = FALSE,
            trait_name = "trait",
            states_names = c("0", "1"),
+           colors= c("orange", "violet"),
            discrete = FALSE,
            cutoff = 0.5,
            tree_layout = "rectangular",
@@ -495,13 +498,13 @@ h_trait_recon <-
       d_state <- ifelse(d_state == 0, states_names[1], states_names[2]) %>% as.factor()
       ggg <- ggg +
         aes(color = d_state) +
-        scale_color_viridis_d(name = trait_name, end = 0.6) +
+        scale_color_manual(name = trait_name, values = colors) +
         guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       d_state <- state
       ggg <- ggg +
         aes(color = d_state) +
-        scale_color_viridis_c(name = trait_name, end = 0.6)
+        scale_color_gradient(name = trait_name, low = colors[1], high = colors[2])
     }
 
     ggg <-
@@ -522,10 +525,11 @@ h_trait_recon <-
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
 #'
 #' @param processed_recon An object produced by \code{h_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
-#' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}
+#' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether 0 and max(rate) is in this vector and adds them if not. Scale appropriatelly if \code{plot_as_waiting_time=TRUE}.
+#' @param colors Colors for the branches. If \code{discrete=TRUE} a vector of length matching the number of bins produced by the breaks. If \code{discrete=FALSE}, a vector of length two giving the min/max of a color gradient.
 #' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
@@ -539,21 +543,13 @@ h_trait_recon <-
 #'data("diatoms")
 #'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'
-#'map_continuous <-
-#'  h_rate_recon(
+#'h_rate_recon(
 #'    processed_recon = processed_hisse,
 #'    parameter = "extinction", discrete=FALSE)
 #'
-#'# change colors, your can pass the trait name to `name=` to title the colorbar
-#'map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
-#'
-#'map_discrete <-
-#'  h_rate_recon(
+#'h_rate_recon(
 #'    processed_recon = processed_hisse,
 #'    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
-#'
-#'# change colors
-#'map_discrete + scale_color_manual(name="", values = c("red", "blue", "orange", "green"))
 #'
 #'@export
 
@@ -563,6 +559,7 @@ h_rate_recon <-
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
+           colors = c("yellow", "purple"),
            plot_as_waiting_time = FALSE,
            tree_layout = "rectangular",
            tree_direction = "right",
@@ -598,6 +595,16 @@ h_rate_recon <-
       )
 
     if (discrete) {
+      max_rate <- datas %>% select(.data$wanted) %>% unlist %>% unname %>% max
+      if (!0 %in% breaks) {
+        breaks <- c(0, breaks)
+      }
+      if (all(max_rate > breaks)) {
+        breaks <- c(breaks, max_rate)
+      }
+      message("Cutting distribution of rate with these breaks:\n")
+      print(breaks)
+
       param <- datas %>%
         select(.data$wanted) %>%
         unlist %>%
@@ -605,20 +612,17 @@ h_rate_recon <-
         cut(breaks = breaks)
       ggg <-
         ggg + aes(color = param) +
-        scale_color_viridis_d(
-          option = "B",
-          begin = 0.25,
-          end = 0.8,
+        scale_color_manual(
+          values=colors,
           name = parameter
         ) + guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       param <- datas %>% select(.data$wanted) %>% unlist %>% unname
       ggg <-
         ggg + aes(color = param) +
-        scale_color_viridis_c(
-          option = "B",
-          begin = 0.25,
-          end = 0.8,
+        scale_color_gradient(
+          low = colors[1],
+          high = colors[2],
           name = parameter
         )
     }
@@ -1438,7 +1442,7 @@ m_dotplot <-
 #' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
 #' @param processed_recon An object produced by \code{m_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
 #' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10). Passed on to \code{pretty} internally, so the number of plotted ticks might not be exactly the same.
@@ -1541,7 +1545,7 @@ m_trait_recon_cp <-
 #' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
 #' @param processed_recon An object produced by \code{m_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
 #' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10). Passed on to \code{pretty} internally, so the number of plotted ticks might not be exactly the same.
@@ -1734,10 +1738,11 @@ m_trait_recon <-
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
 #'
 #' @param processed_recon An object produced by \code{h_process_recon}
-#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
+#' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
-#' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether max(rate) is in this vector and adds it if not.
+#' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether 0 and max(rate) is in this vector and adds them if not. Scale appropriatelly if \code{plot_as_waiting_time=TRUE}.
+#' @param colors Colors for the branches. If \code{discrete=TRUE} a vector of length matching the number of bins produced by the breaks. If \code{discrete=FALSE}, a vector of length two giving the min/max of a color gradient.
 #' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
@@ -1751,21 +1756,13 @@ m_trait_recon <-
 #'data("diatoms")
 #'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
-#'map_continuous <-
-#'  m_rate_recon(
+#'m_rate_recon(
 #'    processed_recon = processed_muhisse,
 #'    parameter = "extinction", discrete=FALSE)
 #'
-#'# change colors, your can pass the trait name to `name=` to title the colorbar
-#'map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
-#'
-#'map_discrete <-
-#'  m_rate_recon(
+#'m_rate_recon(
 #'    processed_recon = processed_muhisse,
 #'    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
-#'
-#'# change colors
-#'map_discrete + scale_color_manual(name="", values = c("red", "blue", "orange", "green"))
 #'
 #'@export
 
@@ -1774,7 +1771,8 @@ m_rate_recon <-
            show_tip_labels = FALSE,
            parameter = "turnover",
            discrete = FALSE,
-           breaks = seq(0, 1, 0.2),
+           breaks = seq(0.3, 0.6, 1),
+           colors = c("red", "blue", "orange", "green"),
            plot_as_waiting_time = FALSE,
            tree_layout = "rectangular",
            tree_direction = "right",
@@ -1825,19 +1823,16 @@ m_rate_recon <-
         unname %>%
         cut(breaks = breaks)
       ggg <-
-        ggg + aes(color = param) + scale_color_viridis_d(
-          option = "B",
-          begin = 0.25,
-          end = 0.8,
+        ggg + aes(color = param) + scale_color_manual(
+          values = colors,
           name = parameter
         ) + guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       param <- datas %>% select(.data$wanted) %>% unlist %>% unname
       ggg <-
-        ggg + aes(color = param) + scale_color_viridis_c(
-          option = "B",
-          begin = 0.25,
-          end = 0.8,
+        ggg + aes(color = param) + scale_color_gradient(
+          low = colors[1],
+          high = colors[2],
           name = parameter
         )
     }

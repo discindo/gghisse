@@ -13,7 +13,7 @@ m_trait_recon_cp(processed_recon, show_tip_labels = FALSE,
 \arguments{
 \item{processed_recon}{An object produced by \code{m_process_recon}}
 
-\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 
 \item{tree_layout}{A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.}
 

@@ -5,18 +5,21 @@
 \title{Plot HiSSE model-averaged marginal ancestral state reconstruction for the trait}
 \usage{
 h_trait_recon(processed_recon, show_tip_labels = FALSE,
-  trait_name = "trait", states_names = c("0", "1"), discrete = FALSE,
-  cutoff = 0.5, tree_layout = "rectangular",
-  tree_direction = "right", time_axis_ticks = 10, open_angle = 10)
+  trait_name = "trait", states_names = c("0", "1"),
+  colors = c("orange", "violet"), discrete = FALSE, cutoff = 0.5,
+  tree_layout = "rectangular", tree_direction = "right",
+  time_axis_ticks = 10, open_angle = 10)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}
 
-\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 
 \item{trait_name}{The name of the trait to be used for guide title}
 
 \item{states_names}{The names for character states}
+
+\item{colors}{Colors for the two character states. If \code{discrete=FALSE} these colors will be used as the min/max of a color gradient.}
 
 \item{discrete}{Logical. Whether to discretize the probabilities of ancestral states into binary (0/1)}
 

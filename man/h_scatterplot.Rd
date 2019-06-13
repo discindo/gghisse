@@ -5,14 +5,17 @@
 \title{Plot diversification rates estimated by a HiSSE model (HiSSE, BiSSE, CID2, CID4)}
 \usage{
 h_scatterplot(processed_recon, parameter = "turnover",
-  states_names = c("0", "1"), plot_as_waiting_time = FALSE)
+  states_names = c("0", "1"), colors = c("yellow", "violet"),
+  plot_as_waiting_time = FALSE)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
-\item{states_names}{A character vector of length two giving the translation for states 0 and 1.}
+\item{states_names}{A character vector of length two giving the translation for states 0 and 1}
+
+\item{colors}{Colors for the points in the two alternate states}
 
 \item{plot_as_waiting_time}{Logical. Whether to plot the rates or their inverse (waiting times)}
 }

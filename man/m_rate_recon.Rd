@@ -5,20 +5,23 @@
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for diversification rates}
 \usage{
 m_rate_recon(processed_recon, show_tip_labels = FALSE,
-  parameter = "turnover", discrete = FALSE, breaks = seq(0, 1, 0.2),
+  parameter = "turnover", discrete = FALSE, breaks = seq(0.3, 0.6,
+  1), colors = c("red", "blue", "orange", "green"),
   plot_as_waiting_time = FALSE, tree_layout = "rectangular",
   tree_direction = "right", time_axis_ticks = 10, open_angle = 10)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}
 
-\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 
 \item{parameter}{The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
 \item{discrete}{Logical. Whether to discretize the distribution of reconstructed rates into bins}
 
-\item{breaks}{A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether max(rate) is in this vector and adds it if not.}
+\item{breaks}{A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether 0 and max(rate) is in this vector and adds them if not. Scale appropriatelly if \code{plot_as_waiting_time=TRUE}.}
+
+\item{colors}{Colors for the branches. If \code{discrete=TRUE} a vector of length matching the number of bins produced by the breaks. If \code{discrete=FALSE}, a vector of length two giving the min/max of a color gradient.}
 
 \item{plot_as_waiting_time}{Whether to plot the rates (FALSE, default) or their inverse (waiting times)}
 
@@ -41,20 +44,12 @@ A function to plot a (model-averaged) marginal ancestral reconstruction for the 
 data("diatoms")
 processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 
-map_continuous <-
- m_rate_recon(
+m_rate_recon(
    processed_recon = processed_muhisse,
    parameter = "extinction", discrete=FALSE)
 
-# change colors, your can pass the trait name to `name=` to title the colorbar
-map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
-
-map_discrete <-
- m_rate_recon(
+m_rate_recon(
    processed_recon = processed_muhisse,
    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
-
-# change colors
-map_discrete + scale_color_manual(name="", values = c("red", "blue", "orange", "green"))
 
 }

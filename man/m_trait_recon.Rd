@@ -12,7 +12,7 @@ m_trait_recon(processed_recon, show_tip_labels = FALSE, cutoff = c(0.2,
 \arguments{
 \item{processed_recon}{An object produced by \code{m_process_recon}}
 
-\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
+\item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for larger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 
 \item{cutoff}{A vector of length 2 giving the values for discretizing the reconstructed probabilities for the first and second character. Categories "0", "uncertain", or "1" are assigned to probabilities \code{>= 1-cutoff}, \code{1-cutoff:cutoff}, \code{<=cutoff}. A cutoff=0.5 will result with four categories, essentially ignoring the uncertainty in ancestral state reconstruction. A cutoff < 0.5 will produce a category "uncertain" for probabilities in the range \code{1-cutoff:cutoff}. The function will print a count of the categories after discretizing, so it is possible to adjust the cutoff values to avoid plotting of categories with too few nodes}
 
