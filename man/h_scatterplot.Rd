@@ -5,15 +5,12 @@
 \title{Plot diversification rates estimated by a HiSSE model (HiSSE, BiSSE, CID2, CID4)}
 \usage{
 h_scatterplot(processed_hisse_recon, parameter = "turnover",
-  x_label = "", states_names = c("0", "1"),
-  plot_as_waiting_time = FALSE)
+  states_names = c("0", "1"), plot_as_waiting_time = FALSE)
 }
 \arguments{
 \item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
-
-\item{x_label}{Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.}
 
 \item{states_names}{A character vector of length two giving the translation for states 0 and 1.}
 
@@ -31,8 +28,7 @@ data("diatoms")
 processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 hisse_rates_plot <- h_scatterplot(
  processed_hisse_recon=processed_hisse,
- parameter="turnover",
- x_label="habitat")
+ parameter="turnover")
 
 # modifications are easy with ggplot
 # change x axis tick labels

@@ -87,7 +87,6 @@ h_process_recon <- function(hisse_recon) {
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
-#' @param x_label Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.
 #' @param states_names A character vector of length two giving the translation for states 0 and 1.
 #' @param plot_as_waiting_time Logical. Whether to plot the rates or their inverse (waiting times)
 #'
@@ -99,8 +98,7 @@ h_process_recon <- function(hisse_recon) {
 #'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'hisse_rates_plot <- h_scatterplot(
 #'  processed_hisse_recon=processed_hisse,
-#'  parameter="turnover",
-#'  x_label="habitat")
+#'  parameter="turnover")
 #'
 #'# modifications are easy with ggplot
 #'# change x axis tick labels
@@ -124,11 +122,14 @@ h_process_recon <- function(hisse_recon) {
 h_scatterplot <-
   function(processed_hisse_recon,
            parameter = "turnover",
-           x_label = "",
            states_names = c("0", "1"),
            plot_as_waiting_time = FALSE) {
     tip.rates <- processed_hisse_recon$tip_rates
-    tip.rates$f_state <- as.factor(tip.rates$state)
+    tip.rates <- tip.rates %>%
+      mutate("f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])) %>%
+      mutate("f_state" = factor(.data$f_state))
+
+    # tip.rates$f_state <- as.factor(tip.rates$state)
 
     if (plot_as_waiting_time) {
       tip.rates <- mutate(tip.rates, wanted = 1 / !!as.name(parameter))
@@ -156,7 +157,7 @@ h_scatterplot <-
              )) +
       geom_point(
         alpha = .7,
-        size = 0.75,
+        size = 1,
         position = position_jitter(width = .15, height = 0)
       ) +
       geom_errorbar(
@@ -176,16 +177,16 @@ h_scatterplot <-
         aes(x = .data$f_state, y = .data$Mean),
         pch = 21
       ) +
-      scale_color_viridis_d(name = x_label,
+      scale_color_viridis_d(name = "",
                             end = 0.6) +
       scale_y_continuous(breaks = pretty(c(0, max(
         tip.rates.sum$Max
       )), n = 8)) +
-      scale_x_discrete(breaks = c(0, 1), labels = states_names) +
+      # scale_x_discrete(breaks = c(0, 1), labels = states_names) +
       theme_classic() +
       theme(legend.position = "right",
             legend.key.size = unit(x = .6, units = "cm")) +
-      labs(x = x_label, y = parameter)
+      labs(x = "", y = parameter)
     return(result)
   }
 
@@ -404,25 +405,6 @@ h_ridgelines <- function(processed_hisse_recon,
       size = 3,
       inherit.aes = FALSE
     ) +
-
-    # geom_density_ridges(alpha = 0.75) +
-    # geom_point(
-    #   data = tip.rates.sum,
-    #   pch = 21,
-    #   aes(y = c(1.2, 2.2), x = .data$Mean),
-    #   size = 3,
-    #   inherit.aes = FALSE
-    # ) +
-    # geom_errorbarh(
-    #   data = tip.rates.sum,
-    #   aes(
-    #     xmin = .data$Mean - .data$SD,
-    #     xmax = .data$Mean + .data$SD,
-    #     y = c(1.2, 2.2)
-    #   ),
-    #   height = 0.05,
-    #   inherit.aes = FALSE
-    # ) +
     scale_fill_manual(name="", values = fill_colors) +
     scale_color_manual(name="", values = line_colors) +
     scale_x_continuous(breaks = pretty(c(0, max(
