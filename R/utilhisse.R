@@ -185,7 +185,8 @@ h_scatterplot <-
       theme_classic() +
       theme(legend.position = "right",
             legend.key.size = unit(x = .6, units = "cm")) +
-      labs(x = "", y = parameter)
+      labs(x = "", y = parameter) +
+      theme_xy
     return(result)
   }
 
@@ -294,7 +295,8 @@ h_dotplot <-
         legend.background = element_blank(),
         legend.key.size = unit(x = .6, units = "cm")
       ) +
-      labs(x = "", y = parameter)
+      labs(x = "", y = parameter)+
+      theme_xy
     return(sss)
   }
 
@@ -409,7 +411,8 @@ h_ridgelines <- function(processed_recon,
     )), n = 8)) +
     labs(y = "", x = parameter) +
     theme_classic() +
-    theme(legend.position = "none")
+    theme(legend.position = "none")+
+    theme_xy
 }
 
 #' Plot HiSSE model-averaged marginal ancestral state reconstruction for the trait
@@ -1031,7 +1034,7 @@ m_scatterplot_cp <-
     sss <- sss +
       geom_point(
         alpha = .7,
-        size = 1.25,
+        size = 2,
         position = position_jitter(width = .15, height = 0)
       ) +
       geom_errorbar(
@@ -1070,7 +1073,8 @@ m_scatterplot_cp <-
       theme_classic() +
       theme(legend.position = "right",
             legend.key.size = unit(x = .6, units = "cm")) +
-      labs(x = focal_character_label, y = parameter)
+      labs(x = focal_character_label, y = parameter) +
+      theme_xy
     return(sss)
   }
 
@@ -1193,7 +1197,8 @@ m_ridgelines <- function(processed_recon,
     scale_colour_manual(name="", values = line_colors) +
     labs(y = "", x = parameter) +
     theme_classic() +
-    theme(legend.position = "none")
+    theme(legend.position = "none") +
+    theme_xy
 }
 
 #' Plot diversification rates estimated by a MuHiSSE model with means and standard deviations across tips
@@ -1300,7 +1305,8 @@ m_scatterplot <-
       theme_classic() +
       labs(x = "",
            y = parameter) +
-      theme(legend.position = "top")
+      theme(legend.position = "top")+
+      theme_xy
     return(pl)
   }
 
@@ -1422,7 +1428,8 @@ m_dotplot <-
       scale_y_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
       labs(x = "", y = parameter) +
       theme_classic() +
-      theme(legend.position = "none")
+      theme(legend.position = "none") +
+      theme_xy
     return(pl)
   }
 
@@ -1869,7 +1876,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.y = element_line(),
           axis.ticks.y = element_line(),
-          axis.text.y = element_text()
+          axis.text.y = element_text(element_text(size=12))
         ) +
         labs(x = "Time (Ma)")
 
@@ -1909,7 +1916,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.y = element_line(),
           axis.ticks.y = element_line(),
-          axis.text.y = element_text()
+          axis.text.y = element_text(element_text(size=12))
         ) +
         labs(x = "Time (Ma)")
 
@@ -1948,7 +1955,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.x = element_line(),
           axis.ticks.x = element_line(),
-          axis.text.x = element_text()
+          axis.text.x = element_text(element_text(size=12))
         ) +
         labs(x = "Time (Ma)")
 
@@ -1982,7 +1989,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.x = element_line(),
           axis.ticks.x = element_line(),
-          axis.text.x = element_text()
+          axis.text.x = element_text(element_text(size=12))
         ) +
         labs(x = "Time (Ma)")
 
@@ -2040,7 +2047,7 @@ tree_flip <- function(ggtree_object,
           y = ntip + 2,
           label = .data$label
         ),
-        size = 2,
+        size = 4,
         inherit.aes = FALSE
       )
     if (show_tip_labels) {
@@ -2099,3 +2106,6 @@ ParameterTransform <- function (x, y)
   extinction <- (x * y) / (1 + y)
   return(c(speciation, extinction))
 }
+
+
+theme_xy <- theme(axis.text = element_text(size=12), axis.title = element_text(size=14))
