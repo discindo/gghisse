@@ -418,7 +418,8 @@ h_ridgelines <- function(processed_hisse_recon,
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
-#' @param x_label The name of the trait to be used for guide title
+#' @param trait_name The name of the trait to be used for guide title
+#' @param states_names The names for character states
 #' @param discrete Logical. Whether to discretize the probabilities of ancestral states into binary (0/1)
 #' @param cutoff A decimal to be used as a threshold for discretizing
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
@@ -436,7 +437,7 @@ h_ridgelines <- function(processed_hisse_recon,
 #'map_continuous <-
 #'  h_trait_recon(
 #'    processed_hisse_recon = processed_hisse,
-#'    x_lab = "", discrete=FALSE, cutoff=.5)
+#'    trait_name = "", discrete=FALSE, cutoff=.5)
 #'
 #'# change colors, your can pass the trait name to `name=` to title the colorbar
 #'map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
@@ -444,7 +445,7 @@ h_ridgelines <- function(processed_hisse_recon,
 #'map_discrete <-
 #'  h_trait_recon(
 #'    processed_hisse_recon = processed_hisse,
-#'    x_lab = "", discrete=TRUE, cutoff=.5)
+#'    trait_name = "", discrete=TRUE, cutoff=.5)
 #'
 #'# change colors
 #'map_discrete + scale_color_manual(name="", values = c("red", "blue"))
@@ -454,7 +455,8 @@ h_ridgelines <- function(processed_hisse_recon,
 h_trait_recon <-
   function(processed_hisse_recon,
            show_tip_labels = FALSE,
-           x_label,
+           trait_name,
+           states_names,
            discrete = FALSE,
            cutoff = .5,
            tree_layout = "rectangular",
@@ -486,16 +488,17 @@ h_trait_recon <-
       )
 
     if (discrete) {
-      d_state <- ifelse(state > cutoff, 1, 0) %>% as.factor()
+      d_state <- ifelse(state > cutoff, 1, 0)
+      d_state <- ifelse(d_state == 0, states_names[1], states_names[2]) %>% as.factor()
       ggg <- ggg +
         aes(color = d_state) +
-        scale_color_viridis_d(name = x_label, end = 0.6) +
+        scale_color_viridis_d(name = trait_name, end = 0.6) +
         guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       d_state <- state
       ggg <- ggg +
         aes(color = d_state) +
-        scale_color_viridis_c(name = x_label, end = 0.6)
+        scale_color_viridis_c(name = trait_name, end = 0.6)
     }
 
     ggg <-
