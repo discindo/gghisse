@@ -1,4 +1,4 @@
-#' Some hisse object from a diatom dataset
+#' Some hisse objects, either from a diatom dataset or simulated.
 #'
 #'
 #' @format A list with 5 elements

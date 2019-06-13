@@ -307,7 +307,8 @@ h_dotplot <-
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param states_names The names for character states
-#' @param colors Colors for the points in the two alternate states
+#' @param fill_colors Colors for the density polygons
+#' @param line_colors Colors for the lines and points
 #' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
 #'
 #' @return A ridgeline plot of tip-associated rates (possibly model averaged).
@@ -316,20 +317,21 @@ h_dotplot <-
 #'
 #'data("diatoms")
 #'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
-#'paint_cols <- c("orange", "violet")
 #'
 #'h_ridgelines(
 #'  processed_hisse_recon = processed_hisse,
 #'  states_names = c("Plankton", "Benthos"),
 #'  parameter = "extinction",
-#'  colors = c("yellow", "red"))
+#'  line_colors = c("black", "black"),
+#'  fill_colors = c("orange", "violet"))
 #'
 #'@export
 
 h_ridgelines <- function(processed_hisse_recon,
                          parameter = "turnover",
                          states_names = c("Marine", "Freshwater"),
-                         colors = c("yellow", "red"),
+                         line_colors = c("black", "black"),
+                         fill_colors = c("yellow", "red"),
                          plot_as_waiting_time = FALSE) {
   tip.rates <- processed_hisse_recon$tip_rates
   tip.rates$f_state <-
@@ -365,27 +367,64 @@ h_ridgelines <- function(processed_hisse_recon,
          aes(
            x = .data$wanted,
            y = .data$f_state,
-           fill = .data$f_state
+           fill = .data$f_state,
+           color = .data$f_state
          )) +
-    geom_density_ridges(alpha = 0.75) +
-    geom_point(
-      data = tip.rates.sum,
-      pch = 21,
-      aes(y = c(1.2, 2.2), x = .data$Mean),
-      size = 3,
-      inherit.aes = FALSE
+    geom_density_ridges(
+      alpha = 0.75,
+      size = 0.75,
+      jittered_points = TRUE,
+      scale = .95,
+      rel_min_height = .01,
+      point_shape = "|",
+      point_size = 1,
+      position = position_nudge(y = rep(-.2, 2))
     ) +
     geom_errorbarh(
       data = tip.rates.sum,
+      position = position_nudge(y = rep(-0.3, 2)),
       aes(
         xmin = .data$Mean - .data$SD,
         xmax = .data$Mean + .data$SD,
-        y = c(1.2, 2.2)
+        y = .data$f_state,
+        colour = .data$f_state
       ),
       height = 0.05,
       inherit.aes = FALSE
     ) +
-    scale_fill_manual(values = colors) +
+    geom_point(
+      data = tip.rates.sum,
+      pch = 21,
+      position = position_nudge(y = rep(-0.3, 2)),
+      aes(
+        y = .data$f_state,
+        x = .data$Mean,
+        colour = .data$f_state
+      ),
+      size = 3,
+      inherit.aes = FALSE
+    ) +
+
+    # geom_density_ridges(alpha = 0.75) +
+    # geom_point(
+    #   data = tip.rates.sum,
+    #   pch = 21,
+    #   aes(y = c(1.2, 2.2), x = .data$Mean),
+    #   size = 3,
+    #   inherit.aes = FALSE
+    # ) +
+    # geom_errorbarh(
+    #   data = tip.rates.sum,
+    #   aes(
+    #     xmin = .data$Mean - .data$SD,
+    #     xmax = .data$Mean + .data$SD,
+    #     y = c(1.2, 2.2)
+    #   ),
+    #   height = 0.05,
+    #   inherit.aes = FALSE
+    # ) +
+    scale_fill_manual(name="", values = fill_colors) +
+    scale_color_manual(name="", values = line_colors) +
     scale_x_continuous(breaks = pretty(c(0, max(
       tip.rates.sum$Max
     )), n = 8)) +
@@ -1137,7 +1176,7 @@ m_ridgelines <- function(processed_muhisse_recon,
     ) +
     geom_errorbarh(
       data = ss.sum,
-      position = position_nudge(y = rep(-0.35, 4)),
+      position = position_nudge(y = rep(-0.3, 4)),
       aes(
         xmin = .data$Mean - .data$SD,
         xmax = .data$Mean + .data$SD,
@@ -1160,8 +1199,8 @@ m_ridgelines <- function(processed_muhisse_recon,
       inherit.aes = FALSE
     ) +
     scale_x_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
-    scale_fill_manual(values = fill_colors) +
-    scale_colour_manual(values = line_colors) +
+    scale_fill_manual(name="", values = fill_colors) +
+    scale_colour_manual(name="", values = line_colors) +
     labs(y = "", x = parameter) +
     theme_classic() +
     theme(legend.position = "none")

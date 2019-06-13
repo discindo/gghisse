@@ -5,8 +5,9 @@
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
 h_ridgelines(processed_hisse_recon, parameter = "turnover",
-  states_names = c("Marine", "Freshwater"), colors = c("yellow",
-  "red"), plot_as_waiting_time = FALSE)
+  states_names = c("Marine", "Freshwater"), line_colors = c("black",
+  "black"), fill_colors = c("yellow", "red"),
+  plot_as_waiting_time = FALSE)
 }
 \arguments{
 \item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
@@ -15,7 +16,9 @@ h_ridgelines(processed_hisse_recon, parameter = "turnover",
 
 \item{states_names}{The names for character states}
 
-\item{colors}{Colors for the points in the two alternate states}
+\item{line_colors}{Colors for the lines and points}
+
+\item{fill_colors}{Colors for the density polygons}
 
 \item{plot_as_waiting_time}{Whether to plot the rates (FALSE, default) or their inverse (waiting times)}
 }
@@ -29,12 +32,12 @@ A function to plot a ridgeline of (model-averaged) diversification rates in the 
 
 data("diatoms")
 processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
-paint_cols <- c("orange", "violet")
 
 h_ridgelines(
  processed_hisse_recon = processed_hisse,
  states_names = c("Plankton", "Benthos"),
  parameter = "extinction",
- colors = c("yellow", "red"))
+ line_colors = c("black", "black"),
+ fill_colors = c("orange", "violet"))
 
 }

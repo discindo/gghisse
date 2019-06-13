@@ -3,7 +3,7 @@
 \docType{data}
 \name{diatoms}
 \alias{diatoms}
-\title{Some hisse object from a diatom dataset}
+\title{Some hisse objects, either from a diatom dataset or simulated.}
 \format{A list with 5 elements
 \describe{
   \item{cid4_recon}{hisse.states object. A marginal ancestral state reconstruction of diatom habitat (plankton-benthos) under hisse's CID4 model}
@@ -18,7 +18,7 @@
 diatoms
 }
 \description{
-Some hisse object from a diatom dataset
+Some hisse objects, either from a diatom dataset or simulated.
 }
 \references{
 \url{https://www.biorxiv.org/content/10.1101/406165v2.abstract}
