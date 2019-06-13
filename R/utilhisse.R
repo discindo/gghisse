@@ -182,7 +182,6 @@ h_scatterplot <-
       scale_y_continuous(breaks = pretty(c(0, max(
         tip.rates.sum$Max
       )), n = 8)) +
-      # scale_x_discrete(breaks = c(0, 1), labels = states_names) +
       theme_classic() +
       theme(legend.position = "right",
             legend.key.size = unit(x = .6, units = "cm")) +
@@ -196,7 +195,6 @@ h_scatterplot <-
 #'
 #' @param processed_hisse_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
-#' @param x_label Label for the x axis. This is the binary trait whose assosiation with diversification is being tested.
 #' @param states_names A character vector of length two giving the translation for states 0 and 1.
 #' @param bin_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
 #' @param colors Colors for the points in the two alternate states
@@ -208,16 +206,15 @@ h_scatterplot <-
 #'
 #'data("diatoms")
 #'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
-#'paint_cols <- c("orange", "violet")
 #'
 #' h_dotplot(
 #'   processed_hisse_recon = processed_hisse,
 #'   parameter = "turnover",
 #'   states_names = c("Plankton", "Benthos"),
 #'   bin_width = 0.2,
-#'   colors=paint_cols[1:2],
+#'   colors=c("orange", "violet"),
 #'   plot_as_waiting_time = TRUE
-#' ) + labs(x = "", y = "waiting time (My)", title = "Turnover")
+#' ) + labs(x = "", y = "Waiting time (My)", title = "Turnover")
 #'
 #'# see ?h_plot_rates_states for examples for modifying the graph using ggplot2
 #'
@@ -227,12 +224,13 @@ h_dotplot <-
   function(processed_hisse_recon,
            parameter = "turnover",
            states_names = c("Marine", "Freshwater"),
-           x_label = "",
            bin_width = 0.1,
            colors,
            plot_as_waiting_time = TRUE) {
     tip.rates <- processed_hisse_recon$tip_rates
-    tip.rates$f_state <- as.factor(tip.rates$state)
+    tip.rates <- tip.rates %>%
+      mutate("f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])) %>%
+      mutate("f_state" = factor(.data$f_state))
 
     if (plot_as_waiting_time) {
       tip.rates <- mutate(tip.rates, "wanted" = 1 / !!as.name(parameter))
@@ -287,7 +285,6 @@ h_dotplot <-
       ) +
       scale_color_manual(values = colors, name = "") +
       scale_fill_manual(values = colors, name = "") +
-      scale_x_discrete(breaks = c(0, 1), labels = states_names) +
       scale_y_continuous(breaks = pretty(c(0, max(
         tip.rates.sum$Max
       )), n = 8)) +
@@ -297,7 +294,7 @@ h_dotplot <-
         legend.background = element_blank(),
         legend.key.size = unit(x = .6, units = "cm")
       ) +
-      labs(x = x_label, y = parameter)
+      labs(x = "", y = parameter)
     return(sss)
   }
 
