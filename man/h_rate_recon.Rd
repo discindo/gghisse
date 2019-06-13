@@ -6,8 +6,8 @@
 \usage{
 h_rate_recon(processed_recon, show_tip_labels = FALSE,
   parameter = "turnover", discrete = FALSE, breaks = seq(0, 1, 0.2),
-  tree_layout = "rectangular", tree_direction = "right",
-  time_axis_ticks = 10, open_angle = 10)
+  plot_as_waiting_time = FALSE, tree_layout = "rectangular",
+  tree_direction = "right", time_axis_ticks = 10, open_angle = 10)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}
@@ -19,6 +19,8 @@ h_rate_recon(processed_recon, show_tip_labels = FALSE,
 \item{discrete}{Logical. Whether to discretize the distribution of reconstructed rates into bins}
 
 \item{breaks}{A numeric vector of cut points for binning the rates. Passed internally to \code{cut}}
+
+\item{plot_as_waiting_time}{Whether to plot the rates (FALSE, default) or their inverse (waiting times)}
 
 \item{tree_layout}{A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.}
 

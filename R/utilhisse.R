@@ -157,7 +157,7 @@ h_scatterplot <-
              )) +
       geom_point(
         alpha = .7,
-        size = 1,
+        size = 2,
         position = position_jitter(width = .15, height = 0)
       ) +
       geom_errorbar(
@@ -523,6 +523,7 @@ h_trait_recon <-
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
 #' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}
+#' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
 #' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10)
@@ -559,6 +560,7 @@ h_rate_recon <-
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
+           plot_as_waiting_time = FALSE,
            tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
@@ -570,7 +572,12 @@ h_rate_recon <-
     tree <- processed_recon$tree_data@phylo
     datas <- processed_recon$tree_data@data
     agemax <- tree %>% branching.times() %>% max()
-    wanted <- as.name(parameter)
+
+    if (plot_as_waiting_time) {
+      datas <- mutate(datas, "wanted" = 1 / !!as.name(parameter))
+    } else {
+      datas <- mutate(datas, "wanted" = !!as.name(parameter))
+    }
 
     ggg <-
       ggtree(
@@ -589,7 +596,7 @@ h_rate_recon <-
 
     if (discrete) {
       param <- datas %>%
-        select(!!wanted) %>%
+        select(.data$wanted) %>%
         unlist %>%
         unname %>%
         cut(breaks = breaks)
@@ -602,7 +609,7 @@ h_rate_recon <-
           name = parameter
         ) + guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
-      param <- datas %>% select(!!wanted) %>% unlist %>% unname
+      param <- datas %>% select(.data$wanted) %>% unlist %>% unname
       ggg <-
         ggg + aes(color = param) +
         scale_color_viridis_c(
@@ -1724,6 +1731,7 @@ m_trait_recon <-
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
 #' @param breaks A numeric vector of cut points for binning the rates. Passed internally to \code{cut}. The function checks whether max(rate) is in this vector and adds it if not.
+#' @param plot_as_waiting_time Whether to plot the rates (FALSE, default) or their inverse (waiting times)
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
 #' @param time_axis_ticks numeric giving the number of ticks for the time axis (default=10)
@@ -1760,6 +1768,7 @@ m_rate_recon <-
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
+           plot_as_waiting_time = FALSE,
            tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
@@ -1771,7 +1780,12 @@ m_rate_recon <-
     tree <- processed_recon$tree_data@phylo
     datas <- processed_recon$tree_data@data
     agemax <- tree %>% branching.times() %>% max()
-    wanted <- as.name(parameter)
+
+    if (plot_as_waiting_time) {
+      datas <- mutate(datas, "wanted" = 1 / !!as.name(parameter))
+    } else {
+      datas <- mutate(datas, "wanted" = !!as.name(parameter))
+    }
 
     ggg <-
       ggtree(
@@ -1788,7 +1802,7 @@ m_rate_recon <-
       )
 
     if (discrete) {
-      max_rate <- datas %>% select(!!wanted) %>% unlist %>% unname %>% max
+      max_rate <- datas %>% select(.data$wanted) %>% unlist %>% unname %>% max
       if (!0 %in% breaks) {
         breaks <- c(0, breaks)
       }
@@ -1799,7 +1813,7 @@ m_rate_recon <-
       print(breaks)
       param <-
         datas %>%
-        select(!!wanted) %>%
+        select(.data$wanted) %>%
         unlist %>%
         unname %>%
         cut(breaks = breaks)
@@ -1811,7 +1825,7 @@ m_rate_recon <-
           name = parameter
         ) + guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
-      param <- datas %>% select(!!wanted) %>% unlist %>% unname
+      param <- datas %>% select(.data$wanted) %>% unlist %>% unname
       ggg <-
         ggg + aes(color = param) + scale_color_viridis_c(
           option = "B",
