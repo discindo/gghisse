@@ -4,13 +4,13 @@
 \alias{h_rate_recon}
 \title{Plot HiSSE model-averaged marginal ancestral state reconstruction for diversification rates}
 \usage{
-h_rate_recon(processed_hisse_recon, show_tip_labels = FALSE,
+h_rate_recon(processed_recon, show_tip_labels = FALSE,
   parameter = "turnover", discrete = FALSE, breaks = seq(0, 1, 0.2),
   tree_layout = "rectangular", tree_direction = "right",
   time_axis_ticks = 10, open_angle = 10)
 }
 \arguments{
-\item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
+\item{processed_recon}{An object produced by \code{h_process_recon}}
 
 \item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 
@@ -41,7 +41,7 @@ processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 
 map_continuous <-
  h_rate_recon(
-   processed_hisse_recon = processed_hisse,
+   processed_recon = processed_hisse,
    parameter = "extinction", discrete=FALSE)
 
 # change colors, your can pass the trait name to `name=` to title the colorbar
@@ -49,7 +49,7 @@ map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7"
 
 map_discrete <-
  h_rate_recon(
-   processed_hisse_recon = processed_hisse,
+   processed_recon = processed_hisse,
    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
 
 # change colors

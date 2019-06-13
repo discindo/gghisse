@@ -4,14 +4,14 @@
 \alias{m_trait_recon_cp}
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with a two-dimensional colorplane}
 \usage{
-m_trait_recon_cp(processed_muhisse_recon, show_tip_labels = FALSE,
+m_trait_recon_cp(processed_recon, show_tip_labels = FALSE,
   tree_layout = "rectangular", tree_direction = "right",
   time_axis_ticks = 10, open_angle = 10,
   focal_character = c("prob_0x", "prob_x0"), focal_character_label,
   second_character_label, colors = viridis(9)[c(5, 1, 9)])
 }
 \arguments{
-\item{processed_muhisse_recon}{An object produced by \code{m_process_recon}}
+\item{processed_recon}{An object produced by \code{m_process_recon}}
 
 \item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 
@@ -39,11 +39,12 @@ A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction 
 }
 \examples{
 
+library("colorplaner")
 data("diatoms")
 processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 
 m_trait_recon_cp(
- processed_muhisse_recon = processed_muhisse,
+ processed_recon = processed_muhisse,
  tree_layout = "fan",
  focal_character = "prob_0x",
  focal_character_label = "p(marine)",

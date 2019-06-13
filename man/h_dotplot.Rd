@@ -4,12 +4,12 @@
 \alias{h_dotplot}
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
-h_dotplot(processed_hisse_recon, parameter = "turnover",
+h_dotplot(processed_recon, parameter = "turnover",
   states_names = c("Marine", "Freshwater"), bin_width = 0.1, colors,
   plot_as_waiting_time = TRUE)
 }
 \arguments{
-\item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
+\item{processed_recon}{An object produced by \code{h_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
@@ -33,7 +33,7 @@ data("diatoms")
 processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 
 h_dotplot(
-  processed_hisse_recon = processed_hisse,
+  processed_recon = processed_hisse,
   parameter = "turnover",
   states_names = c("Plankton", "Benthos"),
   bin_width = 0.2,

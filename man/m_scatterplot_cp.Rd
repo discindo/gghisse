@@ -4,12 +4,12 @@
 \alias{m_scatterplot_cp}
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips and a two-dimensional colorplane for color}
 \usage{
-m_scatterplot_cp(processed_muhisse_recon, parameter = "turnover",
+m_scatterplot_cp(processed_recon, parameter = "turnover",
   focal_character = c("prob_0x", "prob_x0"), focal_character_label,
   second_character_label, colors, plot_as_waiting_time = FALSE)
 }
 \arguments{
-\item{processed_muhisse_recon}{An object produced with \code{m_process_recon}}
+\item{processed_recon}{An object produced with \code{m_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
@@ -31,10 +31,11 @@ A function to plot a jittered scatterplot of (model-averaged) diversification ra
 }
 \examples{
 
+library("colorplaner")
 data("diatoms")
 processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 m_scatterplot_cp(
- processed_muhisse_recon = processed_muhisse,
+ processed_recon = processed_muhisse,
  parameter = "turnover",
  focal_character = "prob_0x",
  focal_character_label = "p(mar)",

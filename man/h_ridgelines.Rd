@@ -4,13 +4,13 @@
 \alias{h_ridgelines}
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
-h_ridgelines(processed_hisse_recon, parameter = "turnover",
+h_ridgelines(processed_recon, parameter = "turnover",
   states_names = c("Marine", "Freshwater"), line_colors = c("black",
   "black"), fill_colors = c("yellow", "red"),
   plot_as_waiting_time = FALSE)
 }
 \arguments{
-\item{processed_hisse_recon}{An object produced by \code{h_process_recon}}
+\item{processed_recon}{An object produced by \code{h_process_recon}}
 
 \item{parameter}{The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction}
 
@@ -34,7 +34,7 @@ data("diatoms")
 processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 
 h_ridgelines(
- processed_hisse_recon = processed_hisse,
+ processed_recon = processed_hisse,
  states_names = c("Plankton", "Benthos"),
  parameter = "extinction",
  line_colors = c("black", "black"),

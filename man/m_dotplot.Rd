@@ -4,12 +4,12 @@
 \alias{m_dotplot}
 \title{Plot diversification rates estimated by a MuHiSSE model with means and standard deviations across tips}
 \usage{
-m_dotplot(processed_muhisse_recon, states_names = c("00", "01", "10",
-  "11"), parameter = "turnover", colors = viridis(n = 4, option = 2,
-  end = 0.7), plot_as_waiting_time = FALSE, bin_width = 0.1)
+m_dotplot(processed_recon, states_names = c("00", "01", "10", "11"),
+  parameter = "turnover", colors = viridis(n = 4, option = 2, end =
+  0.7), plot_as_waiting_time = FALSE, bin_width = 0.1)
 }
 \arguments{
-\item{processed_muhisse_recon}{An object produced by \code{m_process_recon}}
+\item{processed_recon}{An object produced by \code{m_process_recon}}
 
 \item{states_names}{Translation for the character states in the order 00, 01, 10, 11 (if wanted)}
 
@@ -33,7 +33,7 @@ data("diatoms")
 processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 
 m_dotplot(
- processed_muhisse_recon = processed_muhisse,
+ processed_recon = processed_muhisse,
  parameter = "extinction",
  colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 

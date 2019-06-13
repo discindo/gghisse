@@ -4,14 +4,13 @@
 \alias{m_trait_recon}
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with discretized probabilities}
 \usage{
-m_trait_recon(processed_muhisse_recon, show_tip_labels = FALSE,
-  cutoff = c(0.2, 0.2), states_of_first_character,
-  states_of_second_character, tree_layout = "rectangular",
-  tree_direction = "right", time_axis_ticks = 10, open_angle = 10,
-  colors = viridis(n = 9))
+m_trait_recon(processed_recon, show_tip_labels = FALSE, cutoff = c(0.2,
+  0.2), states_of_first_character, states_of_second_character,
+  tree_layout = "rectangular", tree_direction = "right",
+  time_axis_ticks = 10, open_angle = 10, colors = viridis(n = 9))
 }
 \arguments{
-\item{processed_muhisse_recon}{An object produced by \code{m_process_recon}}
+\item{processed_recon}{An object produced by \code{m_process_recon}}
 
 \item{show_tip_labels}{Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.}
 
@@ -44,7 +43,7 @@ processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 cols = c("#00204DFF", "#1B3B6DFF", "#4E576CFF", "#727274FF", "#958F78FF", "#BCAF6FFF", "#E7D159FF")
 # eight categories after binning with a cutoff of 0.2
 m_trait_recon(
- processed_muhisse_recon = processed_muhisse,
+ processed_recon = processed_muhisse,
  cutoff = c(.2, .2),
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
@@ -55,7 +54,7 @@ m_trait_recon(
 # adjust the cutoff for the second variable
 
 m_trait_recon(
- processed_muhisse_recon = processed_muhisse,
+ processed_recon = processed_muhisse,
  cutoff = c(.2, .3),
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
@@ -64,7 +63,7 @@ m_trait_recon(
 
 # ignoring uncertainty
 m_trait_recon(
- processed_muhisse_recon = processed_muhisse,
+ processed_recon = processed_muhisse,
  cutoff = c(.5, .5),
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
@@ -84,7 +83,7 @@ data("diatoms")
 x <- m_process_recon(diatoms$`3state_musse_recon`)
 
 # the defaults work poorly
-m_trait_recon(processed_muhisse_recon = x,
+m_trait_recon(processed_recon = x,
  show_tip_labels= TRUE,
  states_of_first_character = c("0", "1"),
  states_of_second_character = c("0", "1"))
@@ -92,7 +91,7 @@ m_trait_recon(processed_muhisse_recon = x,
 # manual setup is better
 basic_plot <-
  m_trait_recon(
- processed_muhisse_recon = x,
+ processed_recon = x,
  show_tip_labels= FALSE,
  states_of_first_character = c("0", "1"),
  states_of_second_character = c("0", "1"),

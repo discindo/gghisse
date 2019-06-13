@@ -85,7 +85,7 @@ h_process_recon <- function(hisse_recon) {
 #'
 #' @description A function to plot a scatterplot of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait).
 #'
-#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param processed_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param states_names A character vector of length two giving the translation for states 0 and 1.
 #' @param plot_as_waiting_time Logical. Whether to plot the rates or their inverse (waiting times)
@@ -97,7 +97,7 @@ h_process_recon <- function(hisse_recon) {
 #'data("diatoms")
 #'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'hisse_rates_plot <- h_scatterplot(
-#'  processed_hisse_recon=processed_hisse,
+#'  processed_recon=processed_hisse,
 #'  parameter="turnover")
 #'
 #'# modifications are easy with ggplot
@@ -120,11 +120,11 @@ h_process_recon <- function(hisse_recon) {
 #'@export
 
 h_scatterplot <-
-  function(processed_hisse_recon,
+  function(processed_recon,
            parameter = "turnover",
            states_names = c("0", "1"),
            plot_as_waiting_time = FALSE) {
-    tip.rates <- processed_hisse_recon$tip_rates
+    tip.rates <- processed_recon$tip_rates
     tip.rates <- tip.rates %>%
       mutate("f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])) %>%
       mutate("f_state" = factor(.data$f_state))
@@ -193,7 +193,7 @@ h_scatterplot <-
 #'
 #' @description A function to plot a dotplot of (model-averaged) diversification rates in the alternative states.
 #'
-#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param processed_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param states_names A character vector of length two giving the translation for states 0 and 1.
 #' @param bin_width The width of bins for the dotplot. Treat this as any histogram. Testing several different bin width values is recommended.
@@ -208,7 +208,7 @@ h_scatterplot <-
 #'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'
 #' h_dotplot(
-#'   processed_hisse_recon = processed_hisse,
+#'   processed_recon = processed_hisse,
 #'   parameter = "turnover",
 #'   states_names = c("Plankton", "Benthos"),
 #'   bin_width = 0.2,
@@ -221,13 +221,13 @@ h_scatterplot <-
 #'@export
 
 h_dotplot <-
-  function(processed_hisse_recon,
+  function(processed_recon,
            parameter = "turnover",
            states_names = c("Marine", "Freshwater"),
            bin_width = 0.1,
            colors,
            plot_as_waiting_time = TRUE) {
-    tip.rates <- processed_hisse_recon$tip_rates
+    tip.rates <- processed_recon$tip_rates
     tip.rates <- tip.rates %>%
       mutate("f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])) %>%
       mutate("f_state" = factor(.data$f_state))
@@ -302,7 +302,7 @@ h_dotplot <-
 #'
 #' @description A function to plot a ridgeline of (model-averaged) diversification rates in the alternative states. We can change the rate plotted on the y axis and modify the label for the x-axis (your binary 0/1 trait). Further modifications are straightforward with ggplot (see examples).
 #'
-#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param processed_recon An object produced by \code{h_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param states_names The names for character states
 #' @param fill_colors Colors for the density polygons
@@ -317,7 +317,7 @@ h_dotplot <-
 #'processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 #'
 #'h_ridgelines(
-#'  processed_hisse_recon = processed_hisse,
+#'  processed_recon = processed_hisse,
 #'  states_names = c("Plankton", "Benthos"),
 #'  parameter = "extinction",
 #'  line_colors = c("black", "black"),
@@ -325,13 +325,13 @@ h_dotplot <-
 #'
 #'@export
 
-h_ridgelines <- function(processed_hisse_recon,
+h_ridgelines <- function(processed_recon,
                          parameter = "turnover",
                          states_names = c("Marine", "Freshwater"),
                          line_colors = c("black", "black"),
                          fill_colors = c("yellow", "red"),
                          plot_as_waiting_time = FALSE) {
-  tip.rates <- processed_hisse_recon$tip_rates
+  tip.rates <- processed_recon$tip_rates
   tip.rates$f_state <-
     factor(ifelse(tip.rates$state == 0,
                   states_names[1],
@@ -416,7 +416,7 @@ h_ridgelines <- function(processed_hisse_recon,
 #'
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
-#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param processed_recon An object produced by \code{h_process_recon}
 #' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param trait_name The name of the trait to be used for guide title
 #' @param states_names The names for character states
@@ -436,7 +436,7 @@ h_ridgelines <- function(processed_hisse_recon,
 #'
 #'map_continuous <-
 #'  h_trait_recon(
-#'    processed_hisse_recon = processed_hisse,
+#'    processed_recon = processed_hisse,
 #'    trait_name = "", discrete=FALSE, cutoff=.5)
 #'
 #'# change colors, your can pass the trait name to `name=` to title the colorbar
@@ -444,7 +444,7 @@ h_ridgelines <- function(processed_hisse_recon,
 #'
 #'map_discrete <-
 #'  h_trait_recon(
-#'    processed_hisse_recon = processed_hisse,
+#'    processed_recon = processed_hisse,
 #'    trait_name = "", discrete=TRUE, cutoff=.5)
 #'
 #'# change colors
@@ -453,12 +453,12 @@ h_ridgelines <- function(processed_hisse_recon,
 #'@export
 
 h_trait_recon <-
-  function(processed_hisse_recon,
+  function(processed_recon,
            show_tip_labels = FALSE,
-           trait_name,
-           states_names,
+           trait_name = "trait",
+           states_names = c("0", "1"),
            discrete = FALSE,
-           cutoff = .5,
+           cutoff = 0.5,
            tree_layout = "rectangular",
            tree_direction = "right",
            time_axis_ticks = 10,
@@ -467,15 +467,15 @@ h_trait_recon <-
       stop("The selected tree layout is not supported.")
     }
 
-    tree <- processed_hisse_recon$tree_data@phylo
-    state <- processed_hisse_recon$tree_data@data$state
+    tree <- processed_recon$tree_data@phylo
+    state <- processed_recon$tree_data@data$state
     agemax <- tree %>% branching.times() %>% max()
 
     ggg <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .45,
+        size = 0.45,
         open.angle = open_angle
       ) +
       theme(
@@ -518,7 +518,7 @@ h_trait_recon <-
 #'
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
 #'
-#' @param processed_hisse_recon An object produced by \code{h_process_recon}
+#' @param processed_recon An object produced by \code{h_process_recon}
 #' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
@@ -537,7 +537,7 @@ h_trait_recon <-
 #'
 #'map_continuous <-
 #'  h_rate_recon(
-#'    processed_hisse_recon = processed_hisse,
+#'    processed_recon = processed_hisse,
 #'    parameter = "extinction", discrete=FALSE)
 #'
 #'# change colors, your can pass the trait name to `name=` to title the colorbar
@@ -545,7 +545,7 @@ h_trait_recon <-
 #'
 #'map_discrete <-
 #'  h_rate_recon(
-#'    processed_hisse_recon = processed_hisse,
+#'    processed_recon = processed_hisse,
 #'    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
 #'
 #'# change colors
@@ -554,7 +554,7 @@ h_trait_recon <-
 #'@export
 
 h_rate_recon <-
-  function(processed_hisse_recon,
+  function(processed_recon,
            show_tip_labels = FALSE,
            parameter = "turnover",
            discrete = FALSE,
@@ -567,8 +567,8 @@ h_rate_recon <-
       stop("The selected tree layout is not supported.")
     }
 
-    tree <- processed_hisse_recon$tree_data@phylo
-    datas <- processed_hisse_recon$tree_data@data
+    tree <- processed_recon$tree_data@phylo
+    datas <- processed_recon$tree_data@data
     agemax <- tree %>% branching.times() %>% max()
     wanted <- as.name(parameter)
 
@@ -698,11 +698,11 @@ m_transition_matrix <-
         "q11A_11A"
       )
     } else {
-      wanted <-
+      tmp <-
         colnames(model_fit$trans.matrix) %>%
         str_replace(regex("\\("), "") %>%
-        str_replace(regex("\\)"), "") %>%
-        expand.grid(., .) %>%
+        str_replace(regex("\\)"), "")
+      wanted <- expand.grid(tmp, tmp) %>%
         mutate("Names" = paste("q", .data$Var1, "_", .data$Var2, sep = "")) %>%
         select(.data$Names) %>% unlist %>% unname
     }
@@ -725,7 +725,7 @@ m_transition_matrix <-
     Rate_matrix <-
       map(1:length(Rates), function(x)
         get_rate(name = names(Rates)[x], named_rates = model_fit$solution)) %>%
-      unlist %>% zapsmall(x = ., digits = 8) %>% matrix(ncol = mat_size)
+      unlist %>% matrix(ncol = mat_size)
 
     Col_names <-
       colnames(model_fit$trans.matrix) %>%
@@ -929,7 +929,7 @@ m_process_recon <- function(muhisse_recon) {
 #'
 #' @description  A function to plot a jittered scatterplot of (model-averaged) diversification rates in the alternative states.
 #'
-#' @param processed_muhisse_recon An object produced with \code{m_process_recon}
+#' @param processed_recon An object produced with \code{m_process_recon}
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param focal_character Specifies the x axis. Either \code{prob_0x} to plot the probability of state 0 for the first character, or \code{prob_x0} to plot the probability for state 0 for the second character.
 #' @param focal_character_label Label for the x axis of the scatterplot and two-dimensional color gradient. This should match the focal probability.
@@ -941,10 +941,11 @@ m_process_recon <- function(muhisse_recon) {
 #'
 #' @examples
 #'
+#'library("colorplaner")
 #'data("diatoms")
 #'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'m_scatterplot_cp(
-#'  processed_muhisse_recon = processed_muhisse,
+#'  processed_recon = processed_muhisse,
 #'  parameter = "turnover",
 #'  focal_character = "prob_0x",
 #'  focal_character_label = "p(mar)",
@@ -956,7 +957,7 @@ m_process_recon <- function(muhisse_recon) {
 #'@export
 
 m_scatterplot_cp <-
-  function(processed_muhisse_recon,
+  function(processed_recon,
            parameter = "turnover",
            focal_character = c("prob_0x", "prob_x0"),
            focal_character_label,
@@ -964,10 +965,10 @@ m_scatterplot_cp <-
            colors,
            plot_as_waiting_time = FALSE) {
     if (plot_as_waiting_time) {
-      tip_rates <- processed_muhisse_recon$tip_rates %>%
+      tip_rates <- processed_recon$tip_rates %>%
         mutate(wanted = 1 / !!as.name(parameter))
     } else
-      tip_rates <- processed_muhisse_recon$tip_rates %>%
+      tip_rates <- processed_recon$tip_rates %>%
         mutate(wanted = !!as.name(parameter))
 
     max_rate <- tip_rates %>% select(.data$wanted) %>% unlist %>% max
@@ -1071,7 +1072,7 @@ m_scatterplot_cp <-
 #'
 #' @description A function to plot a ridgeline of (model-averaged) diversification rates in the alternative states.
 #'
-#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
+#' @param processed_recon An object produced by \code{m_process_recon}
 #' @param states_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param fill_colors Colors for the density polygons
@@ -1086,13 +1087,13 @@ m_scatterplot_cp <-
 #'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'m_ridgelines(
-#'  processed_muhisse_recon = processed_muhisse,
+#'  processed_recon = processed_muhisse,
 #'  parameter = "extinction",
 #'  line_colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 #'
 #'@export
 
-m_ridgelines <- function(processed_muhisse_recon,
+m_ridgelines <- function(processed_recon,
                          states_names = c("00", "01", "10", "11"),
                          parameter = "turnover",
                          plot_as_waiting_time = FALSE,
@@ -1104,7 +1105,7 @@ m_ridgelines <- function(processed_muhisse_recon,
 
   ss <-
     m_prep_df(
-      processed_muhisse_recon = processed_muhisse_recon,
+      processed_recon = processed_recon,
       states_names = states_names,
       parameter = parameter
     )
@@ -1192,7 +1193,7 @@ m_ridgelines <- function(processed_muhisse_recon,
 #'
 #' @description A function to plot a jittered scatterplot of (model-averaged) diversification rates and summary statistics in the alternative states.
 #'
-#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
+#' @param processed_recon An object produced by \code{m_process_recon}
 #' @param states_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param colors Colors for the lines and points
@@ -1206,14 +1207,14 @@ m_ridgelines <- function(processed_muhisse_recon,
 #'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'m_scatterplot(
-#'  processed_muhisse_recon = processed_muhisse,
+#'  processed_recon = processed_muhisse,
 #'  parameter = "extinction",
 #'  colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 #'
 #'@export
 
 m_scatterplot <-
-  function(processed_muhisse_recon,
+  function(processed_recon,
            states_names = c("00", "01", "10", "11"),
            parameter = "turnover",
            colors = viridis(n = 4, option = 2, end = 0.7),
@@ -1224,7 +1225,7 @@ m_scatterplot <-
 
     ss <-
       m_prep_df(
-        processed_muhisse_recon = processed_muhisse_recon,
+        processed_recon = processed_recon,
         states_names = states_names,
         parameter = parameter
       )
@@ -1300,7 +1301,7 @@ m_scatterplot <-
 #'
 #' @description A function to plot a stacked dotplot of (model-averaged) diversification rates and summary statistics in the alternative states.
 #'
-#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
+#' @param processed_recon An object produced by \code{m_process_recon}
 #' @param states_names Translation for the character states in the order 00, 01, 10, 11 (if wanted)
 #' @param parameter The diversification parameter to be plotted on the y axis. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param colors Colors for the lines and points
@@ -1315,14 +1316,14 @@ m_scatterplot <-
 #'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'m_dotplot(
-#'  processed_muhisse_recon = processed_muhisse,
+#'  processed_recon = processed_muhisse,
 #'  parameter = "extinction",
 #'  colors = c("#000004FF", "#57157EFF", "#C43C75FF", "#FE9F6DFF"))
 #'
 #'@export
 
 m_dotplot <-
-  function(processed_muhisse_recon,
+  function(processed_recon,
            states_names = c("00", "01", "10", "11"),
            parameter = "turnover",
            colors = viridis(n = 4, option = 2, end = 0.7),
@@ -1334,7 +1335,7 @@ m_dotplot <-
 
     ss <-
       m_prep_df(
-        processed_muhisse_recon = processed_muhisse_recon,
+        processed_recon = processed_recon,
         states_names = states_names,
         parameter = parameter
       )
@@ -1422,7 +1423,7 @@ m_dotplot <-
 #'
 #' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
-#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
+#' @param processed_recon An object produced by \code{m_process_recon}
 #' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
@@ -1437,11 +1438,12 @@ m_dotplot <-
 #'
 #' @examples
 #'
+#'library("colorplaner")
 #'data("diatoms")
 #'processed_muhisse <- m_process_recon(muhisse_recon=diatoms$muhisse_recon)
 #'
 #'m_trait_recon_cp(
-#'  processed_muhisse_recon = processed_muhisse,
+#'  processed_recon = processed_muhisse,
 #'  tree_layout = "fan",
 #'  focal_character = "prob_0x",
 #'  focal_character_label = "p(marine)",
@@ -1452,7 +1454,7 @@ m_dotplot <-
 #'@export
 
 m_trait_recon_cp <-
-  function(processed_muhisse_recon,
+  function(processed_recon,
            show_tip_labels = FALSE,
            tree_layout = "rectangular",
            tree_direction = "right",
@@ -1466,8 +1468,8 @@ m_trait_recon_cp <-
       stop("The selected tree layout is not supported.")
     }
 
-    tree <- processed_muhisse_recon$tree_data@phylo
-    datas <- processed_muhisse_recon$tree_data@data
+    tree <- processed_recon$tree_data@phylo
+    datas <- processed_recon$tree_data@data
     agemax <- tree %>% branching.times() %>% max()
 
     ggg <-
@@ -1524,7 +1526,7 @@ m_trait_recon_cp <-
 #'
 #' @description A function to plot a MuHiSSE (model-averaged) marginal ancestral reconstruction for the trait data.
 #'
-#' @param processed_muhisse_recon An object produced by \code{m_process_recon}
+#' @param processed_recon An object produced by \code{m_process_recon}
 #' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param tree_layout A layout for the tree. Available options are 'rectangular' (default), 'slanted', 'circular', 'fan' and 'radial'.
 #' @param tree_direction 'right' (default), 'left', 'up', or 'down' for rectangular and slanted tree layouts
@@ -1544,7 +1546,7 @@ m_trait_recon_cp <-
 #'cols = c("#00204DFF", "#1B3B6DFF", "#4E576CFF", "#727274FF", "#958F78FF", "#BCAF6FFF", "#E7D159FF")
 #'# eight categories after binning with a cutoff of 0.2
 #'m_trait_recon(
-#'  processed_muhisse_recon = processed_muhisse,
+#'  processed_recon = processed_muhisse,
 #'  cutoff = c(.2, .2),
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
@@ -1555,7 +1557,7 @@ m_trait_recon_cp <-
 #'# adjust the cutoff for the second variable
 #'
 #'m_trait_recon(
-#'  processed_muhisse_recon = processed_muhisse,
+#'  processed_recon = processed_muhisse,
 #'  cutoff = c(.2, .3),
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
@@ -1564,7 +1566,7 @@ m_trait_recon_cp <-
 #'
 #'# ignoring uncertainty
 #'m_trait_recon(
-#'  processed_muhisse_recon = processed_muhisse,
+#'  processed_recon = processed_muhisse,
 #'  cutoff = c(.5, .5),
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
@@ -1584,7 +1586,7 @@ m_trait_recon_cp <-
 #'x <- m_process_recon(diatoms$`3state_musse_recon`)
 #'
 #'# the defaults work poorly
-#'m_trait_recon(processed_muhisse_recon = x,
+#'m_trait_recon(processed_recon = x,
 #'  show_tip_labels= TRUE,
 #'  states_of_first_character = c("0", "1"),
 #'  states_of_second_character = c("0", "1"))
@@ -1592,7 +1594,7 @@ m_trait_recon_cp <-
 #'# manual setup is better
 #'basic_plot <-
 #'  m_trait_recon(
-#'  processed_muhisse_recon = x,
+#'  processed_recon = x,
 #'  show_tip_labels= FALSE,
 #'  states_of_first_character = c("0", "1"),
 #'  states_of_second_character = c("0", "1"),
@@ -1622,7 +1624,7 @@ m_trait_recon_cp <-
 #'@export
 
 m_trait_recon <-
-  function(processed_muhisse_recon,
+  function(processed_recon,
            show_tip_labels = FALSE,
            cutoff = c(.2, .2),
            states_of_first_character,
@@ -1636,10 +1638,10 @@ m_trait_recon <-
       stop("The selected tree layout is not supported.")
     }
 
-    tree <- processed_muhisse_recon$tree_data@phylo
+    tree <- processed_recon$tree_data@phylo
     agemax <- tree %>% branching.times() %>% max()
 
-    ss <- processed_muhisse_recon$tree_data@data %>%
+    ss <- processed_recon$tree_data@data %>%
       mutate(
         prob_0x_named =
           case_when(
@@ -1717,7 +1719,7 @@ m_trait_recon <-
 #'
 #' @description A function to plot a (model-averaged) marginal ancestral reconstruction for the estimated diversification rates.
 #'
-#' @param processed_muhisse_recon An object produced by \code{h_process_recon}
+#' @param processed_recon An object produced by \code{h_process_recon}
 #' @param show_tip_labels Logical, whether to plot tip labels. Default is FALSE because it is difficult to plot legible tip labels for lerger trees common in this type of analysis. See \code{?m_trait_recon} for a good manual solution.
 #' @param parameter The diversification parameter to be mapped onto the tree. Possible options are turnover, extinct.frac, net.div, speciation, extinction
 #' @param discrete Logical. Whether to discretize the distribution of reconstructed rates into bins
@@ -1736,7 +1738,7 @@ m_trait_recon <-
 #'
 #'map_continuous <-
 #'  m_rate_recon(
-#'    processed_muhisse_recon = processed_muhisse,
+#'    processed_recon = processed_muhisse,
 #'    parameter = "extinction", discrete=FALSE)
 #'
 #'# change colors, your can pass the trait name to `name=` to title the colorbar
@@ -1744,7 +1746,7 @@ m_trait_recon <-
 #'
 #'map_discrete <-
 #'  m_rate_recon(
-#'    processed_muhisse_recon = processed_muhisse,
+#'    processed_recon = processed_muhisse,
 #'    parameter = "extinction", discrete=TRUE, breaks=c(0.3, 0.6, 1))
 #'
 #'# change colors
@@ -1753,7 +1755,7 @@ m_trait_recon <-
 #'@export
 
 m_rate_recon <-
-  function(processed_muhisse_recon,
+  function(processed_recon,
            show_tip_labels = FALSE,
            parameter = "turnover",
            discrete = FALSE,
@@ -1766,8 +1768,8 @@ m_rate_recon <-
       stop("The selected tree layout is not supported.")
     }
 
-    tree <- processed_muhisse_recon$tree_data@phylo
-    datas <- processed_muhisse_recon$tree_data@data
+    tree <- processed_recon$tree_data@phylo
+    datas <- processed_recon$tree_data@data
     agemax <- tree %>% branching.times() %>% max()
     wanted <- as.name(parameter)
 
@@ -2037,10 +2039,10 @@ tree_flip <- function(ggtree_object,
 }
 
 m_prep_df <-
-  function(processed_muhisse_recon,
+  function(processed_recon,
            states_names,
            parameter) {
-    ss <- processed_muhisse_recon$tip_rates %>%
+    ss <- processed_recon$tip_rates %>%
       mutate(
         what_state = paste(
           .data$state.00,
