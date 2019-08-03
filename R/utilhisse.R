@@ -218,7 +218,7 @@ h_scatterplot <-
 #'   plot_as_waiting_time = TRUE
 #' ) + labs(x = "", y = "Waiting time (My)", title = "Turnover")
 #'
-#'# see ?h_plot_rates_states for examples for modifying the graph using ggplot2
+#'# see ?h_scatterplot for examples for modifying the graph using ggplot2
 #'
 #' @export
 
@@ -559,7 +559,7 @@ h_rate_recon <-
            parameter = "turnover",
            discrete = FALSE,
            breaks = seq(0, 1, 0.2),
-           colors = c("yellow", "purple"),
+           colors = viridis(n=2),
            plot_as_waiting_time = FALSE,
            tree_layout = "rectangular",
            tree_direction = "right",
@@ -604,7 +604,10 @@ h_rate_recon <-
       }
       message("Cutting distribution of rate with these breaks:\n")
       print(breaks)
-
+      if (length(breaks != length(colors))) {
+        message("The number of supplied colors does not match the number of breaks. Choosing different colors.")
+        colors <- viridis(n = length(breaks))
+      }
       param <- datas %>%
         select(.data$wanted) %>%
         unlist %>%
