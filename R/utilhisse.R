@@ -1874,7 +1874,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.y = element_line(),
           axis.ticks.y = element_line(),
-          axis.text.y = element_text(element_text(size=12))
+          axis.text.y = element_text(size=12)
         ) +
         labs(x = "Time (Ma)")
 
@@ -1914,7 +1914,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.y = element_line(),
           axis.ticks.y = element_line(),
-          axis.text.y = element_text(element_text(size=12))
+          axis.text.y = element_text(size=12)
         ) +
         labs(x = "Time (Ma)")
 
@@ -1953,7 +1953,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.x = element_line(),
           axis.ticks.x = element_line(),
-          axis.text.x = element_text(element_text(size=12))
+          axis.text.x = element_text(size=12)
         ) +
         labs(x = "Time (Ma)")
 
@@ -1987,7 +1987,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.x = element_line(),
           axis.ticks.x = element_line(),
-          axis.text.x = element_text(element_text(size=12))
+          axis.text.x = element_text(size=12)
         ) +
         labs(x = "Time (Ma)")
 
