@@ -3,6 +3,6 @@ R package with helper functions for summarising and visualizing [HiSSE](https://
 
 
 Install with
-`devtools::install_github("teofiln/utilhisse")`
+`devtools::install_github("discindo/gghisse")`
 
 To  see the functionality and example code, visit the Shiny web application: https://diatom.shinyapps.io/hisse-web/
