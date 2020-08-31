@@ -46,8 +46,8 @@ To see the main functionality and example code, visit the Shiny web application:
 ``` r
 library("gghisse")
 data("diatoms")
-processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
-hisse_rates_plot <- h_scatterplot(
+processed_hisse <- gghisse::h_process_recon(hisse_recon=diatoms$cid4_recon)
+hisse_rates_plot <- gghisse::h_scatterplot(
   processed_recon=processed_hisse,
   parameter="turnover")
 ```
