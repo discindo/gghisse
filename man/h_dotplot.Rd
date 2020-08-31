@@ -4,9 +4,14 @@
 \alias{h_dotplot}
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
-h_dotplot(processed_recon, parameter = "turnover",
-  states_names = c("Marine", "Freshwater"), bin_width = 0.1, colors,
-  plot_as_waiting_time = TRUE)
+h_dotplot(
+  processed_recon,
+  parameter = "turnover",
+  states_names = c("Marine", "Freshwater"),
+  bin_width = 0.1,
+  colors,
+  plot_as_waiting_time = TRUE
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}
@@ -41,6 +46,6 @@ h_dotplot(
   plot_as_waiting_time = TRUE
 ) + labs(x = "", y = "Waiting time (My)", title = "Turnover")
 
-# see ?h_plot_rates_states for examples for modifying the graph using ggplot2
+# see ?h_scatterplot for examples for modifying the graph using ggplot2
 
 }

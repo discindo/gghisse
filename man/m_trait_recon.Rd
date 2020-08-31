@@ -4,10 +4,18 @@
 \alias{m_trait_recon}
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with discretized probabilities}
 \usage{
-m_trait_recon(processed_recon, show_tip_labels = FALSE, cutoff = c(0.2,
-  0.2), states_of_first_character, states_of_second_character,
-  tree_layout = "rectangular", tree_direction = "right",
-  time_axis_ticks = 10, open_angle = 10, colors = viridis(n = 9))
+m_trait_recon(
+  processed_recon,
+  show_tip_labels = FALSE,
+  cutoff = c(0.2, 0.2),
+  states_of_first_character,
+  states_of_second_character,
+  tree_layout = "rectangular",
+  tree_direction = "right",
+  time_axis_ticks = 10,
+  open_angle = 10,
+  colors = viridis(n = 9)
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{m_process_recon}}

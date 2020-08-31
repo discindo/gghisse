@@ -4,11 +4,19 @@
 \alias{h_trait_recon}
 \title{Plot HiSSE model-averaged marginal ancestral state reconstruction for the trait}
 \usage{
-h_trait_recon(processed_recon, show_tip_labels = FALSE,
-  trait_name = "trait", states_names = c("0", "1"),
-  colors = c("orange", "violet"), discrete = FALSE, cutoff = 0.5,
-  tree_layout = "rectangular", tree_direction = "right",
-  time_axis_ticks = 10, open_angle = 10)
+h_trait_recon(
+  processed_recon,
+  show_tip_labels = FALSE,
+  trait_name = "trait",
+  states_names = c("0", "1"),
+  colors = c("orange", "violet"),
+  discrete = FALSE,
+  cutoff = 0.5,
+  tree_layout = "rectangular",
+  tree_direction = "right",
+  time_axis_ticks = 10,
+  open_angle = 10
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}

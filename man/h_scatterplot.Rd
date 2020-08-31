@@ -4,9 +4,13 @@
 \alias{h_scatterplot}
 \title{Plot diversification rates estimated by a HiSSE model (HiSSE, BiSSE, CID2, CID4)}
 \usage{
-h_scatterplot(processed_recon, parameter = "turnover",
-  states_names = c("0", "1"), colors = c("yellow", "violet"),
-  plot_as_waiting_time = FALSE)
+h_scatterplot(
+  processed_recon,
+  parameter = "turnover",
+  states_names = c("0", "1"),
+  colors = c("yellow", "violet"),
+  plot_as_waiting_time = FALSE
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}

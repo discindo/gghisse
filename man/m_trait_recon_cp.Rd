@@ -4,11 +4,18 @@
 \alias{m_trait_recon_cp}
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for the trait with a two-dimensional colorplane}
 \usage{
-m_trait_recon_cp(processed_recon, show_tip_labels = FALSE,
-  tree_layout = "rectangular", tree_direction = "right",
-  time_axis_ticks = 10, open_angle = 10,
-  focal_character = c("prob_0x", "prob_x0"), focal_character_label,
-  second_character_label, colors = viridis(9)[c(5, 1, 9)])
+m_trait_recon_cp(
+  processed_recon,
+  show_tip_labels = FALSE,
+  tree_layout = "rectangular",
+  tree_direction = "right",
+  time_axis_ticks = 10,
+  open_angle = 10,
+  focal_character = c("prob_0x", "prob_x0"),
+  focal_character_label,
+  second_character_label,
+  colors = viridis(9)[c(5, 1, 9)]
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{m_process_recon}}

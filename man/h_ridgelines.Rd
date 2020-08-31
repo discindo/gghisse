@@ -4,10 +4,14 @@
 \alias{h_ridgelines}
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips}
 \usage{
-h_ridgelines(processed_recon, parameter = "turnover",
-  states_names = c("Marine", "Freshwater"), line_colors = c("black",
-  "black"), fill_colors = c("yellow", "red"),
-  plot_as_waiting_time = FALSE)
+h_ridgelines(
+  processed_recon,
+  parameter = "turnover",
+  states_names = c("Marine", "Freshwater"),
+  line_colors = c("black", "black"),
+  fill_colors = c("yellow", "red"),
+  plot_as_waiting_time = FALSE
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}

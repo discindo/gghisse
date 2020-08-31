@@ -4,11 +4,19 @@
 \alias{m_rate_recon}
 \title{Plot MuHiSSE model-averaged marginal ancestral state reconstruction for diversification rates}
 \usage{
-m_rate_recon(processed_recon, show_tip_labels = FALSE,
-  parameter = "turnover", discrete = FALSE, breaks = seq(0.3, 0.6,
-  1), colors = c("red", "blue", "orange", "green"),
-  plot_as_waiting_time = FALSE, tree_layout = "rectangular",
-  tree_direction = "right", time_axis_ticks = 10, open_angle = 10)
+m_rate_recon(
+  processed_recon,
+  show_tip_labels = FALSE,
+  parameter = "turnover",
+  discrete = FALSE,
+  breaks = seq(0.3, 0.6, 1),
+  colors = c("red", "blue", "orange", "green"),
+  plot_as_waiting_time = FALSE,
+  tree_layout = "rectangular",
+  tree_direction = "right",
+  time_axis_ticks = 10,
+  open_angle = 10
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{h_process_recon}}

@@ -4,9 +4,15 @@
 \alias{m_scatterplot_cp}
 \title{Plot diversification rates estimated by a HiSSE model with means and standard deviations across tips and a two-dimensional colorplane for color}
 \usage{
-m_scatterplot_cp(processed_recon, parameter = "turnover",
-  focal_character = c("prob_0x", "prob_x0"), focal_character_label,
-  second_character_label, colors, plot_as_waiting_time = FALSE)
+m_scatterplot_cp(
+  processed_recon,
+  parameter = "turnover",
+  focal_character = c("prob_0x", "prob_x0"),
+  focal_character_label,
+  second_character_label,
+  colors,
+  plot_as_waiting_time = FALSE
+)
 }
 \arguments{
 \item{processed_recon}{An object produced with \code{m_process_recon}}
@@ -42,6 +48,6 @@ m_scatterplot_cp(
  second_character_label = "p(pla)",
  colors = c("#21908CFF", "#440154FF", "#FDE725FF"),
  plot_as_waiting_time = TRUE) +
- labs(y="Net turnover\\n(waiting time in millions of years)")
+ labs(y="Net turnover\n(waiting time in millions of years)")
 
 }

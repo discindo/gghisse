@@ -4,9 +4,14 @@
 \alias{m_ridgelines}
 \title{Plot diversification rates estimated by a MuHiSSE model with means and standard deviations across tips}
 \usage{
-m_ridgelines(processed_recon, states_names = c("00", "01", "10", "11"),
-  parameter = "turnover", plot_as_waiting_time = FALSE,
-  fill_colors = rep(NA, 4), line_colors = viridis(n = 4))
+m_ridgelines(
+  processed_recon,
+  states_names = c("00", "01", "10", "11"),
+  parameter = "turnover",
+  plot_as_waiting_time = FALSE,
+  fill_colors = rep(NA, 4),
+  line_colors = viridis(n = 4)
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{m_process_recon}}

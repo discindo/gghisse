@@ -4,9 +4,13 @@
 \alias{m_scatterplot}
 \title{Plot diversification rates estimated by a MuHiSSE model with means and standard deviations across tips}
 \usage{
-m_scatterplot(processed_recon, states_names = c("00", "01", "10", "11"),
-  parameter = "turnover", colors = viridis(n = 4, option = 2, end =
-  0.7), plot_as_waiting_time = FALSE)
+m_scatterplot(
+  processed_recon,
+  states_names = c("00", "01", "10", "11"),
+  parameter = "turnover",
+  colors = viridis(n = 4, option = 2, end = 0.7),
+  plot_as_waiting_time = FALSE
+)
 }
 \arguments{
 \item{processed_recon}{An object produced by \code{m_process_recon}}
