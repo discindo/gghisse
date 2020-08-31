@@ -18,53 +18,62 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of gghisse is to ...
-
-
-R package with helper functions for summarising and visualizing [HiSSE](https://cran.r-project.org/web/packages/hisse/index.html) objects
-
-
-Install with
-`devtools::install_github("discindo/gghisse")`
-
-To  see the functionality and example code, visit the Shiny web application: https://diatom.shinyapps.io/hisse-web/
+The goal of `gghisse` is to provide additional ways to visualize results from `hisse` family models ([HiSSE](https://cran.r-project.org/web/packages/hisse/index.html) objects)
 
 ## Installation
 
-You can install the released version of gghisse from [CRAN](https://CRAN.R-project.org) with:
+<!-- You can install the released version of `gghisse` from [CRAN](https://CRAN.R-project.org) with: -->
 
-``` r
-install.packages("gghisse")
-```
+<!-- ``` r -->
+<!-- install.packages("gghisse") -->
+<!-- ``` -->
 
-And the development version from [GitHub](https://github.com/) with:
+The development version can be installed from from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("discindo/gghisse")
 ```
-## Example
 
-This is a basic example which shows you how to solve a common problem:
+A CRAN submission is forthcoming.
 
-```{r example}
-#library(gghisse)
-## basic example code
-## here
+## Web application
+
+To see the main functionality and example code, visit the Shiny web application: https://diatom.shinyapps.io/hisse-web/
+
+## Example usage
+
+``` r
+library("gghisse")
+data("diatoms")
+processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
+hisse_rates_plot <- h_scatterplot(
+  processed_recon=processed_hisse,
+  parameter="turnover")
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
 
-```{r cars}
-summary(cars)
+As `gghisse` is built on top of `ggplot2`, modifications to `gghisse` plots are easy with the familiar `ggplot` functions. For example, changing X axis tick labels:
+
+``` r
+hisse_rates_plot +
+  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos"))
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
+Or chaning the  position of the legend
 
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
+``` r
+hisse_rates_plot +
+  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
+  theme(legend.position="top")
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+Or using expressions (for greek letters) in the axis labels
+
+``` r
+hisse_rates_plot +
+  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
+  theme(legend.position="top") +
+  labs(y=expression(paste(tau, "=", lambda, "+", mu))) +
+  theme(axis.text.y=element_text(size=15))
+```

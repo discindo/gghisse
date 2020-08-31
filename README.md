@@ -7,63 +7,70 @@
 
 <!-- badges: end -->
 
-The goal of gghisse is to …
-
-R package with helper functions for summarising and visualizing
-[HiSSE](https://cran.r-project.org/web/packages/hisse/index.html)
-objects
-
-Install with `devtools::install_github("discindo/gghisse")`
-
-To see the functionality and example code, visit the Shiny web
-application: <https://diatom.shinyapps.io/hisse-web/>
+The goal of `gghisse` is to provide additional ways to visualize results
+from `hisse` family models
+([HiSSE](https://cran.r-project.org/web/packages/hisse/index.html)
+objects)
 
 ## Installation
 
-You can install the released version of gghisse from
-[CRAN](https://CRAN.R-project.org) with:
+<!-- You can install the released version of `gghisse` from [CRAN](https://CRAN.R-project.org) with: -->
 
-``` r
-install.packages("gghisse")
-```
+<!-- ``` r -->
 
-And the development version from [GitHub](https://github.com/) with:
+<!-- install.packages("gghisse") -->
+
+<!-- ``` -->
+
+The development version can be installed from from
+[GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("discindo/gghisse")
 ```
 
-## Example
+A CRAN submission is forthcoming.
 
-This is a basic example which shows you how to solve a common problem:
+## Web application
 
-``` r
-#library(gghisse)
-## basic example code
-## here
-```
+To see the main functionality and example code, visit the Shiny web
+application: <https://diatom.shinyapps.io/hisse-web/>
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+## Example usage
 
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+library("gghisse")
+data("diatoms")
+processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
+hisse_rates_plot <- h_scatterplot(
+  processed_recon=processed_hisse,
+  parameter="turnover")
 ```
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date.
+As `gghisse` is built on top of `ggplot2`, modifications to `gghisse`
+plots are easy with the familiar `ggplot` functions. For example,
+changing X axis tick labels:
 
-You can also embed plots, for example:
+``` r
+hisse_rates_plot +
+  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos"))
+```
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
+Or chaning the position of the legend
 
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub\!
+``` r
+hisse_rates_plot +
+  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
+  theme(legend.position="top")
+```
+
+Or using expressions (for greek letters) in the axis labels
+
+``` r
+hisse_rates_plot +
+  scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
+  theme(legend.position="top") +
+  labs(y=expression(paste(tau, "=", lambda, "+", mu))) +
+  theme(axis.text.y=element_text(size=15))
+```
