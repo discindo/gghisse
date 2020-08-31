@@ -1,4 +1,4 @@
-#' @name utilhisse
+#' @name gghisse
 #' @docType package
 #' @keywords package
 #'
