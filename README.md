@@ -41,9 +41,28 @@ application: <https://diatom.shinyapps.io/hisse-web/>
 
 ``` r
 library("gghisse")
+#> Loading required package: hisse
+#> Loading required package: ape
+#> Loading required package: deSolve
+#> Loading required package: GenSA
+#> Loading required package: subplex
+#> Loading required package: nloptr
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+#> Loading required package: ggplot2
+#> Registered S3 method overwritten by 'treeio':
+#>   method     from
+#>   root.phylo ape
 data("diatoms")
-processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
-hisse_rates_plot <- h_scatterplot(
+processed_hisse <- gghisse::h_process_recon(hisse_recon=diatoms$cid4_recon)
+hisse_rates_plot <- gghisse::h_scatterplot(
   processed_recon=processed_hisse,
   parameter="turnover")
 ```
@@ -57,7 +76,9 @@ hisse_rates_plot +
   scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos"))
 ```
 
-Or chaning the position of the legend
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+
+Or changing the position of the legend
 
 ``` r
 hisse_rates_plot +
@@ -65,7 +86,9 @@ hisse_rates_plot +
   theme(legend.position="top")
 ```
 
-Or using expressions (for greek letters) in the axis labels
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+Or using expressions (for Greek letters) in the axis labels
 
 ``` r
 hisse_rates_plot +
@@ -74,3 +97,5 @@ hisse_rates_plot +
   labs(y=expression(paste(tau, "=", lambda, "+", mu))) +
   theme(axis.text.y=element_text(size=15))
 ```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />

@@ -43,7 +43,7 @@ To see the main functionality and example code, visit the Shiny web application:
 
 ## Example usage
 
-``` r
+```{r}
 library("gghisse")
 data("diatoms")
 processed_hisse <- gghisse::h_process_recon(hisse_recon=diatoms$cid4_recon)
@@ -55,22 +55,22 @@ hisse_rates_plot <- gghisse::h_scatterplot(
 
 As `gghisse` is built on top of `ggplot2`, modifications to `gghisse` plots are easy with the familiar `ggplot` functions. For example, changing X axis tick labels:
 
-``` r
+```{r}
 hisse_rates_plot +
   scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos"))
 ```
 
-Or chaning the  position of the legend
+Or changing the  position of the legend
 
-``` r
+```{r}
 hisse_rates_plot +
   scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
   theme(legend.position="top")
 ```
 
-Or using expressions (for greek letters) in the axis labels
+Or using expressions (for Greek letters) in the axis labels
 
-``` r
+```{r}
 hisse_rates_plot +
   scale_x_discrete(breaks=c(0,1), labels=c("plankton", "benthos")) +
   theme(legend.position="top") +
