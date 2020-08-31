@@ -5,6 +5,11 @@
 
 <!-- badges: start -->
 
+![R-CMD-check-bioc](https://github.com/discindo/gghisse/workflows/R-CMD-check-bioc/badge.svg)
+
+[![Codecov test
+coverage](https://codecov.io/gh/discindo/gghisse/branch/master/graph/badge.svg)](https://codecov.io/gh/discindo/gghisse?branch=master)
+
 <!-- badges: end -->
 
 The goal of `gghisse` is to provide additional ways to visualize results
