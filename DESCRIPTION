@@ -30,7 +30,8 @@ Imports:
     stringr, 
     ape, 
     purrr, 
-    rlang
+    rlang,
+    colorplaner
 Suggests: 
     knitr,
     rmarkdown,
