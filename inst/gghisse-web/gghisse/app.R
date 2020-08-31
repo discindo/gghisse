@@ -58,32 +58,32 @@ mods <-
 lapply(mods, source)
 
 ui <-
-  navbarPage(
+  shiny::navbarPage(
     theme = shinytheme("flatly"),
     title = "Hidden State Speciation and Extinction (HiSSE)",
     fluid = TRUE,
     inverse = TRUE,
     
     # navbar for type of model
-    tabPanel(
+    shiny::tabPanel(
       "BINARY",
       # file load
-      column(3,
-             wellPanel(
-               fileInput(
+      shiny::column(3,
+                    shiny::wellPanel(
+                      shiny::fileInput(
                  width = "100%",
                  'h_recon_input',
                  'Choose a HiSSE marginal ancestral reconstruction file:',
                  accept = c('.Rsave', "RSave", '.Rdata', 'RData')
                ),
-               helpText(
+               shiny::helpText(
                  'This should be an object output from `hisse::MarginRecon` or a list of such objects where each element contains the AIC score of the model. Make sure the object was saved to a file with the extension "Rsave" or "Rdata".'
                ),
-               checkboxInput("h_demo", label = "Use demo file", value = FALSE),
-               conditionalPanel(condition = "input.h_demo", 
-                                HTML("This is an ancestral state reconstruction object for a CID4 model for plankton-benthos trait in diatoms. For more information see our paper: <a href=https://doi.org/10.1101/406165>'Biorxiv'</a>."))
+               shiny::checkboxInput("h_demo", label = "Use demo file", value = FALSE),
+               shiny::conditionalPanel(condition = "input.h_demo", 
+                                       shiny::HTML("This is an ancestral state reconstruction object for a CID4 model for plankton-benthos trait in diatoms. For more information see our paper: <a href=https://doi.org/10.1101/406165>'Biorxiv'</a>."))
              )),
-      column(
+      shiny::column(
         9,
         h_scatterplot_ui(id = "1"),
         h_dotplot_ui(id = "2"),
@@ -93,25 +93,25 @@ ui <-
       )
       
     ),
-    tabPanel(
+    shiny::tabPanel(
       "MULTISTATE",
       # file load
-      column(3,
-             wellPanel(
-               fileInput(
+      shiny::column(3,
+                    shiny::wellPanel(
+                      shiny::fileInput(
                  width = "100%",
                  'm_recon_input',
                  'Choose a MuHiSSE marginal ancestral reconstruction file:',
                  accept = c('.Rsave', "RSave", '.Rdata', 'RData')
                ),
-               helpText(
+               shiny::helpText(
                  'This should be an object output from `hisse::MarginReconMuHiSSE` or a list of such objects where each element contains the AIC score of the model. Make sure the object was saved to a file with the extension "Rsave" or "Rdata".'
                ),
-               checkboxInput("m_demo", label = "Use demo file", value = FALSE),
-               conditionalPanel(condition = "input.m_demo", 
+               shiny::checkboxInput("m_demo", label = "Use demo file", value = FALSE),
+               shiny::conditionalPanel(condition = "input.m_demo", 
                                 HTML("This is an ancestral state reconstruction object for a MuHiSSE model for marine-freshwater + plankton-benthos interaction in diatoms. For more information see our paper: <a href=https://doi.org/10.1101/406165>'Biorxiv'</a>."))
     )),
-      column(
+    shiny::column(
         9,
         m_scatterplot_ui(id = "11"),
         m_dotplot_ui(id = "12"),
@@ -123,21 +123,21 @@ ui <-
       )
     ),
     # tabPanel("GEOGRAPHIC")
-    tabPanel("ABOUT",
-             column(width = 6,
+    shiny::tabPanel("ABOUT",
+                    shiny::column(width = 6,
                     wellPanel(refs_text)))
   )
 
 server <- function(input, output) {
   ##### ---- server logic for binary ----------------------- #####
-  h_recon_load <- reactive({
+  h_recon_load <- shiny::reactive({
     if (input$h_demo) {
       data("diatoms")
       H <- diatoms$cid4_recon
       return(H)
     } else {
-      validate(
-        need(
+      shiny::validate(
+        shiny::need(
           input$h_recon_input != "" ,
           "Please select a HiSSE ancestral reconstruction file"
         )
@@ -145,8 +145,8 @@ server <- function(input, output) {
       in_file <- input$h_recon_input
       
       H <- get(load(in_file$datapath))
-      validate(
-        need(
+      shiny::validate(
+        shiny::need(
           class(H) == "hisse.states" || class(H[[1]]) == "hisse.states",
           "Looks like this is not a MuHiSSE ancestral reconstruction file (makes sure `class(obj)` or if list, `class(obj[[1]])`, returns 'hisse.states')"
         )
@@ -155,44 +155,44 @@ server <- function(input, output) {
     }
   })
   
-  callModule(module = h_scatterplot_srv,
+  shiny::callModule(module = h_scatterplot_srv,
              id = "1",
              h_obj = h_recon_load)
   
-  callModule(module = h_dotplot_srv,
+  shiny::callModule(module = h_dotplot_srv,
              id = "2",
              h_obj = h_recon_load)
   
-  callModule(module = h_ridgelines_srv,
+  shiny::callModule(module = h_ridgelines_srv,
              id = "3",
              h_obj = h_recon_load)
   
-  callModule(module = h_trait_recon_srv,
+  shiny::callModule(module = h_trait_recon_srv,
              id = "4",
              h_obj = h_recon_load)
   
-  callModule(module = h_rate_recon_srv,
+  shiny::callModule(module = h_rate_recon_srv,
              id = "5",
              h_obj = h_recon_load)
   
   
   ##### ---- server logic for multistate ----------------------- #####
-  m_recon_load <- reactive({
+  m_recon_load <- shiny::reactive({
     if (input$m_demo) {
       data("diatoms")
       H <- diatoms$muhisse_recon
       return(H)
     } else {
-      validate(
-        need(
+      shiny::validate(
+        shiny::need(
           input$m_recon_input != "" ,
           "Please select a MuHiSSE ancestral reconstruction file"
         )
       )
       in_file <- input$m_recon_input
       H <- get(load(in_file$datapath))
-      validate(
-        need(
+      shiny::validate(
+        shiny::need(
           class(H) == "muhisse.states" || class(H[[1]]) == "muhisse.states",
           "Looks like this is not a MuHiSSE ancestral reconstruction file (make sure `class(obj)` or if list, `class(obj[[1]])`, returns 'muhisse.states')"
         )
@@ -201,34 +201,34 @@ server <- function(input, output) {
     }
   })
   
-  callModule(module = m_scatterplot_srv,
+  shiny::callModule(module = m_scatterplot_srv,
              id = "11",
              h_obj = m_recon_load)
   
-  callModule(module = m_dotplot_srv,
+  shiny::callModule(module = m_dotplot_srv,
              id = "12",
              h_obj = m_recon_load)
   
-  callModule(module = m_ridgelines_srv,
+  shiny::callModule(module = m_ridgelines_srv,
              id = "13",
              h_obj = m_recon_load)
   
-  callModule(module = m_scatterplot_cp_srv,
+  shiny::callModule(module = m_scatterplot_cp_srv,
              id = "14",
              h_obj = m_recon_load)
   
-  callModule(module = m_trait_recon_srv,
+  shiny::callModule(module = m_trait_recon_srv,
              id = "15",
              h_obj = m_recon_load)
   
-  callModule(module = m_trait_recon_cp_srv,
+  shiny::callModule(module = m_trait_recon_cp_srv,
              id = "16",
              h_obj = m_recon_load)
 
-  callModule(module = m_rate_recon_srv,
+  shiny::callModule(module = m_rate_recon_srv,
              id = "17",
              h_obj = m_recon_load)
 }
 
 # Run the application
-shinyApp(ui = ui, server = server)
+shiny::shinyApp(ui = ui, server = server)

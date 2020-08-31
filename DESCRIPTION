@@ -34,7 +34,8 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    shiny
 Remotes: 
     wmurphyrd/colorplaner
 VignetteBuilder: 
