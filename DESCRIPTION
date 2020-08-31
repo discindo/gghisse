@@ -31,14 +31,13 @@ Imports:
     ape, 
     purrr, 
     rlang,
-    colorplaner
+    shiny
 Suggests: 
     knitr,
     rmarkdown,
-    testthat,
-    shiny
+    testthat
 Remotes: 
-    wmurphyrd/colorplaner
+    github::wmurphyrd/colorplaner
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
