@@ -14,7 +14,7 @@
 #' @importFrom ape branching.times
 #' @importFrom purrr map
 #' @importFrom rlang .data
-#' @importFrom shiny tags 
+#' @importFrom shiny tags
 #'
 NULL
 
@@ -121,14 +121,18 @@ h_process_recon <- function(hisse_recon) {
 #'@export
 
 h_scatterplot <-
-  function(processed_recon,
-           parameter = "turnover",
-           states_names = c("0", "1"),
-           colors = c("yellow", "violet"),
-           plot_as_waiting_time = FALSE) {
+  function(
+    processed_recon,
+    parameter = "turnover",
+    states_names = c("0", "1"),
+    colors = c("yellow", "violet"),
+    plot_as_waiting_time = FALSE
+  ) {
     tip.rates <- processed_recon$tip_rates
     tip.rates <- tip.rates %>%
-      mutate("f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])) %>%
+      mutate(
+        "f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])
+      ) %>%
       mutate("f_state" = factor(.data$f_state))
 
     if (plot_as_waiting_time) {
@@ -140,27 +144,31 @@ h_scatterplot <-
     tip.rates.sum <- tip.rates %>%
       group_by(.data$f_state) %>%
       select(.data$f_state, .data$wanted) %>%
-      summarise_if(.predicate = is.numeric,
-                   .funs = list(
-                     "Mean" = mean,
-                     "SD" = sd,
-                     "Max" = max
-                   )) %>%
+      summarise_if(
+        .predicate = is.numeric,
+        .funs = list(
+          "Mean" = mean,
+          "SD" = sd,
+          "Max" = max
+        )
+      ) %>%
       mutate("wanted" = .data$Mean) #to bypass warning in geom_errorbar
 
     result <-
-      ggplot(data = tip.rates,
-             aes(
-               x = .data$f_state,
-               y = .data$wanted,
-               # color = .data$f_state,
-               fill = .data$f_state
-             )) +
+      ggplot(
+        data = tip.rates,
+        aes(
+          x = .data$f_state,
+          y = .data$wanted,
+          # color = .data$f_state,
+          fill = .data$f_state
+        )
+      ) +
       geom_point(
         alpha = .7,
         size = 2,
         position = position_jitter(width = .15, height = 0),
-        pch=21
+        pch = 21
       ) +
       geom_errorbar(
         data = tip.rates.sum,
@@ -181,12 +189,22 @@ h_scatterplot <-
       ) +
       scale_color_manual(values = colors, name = "") +
       scale_fill_manual(values = colors, name = "") +
-      scale_y_continuous(breaks = pretty(c(0, max(
-        tip.rates.sum$Max
-      )), n = 8)) +
+      scale_y_continuous(
+        breaks = pretty(
+          c(
+            0,
+            max(
+              tip.rates.sum$Max
+            )
+          ),
+          n = 8
+        )
+      ) +
       theme_classic() +
-      theme(legend.position = "right",
-            legend.key.size = unit(x = .6, units = "cm")) +
+      theme(
+        legend.position = "right",
+        legend.key.size = unit(x = .6, units = "cm")
+      ) +
       labs(x = "", y = parameter) +
       theme_xy
     return(result)
@@ -224,15 +242,19 @@ h_scatterplot <-
 #' @export
 
 h_dotplot <-
-  function(processed_recon,
-           parameter = "turnover",
-           states_names = c("Marine", "Freshwater"),
-           bin_width = 0.1,
-           colors,
-           plot_as_waiting_time = TRUE) {
+  function(
+    processed_recon,
+    parameter = "turnover",
+    states_names = c("Marine", "Freshwater"),
+    bin_width = 0.1,
+    colors,
+    plot_as_waiting_time = TRUE
+  ) {
     tip.rates <- processed_recon$tip_rates
     tip.rates <- tip.rates %>%
-      mutate("f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])) %>%
+      mutate(
+        "f_state" = ifelse(.data$state == 0, states_names[1], states_names[2])
+      ) %>%
       mutate("f_state" = factor(.data$f_state))
 
     if (plot_as_waiting_time) {
@@ -244,21 +266,25 @@ h_dotplot <-
     tip.rates.sum <- tip.rates %>%
       group_by(.data$f_state) %>%
       select(.data$f_state, .data$wanted) %>%
-      summarise_if(.predicate = is.numeric,
-                   .funs = list(
-                     "Mean" = mean,
-                     "SD" = sd,
-                     "Max" = max
-                   )) %>%
+      summarise_if(
+        .predicate = is.numeric,
+        .funs = list(
+          "Mean" = mean,
+          "SD" = sd,
+          "Max" = max
+        )
+      ) %>%
       mutate("wanted" = .data$Mean) #to bypass warning in geom_errorbar
 
     sss <-
-      ggplot(data = tip.rates,
-             aes(
-               x = .data$f_state,
-               y = .data$wanted,
-               fill = .data$f_state
-             )) +
+      ggplot(
+        data = tip.rates,
+        aes(
+          x = .data$f_state,
+          y = .data$wanted,
+          fill = .data$f_state
+        )
+      ) +
       geom_dotplot(
         alpha = .75,
         colour = "white",
@@ -288,16 +314,24 @@ h_dotplot <-
       ) +
       scale_color_manual(values = colors, name = "") +
       scale_fill_manual(values = colors, name = "") +
-      scale_y_continuous(breaks = pretty(c(0, max(
-        tip.rates.sum$Max
-      )), n = 8)) +
+      scale_y_continuous(
+        breaks = pretty(
+          c(
+            0,
+            max(
+              tip.rates.sum$Max
+            )
+          ),
+          n = 8
+        )
+      ) +
       theme_classic() +
       theme(
         legend.position = "none",
         legend.background = element_blank(),
         legend.key.size = unit(x = .6, units = "cm")
       ) +
-      labs(x = "", y = parameter)+
+      labs(x = "", y = parameter) +
       theme_xy
     return(sss)
   }
@@ -329,18 +363,20 @@ h_dotplot <-
 #'
 #'@export
 
-h_ridgelines <- function(processed_recon,
-                         parameter = "turnover",
-                         states_names = c("Marine", "Freshwater"),
-                         line_colors = c("black", "black"),
-                         fill_colors = c("yellow", "red"),
-                         plot_as_waiting_time = FALSE) {
+h_ridgelines <- function(
+  processed_recon,
+  parameter = "turnover",
+  states_names = c("Marine", "Freshwater"),
+  line_colors = c("black", "black"),
+  fill_colors = c("yellow", "red"),
+  plot_as_waiting_time = FALSE
+) {
   tip.rates <- processed_recon$tip_rates
   tip.rates$f_state <-
-    factor(ifelse(tip.rates$state == 0,
-                  states_names[1],
-                  states_names[2]),
-           levels = states_names)
+    factor(
+      ifelse(tip.rates$state == 0, states_names[1], states_names[2]),
+      levels = states_names
+    )
 
   if (plot_as_waiting_time) {
     tip.rates <- mutate(tip.rates, "wanted" = 1 / !!as.name(parameter))
@@ -365,13 +401,15 @@ h_ridgelines <- function(processed_recon,
     )
   print(tip.rates.sum)
 
-  ggplot(data = tip.rates,
-         aes(
-           x = .data$wanted,
-           y = .data$f_state,
-           fill = .data$f_state,
-           color = .data$f_state
-         )) +
+  ggplot(
+    data = tip.rates,
+    aes(
+      x = .data$wanted,
+      y = .data$f_state,
+      fill = .data$f_state,
+      color = .data$f_state
+    )
+  ) +
     geom_density_ridges(
       alpha = 0.75,
       size = 0.75,
@@ -406,14 +444,22 @@ h_ridgelines <- function(processed_recon,
       size = 3,
       inherit.aes = FALSE
     ) +
-    scale_fill_manual(name="", values = fill_colors) +
-    scale_color_manual(name="", values = line_colors) +
-    scale_x_continuous(breaks = pretty(c(0, max(
-      tip.rates.sum$Max
-    )), n = 8)) +
+    scale_fill_manual(name = "", values = fill_colors) +
+    scale_color_manual(name = "", values = line_colors) +
+    scale_x_continuous(
+      breaks = pretty(
+        c(
+          0,
+          max(
+            tip.rates.sum$Max
+          )
+        ),
+        n = 8
+      )
+    ) +
     labs(y = "", x = parameter) +
     theme_classic() +
-    theme(legend.position = "none")+
+    theme(legend.position = "none") +
     theme_xy
 }
 
@@ -459,18 +505,22 @@ h_ridgelines <- function(processed_recon,
 #'@export
 
 h_trait_recon <-
-  function(processed_recon,
-           show_tip_labels = FALSE,
-           trait_name = "trait",
-           states_names = c("0", "1"),
-           colors= c("orange", "violet"),
-           discrete = FALSE,
-           cutoff = 0.5,
-           tree_layout = "rectangular",
-           tree_direction = "right",
-           time_axis_ticks = 10,
-           open_angle = 10) {
-    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+  function(
+    processed_recon,
+    show_tip_labels = FALSE,
+    trait_name = "trait",
+    states_names = c("0", "1"),
+    colors = c("orange", "violet"),
+    discrete = FALSE,
+    cutoff = 0.5,
+    tree_layout = "rectangular",
+    tree_direction = "right",
+    time_axis_ticks = 10,
+    open_angle = 10
+  ) {
+    if (
+      !tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')
+    ) {
       stop("The selected tree layout is not supported.")
     }
 
@@ -496,7 +546,8 @@ h_trait_recon <-
 
     if (discrete) {
       d_state <- ifelse(state > cutoff, 1, 0)
-      d_state <- ifelse(d_state == 0, states_names[1], states_names[2]) %>% as.factor()
+      d_state <- ifelse(d_state == 0, states_names[1], states_names[2]) %>%
+        as.factor()
       ggg <- ggg +
         aes(color = d_state) +
         scale_color_manual(name = trait_name, values = colors) +
@@ -505,7 +556,11 @@ h_trait_recon <-
       d_state <- state
       ggg <- ggg +
         aes(color = d_state) +
-        scale_color_gradient(name = trait_name, low = colors[1], high = colors[2])
+        scale_color_gradient(
+          name = trait_name,
+          low = colors[1],
+          high = colors[2]
+        )
     }
 
     ggg <-
@@ -555,18 +610,22 @@ h_trait_recon <-
 #'@export
 
 h_rate_recon <-
-  function(processed_recon,
-           show_tip_labels = FALSE,
-           parameter = "turnover",
-           discrete = FALSE,
-           breaks = seq(0, 1, 0.2),
-           colors = viridis(n=2),
-           plot_as_waiting_time = FALSE,
-           tree_layout = "rectangular",
-           tree_direction = "right",
-           time_axis_ticks = 10,
-           open_angle = 10) {
-    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+  function(
+    processed_recon,
+    show_tip_labels = FALSE,
+    parameter = "turnover",
+    discrete = FALSE,
+    breaks = seq(0, 1, 0.2),
+    colors = viridis(n = 2),
+    plot_as_waiting_time = FALSE,
+    tree_layout = "rectangular",
+    tree_direction = "right",
+    time_axis_ticks = 10,
+    open_angle = 10
+  ) {
+    if (
+      !tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')
+    ) {
       stop("The selected tree layout is not supported.")
     }
 
@@ -606,7 +665,9 @@ h_rate_recon <-
       message("Cutting distribution of rate with these breaks:\n")
       print(breaks)
       if (length(breaks != length(colors))) {
-        message("The number of supplied colors does not match the number of breaks. Choosing different colors.")
+        message(
+          "The number of supplied colors does not match the number of breaks. Choosing different colors."
+        )
         colors <- viridis(n = length(breaks))
       }
       param <- datas %>%
@@ -615,15 +676,18 @@ h_rate_recon <-
         unname %>%
         cut(breaks = breaks)
       ggg <-
-        ggg + aes(color = param) +
+        ggg +
+        aes(color = param) +
         scale_color_manual(
-          values=colors,
+          values = colors,
           name = parameter
-        ) + guides(color = guide_legend(override.aes = list(size = 4)))
+        ) +
+        guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       param <- datas %>% select(.data$wanted) %>% unlist %>% unname
       ggg <-
-        ggg + aes(color = param) +
+        ggg +
+        aes(color = param) +
         scale_color_gradient(
           low = colors[1],
           high = colors[2],
@@ -687,14 +751,14 @@ h_rate_recon <-
 #'@export
 
 m_transition_matrix <-
-  function(model_fit,
-           hidden_states = TRUE,
-           states) {
+  function(model_fit, hidden_states = TRUE, states) {
     mat_size <- model_fit$trans.matrix %>% ncol
     all_states <-
       expand.grid(states, 1:(mat_size / 4)) %>%
       mutate(Name = paste(.data$Var1, .data$Var2, sep = "")) %>%
-      select(.data$Name) %>% unlist %>% unname
+      select(.data$Name) %>%
+      unlist %>%
+      unname
 
     if (!hidden_states) {
       wanted <- c(
@@ -722,7 +786,9 @@ m_transition_matrix <-
         str_replace(regex("\\)"), "")
       wanted <- expand.grid(tmp, tmp) %>%
         mutate("Names" = paste("q", .data$Var1, "_", .data$Var2, sep = "")) %>%
-        select(.data$Names) %>% unlist %>% unname
+        select(.data$Names) %>%
+        unlist %>%
+        unname
     }
 
     Rates <- numeric(length = length(wanted))
@@ -741,9 +807,11 @@ m_transition_matrix <-
 
     # map(1:length(Rates), function(x) print(names(Rates)[x]))
     Rate_matrix <-
-      map(1:length(Rates), function(x)
-        get_rate(name = names(Rates)[x], named_rates = model_fit$solution)) %>%
-      unlist %>% matrix(ncol = mat_size)
+      map(1:length(Rates), function(x) {
+        get_rate(name = names(Rates)[x], named_rates = model_fit$solution)
+      }) %>%
+      unlist %>%
+      matrix(ncol = mat_size)
 
     Col_names <-
       colnames(model_fit$trans.matrix) %>%
@@ -755,11 +823,11 @@ m_transition_matrix <-
       rownames(Rate_matrix) <- translation$states_names
     row_ind <- is.na(rep(states, (mat_size / 4)))
     col_ind <- is.na(rep(states, (mat_size / 4)))
-    Rate_matrix <- Rate_matrix[!row_ind,!col_ind]
+    Rate_matrix <- Rate_matrix[!row_ind, !col_ind]
     if (!hidden_states) {
       colnames(Rate_matrix) <-
         rownames(Rate_matrix) <-
-        str_remove(colnames(Rate_matrix), regex("\\d+"))
+          str_remove(colnames(Rate_matrix), regex("\\d+"))
     }
     return(Rate_matrix)
   }
@@ -791,8 +859,11 @@ m_transition_matrix <-
 
 m_diversification_rates <- function(model_fit, states) {
   hidden_traits <-
-    str_extract(string = colnames(model_fit$trans.matrix),
-                pattern = regex("[A-Z]")) %>% unique
+    str_extract(
+      string = colnames(model_fit$trans.matrix),
+      pattern = regex("[A-Z]")
+    ) %>%
+    unique
   hidden_traits <- as.numeric(as.factor(hidden_traits))
   hidden_traits <- ifelse(is.na(hidden_traits), 1, hidden_traits)
   num_hidden_traits <- length(unique(hidden_traits))
@@ -801,22 +872,32 @@ m_diversification_rates <- function(model_fit, states) {
   num_states <- num_states * 4
 
   tur <-
-    tibble("par_name" = names(model_fit$solution),
-           "par_value" = model_fit$solution) %>%
+    tibble(
+      "par_name" = names(model_fit$solution),
+      "par_value" = model_fit$solution
+    ) %>%
     filter(stringr::str_detect(.data$par_name, "turnover")) %>%
     slice(1:num_states) %>%
-    select(.data$par_value) %>% unlist %>% unname
+    select(.data$par_value) %>%
+    unlist %>%
+    unname
 
   eps <-
-    tibble("par_name" = names(model_fit$solution),
-           "par_value" = model_fit$solution) %>%
+    tibble(
+      "par_name" = names(model_fit$solution),
+      "par_value" = model_fit$solution
+    ) %>%
     filter(stringr::str_detect(.data$par_name, "eps")) %>%
     slice(1:num_states) %>%
-    select(.data$par_value) %>% unlist %>% unname
+    select(.data$par_value) %>%
+    unlist %>%
+    unname
 
   States <- expand.grid(states, hidden_traits) %>%
     mutate("Name" = paste(.data$Var1, .data$Var2, sep = "")) %>%
-    select(.data$Name) %>% unlist %>% unname
+    select(.data$Name) %>%
+    unlist %>%
+    unname
 
   res <-
     tibble(
@@ -828,19 +909,24 @@ m_diversification_rates <- function(model_fit, states) {
   na_index <-
     rep(states, num_hidden_traits) %>% is.na() %>% as.numeric()
   res <-
-    res %>% mutate(na_index = na_index) %>% filter(na_index == 0) %>% select(-na_index)
+    res %>%
+    mutate(na_index = na_index) %>%
+    filter(na_index == 0) %>%
+    select(-na_index)
   res_len <- nrow(res)
   res <- res %>%
-    mutate(Speciation =
-             ParameterTransform(
-               .data$Turnover,
-               .data$Extinction_fraction)[1:res_len]
-           ) %>%
-    mutate(Extinction =
-             ParameterTransform(
-               .data$Turnover,
-               .data$Extinction_fraction)[(res_len +1):(res_len + res_len)]
-           ) %>%
+    mutate(
+      Speciation = ParameterTransform(
+        .data$Turnover,
+        .data$Extinction_fraction
+      )[1:res_len]
+    ) %>%
+    mutate(
+      Extinction = ParameterTransform(
+        .data$Turnover,
+        .data$Extinction_fraction
+      )[(res_len + 1):(res_len + res_len)]
+    ) %>%
     mutate(Net_diversification = .data$Speciation - .data$Extinction)
 
   return(res)
@@ -868,13 +954,13 @@ m_diversification_rates <- function(model_fit, states) {
 #'@export
 
 m_collect_rates <-
-  function(model_fit,
-           hidden_traits,
-           character_states) {
+  function(model_fit, hidden_traits, character_states) {
     trans_rates <-
-      m_transition_matrix(model_fit = model_fit,
-                          hidden_states = hidden_traits,
-                          states = character_states)
+      m_transition_matrix(
+        model_fit = model_fit,
+        hidden_states = hidden_traits,
+        states = character_states
+      )
     div_rates <-
       m_diversification_rates(model_fit = model_fit, states = character_states)
 
@@ -912,15 +998,19 @@ m_process_recon <- function(muhisse_recon) {
   tip.rates <-
     GetModelAveRates(x = muhisse_recon, type = "tips") %>%
     as_tibble() %>%
-    mutate("prob_0x" = .data$state.00 + .data$state.01,
-           "prob_x0" = .data$state.00 + .data$state.10)
+    mutate(
+      "prob_0x" = .data$state.00 + .data$state.01,
+      "prob_x0" = .data$state.00 + .data$state.10
+    )
   colnames(tip.rates)[1] <- "id"
 
   nod.rates <-
     GetModelAveRates(x = muhisse_recon, type = "nodes") %>%
     as_tibble() %>%
-    mutate("prob_0x" = .data$state.00 + .data$state.01,
-           "prob_x0" = .data$state.00 + .data$state.10)
+    mutate(
+      "prob_0x" = .data$state.00 + .data$state.01,
+      "prob_x0" = .data$state.00 + .data$state.10
+    )
 
   nod.rates$id <- as.character(nod.rates$id)
   tip.rates$id <- as.character(tip.rates$id)
@@ -975,19 +1065,22 @@ m_process_recon <- function(muhisse_recon) {
 #'@export
 
 m_scatterplot_cp <-
-  function(processed_recon,
-           parameter = "turnover",
-           focal_character = c("prob_0x", "prob_x0"),
-           focal_character_label,
-           second_character_label,
-           colors,
-           plot_as_waiting_time = FALSE) {
+  function(
+    processed_recon,
+    parameter = "turnover",
+    focal_character = c("prob_0x", "prob_x0"),
+    focal_character_label,
+    second_character_label,
+    colors,
+    plot_as_waiting_time = FALSE
+  ) {
     if (plot_as_waiting_time) {
       tip_rates <- processed_recon$tip_rates %>%
         mutate(wanted = 1 / !!as.name(parameter))
-    } else
+    } else {
       tip_rates <- processed_recon$tip_rates %>%
         mutate(wanted = !!as.name(parameter))
+    }
 
     max_rate <- tip_rates %>% select(.data$wanted) %>% unlist %>% max
 
@@ -995,11 +1088,21 @@ m_scatterplot_cp <-
       mutate(both_prob = interaction(.data$prob_0x, .data$prob_x0)) %>%
       group_by(.data$both_prob) %>%
       select(.data$both_prob, .data$wanted) %>%
-      summarise_at(.vars = vars("wanted"),
-                   .funs = list("MN" = mean, "SD" = sd)) %>%
-      mutate(LB = .data$MN - .data$SD, UB = .data$MN + .data$SD, wanted=.data$MN) %>%
-      mutate(prob_0x = str_extract(.data$both_prob, regex("^\\d+")) %>% as.numeric()) %>%
-      mutate(prob_x0 = str_extract(.data$both_prob, regex("\\d+$")) %>% as.numeric())
+      summarise_at(
+        .vars = vars("wanted"),
+        .funs = list("MN" = mean, "SD" = sd)
+      ) %>%
+      mutate(
+        LB = .data$MN - .data$SD,
+        UB = .data$MN + .data$SD,
+        wanted = .data$MN
+      ) %>%
+      mutate(
+        prob_0x = str_extract(.data$both_prob, regex("^\\d+")) %>% as.numeric()
+      ) %>%
+      mutate(
+        prob_x0 = str_extract(.data$both_prob, regex("\\d+$")) %>% as.numeric()
+      )
 
     if (focal_character == "prob_0x") {
       sum_tip_rates <-
@@ -1015,7 +1118,7 @@ m_scatterplot_cp <-
             color2 = .data$prob_x0
           )
         )
-      nudgex <- c(-0.3,-0.3, 0.3, 0.3)
+      nudgex <- c(-0.3, -0.3, 0.3, 0.3)
     }
 
     if (focal_character == "prob_x0") {
@@ -1032,7 +1135,7 @@ m_scatterplot_cp <-
             color2 = .data$prob_0x
           )
         )
-      nudgex <- c(-0.3, 0.3,-0.3, 0.3)
+      nudgex <- c(-0.3, 0.3, -0.3, 0.3)
     }
 
     if (nrow(sum_tip_rates) == 3) {
@@ -1079,8 +1182,10 @@ m_scatterplot_cp <-
       ) +
       scale_y_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
       theme_classic() +
-      theme(legend.position = "right",
-            legend.key.size = unit(x = .6, units = "cm")) +
+      theme(
+        legend.position = "right",
+        legend.key.size = unit(x = .6, units = "cm")
+      ) +
       labs(x = focal_character_label, y = parameter) +
       theme_xy
     return(sss)
@@ -1112,12 +1217,14 @@ m_scatterplot_cp <-
 #'
 #'@export
 
-m_ridgelines <- function(processed_recon,
-                         states_names = c("00", "01", "10", "11"),
-                         parameter = "turnover",
-                         plot_as_waiting_time = FALSE,
-                         fill_colors = rep(NA, 4),
-                         line_colors = viridis(n = 4)) {
+m_ridgelines <- function(
+  processed_recon,
+  states_names = c("00", "01", "10", "11"),
+  parameter = "turnover",
+  plot_as_waiting_time = FALSE,
+  fill_colors = rep(NA, 4),
+  line_colors = viridis(n = 4)
+) {
   message(
     "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n"
   )
@@ -1133,7 +1240,10 @@ m_ridgelines <- function(processed_recon,
   wanted <- as.name(parameter)
 
   ss_var <-
-    ss %>% group_by(.data$four_state) %>% select(.data$four_state, .data$wanted) %>% distinct()
+    ss %>%
+    group_by(.data$four_state) %>%
+    select(.data$four_state, .data$wanted) %>%
+    distinct()
   if (nrow(ss_var) == length(states_names)) {
     print(ss_var)
     stop(
@@ -1143,15 +1253,18 @@ m_ridgelines <- function(processed_recon,
 
   if (plot_as_waiting_time) {
     ss <- mutate(ss, wanted = 1 / !!wanted)
-    ss.sum <- ss %>% group_by(.data$four_state) %>%
-      summ()
+    ss.sum <- ss %>% group_by(.data$four_state) %>% summ()
   } else {
     ss <- mutate(ss, wanted = !!wanted)
-    ss.sum <- ss %>% group_by(.data$four_state) %>%
-      summ()
+    ss.sum <- ss %>% group_by(.data$four_state) %>% summ()
   }
   max_rate <-
-    ss %>% select(.data$wanted) %>% top_n(1, wt = .data$wanted) %>% unlist %>% unname %>% unique
+    ss %>%
+    select(.data$wanted) %>%
+    top_n(1, wt = .data$wanted) %>%
+    unlist %>%
+    unname %>%
+    unique
   # print(max_rate)
   print(ss.sum)
 
@@ -1201,8 +1314,8 @@ m_ridgelines <- function(processed_recon,
       inherit.aes = FALSE
     ) +
     scale_x_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
-    scale_fill_manual(name="", values = fill_colors) +
-    scale_colour_manual(name="", values = line_colors) +
+    scale_fill_manual(name = "", values = fill_colors) +
+    scale_colour_manual(name = "", values = line_colors) +
     labs(y = "", x = parameter) +
     theme_classic() +
     theme(legend.position = "none") +
@@ -1234,11 +1347,13 @@ m_ridgelines <- function(processed_recon,
 #'@export
 
 m_scatterplot <-
-  function(processed_recon,
-           states_names = c("00", "01", "10", "11"),
-           parameter = "turnover",
-           colors = viridis(n = 4, option = 2, end = 0.7),
-           plot_as_waiting_time = FALSE) {
+  function(
+    processed_recon,
+    states_names = c("00", "01", "10", "11"),
+    parameter = "turnover",
+    colors = viridis(n = 4, option = 2, end = 0.7),
+    plot_as_waiting_time = FALSE
+  ) {
     message(
       "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n"
     )
@@ -1255,26 +1370,30 @@ m_scatterplot <-
 
     if (plot_as_waiting_time) {
       ss <- mutate(ss, wanted = 1 / !!wanted)
-      ss.sum <- ss %>% group_by(.data$four_state) %>%
-        summ()
+      ss.sum <- ss %>% group_by(.data$four_state) %>% summ()
     } else {
       ss <- mutate(ss, wanted = !!wanted)
-      ss.sum <- ss %>% group_by(.data$four_state) %>%
-        summ()
+      ss.sum <- ss %>% group_by(.data$four_state) %>% summ()
     }
     max_rate <-
-      ss %>% select(.data$wanted) %>% top_n(1, wt = .data$wanted) %>% unlist %>% unname
+      ss %>%
+      select(.data$wanted) %>%
+      top_n(1, wt = .data$wanted) %>%
+      unlist %>%
+      unname
     print(select(ss.sum, -.data$wanted))
 
     message("\nPlotting\n")
 
     pl <-
-      ggplot(data = ss,
-             aes(
-               x = .data$four_state,
-               y = .data$wanted,
-               fill = .data$four_state
-             )) +
+      ggplot(
+        data = ss,
+        aes(
+          x = .data$four_state,
+          y = .data$wanted,
+          fill = .data$four_state
+        )
+      ) +
       geom_point(
         pch = 21,
         position = position_jitter(width = 0.2, height = 0),
@@ -1311,9 +1430,8 @@ m_scatterplot <-
       scale_colour_manual(name = "", values = colors) +
       scale_y_continuous(breaks = pretty(x = c(0, max_rate), n = 10)) +
       theme_classic() +
-      labs(x = "",
-           y = parameter) +
-      theme(legend.position = "top")+
+      labs(x = "", y = parameter) +
+      theme(legend.position = "top") +
       theme_xy
     return(pl)
   }
@@ -1344,12 +1462,14 @@ m_scatterplot <-
 #'@export
 
 m_dotplot <-
-  function(processed_recon,
-           states_names = c("00", "01", "10", "11"),
-           parameter = "turnover",
-           colors = viridis(n = 4, option = 2, end = 0.7),
-           plot_as_waiting_time = FALSE,
-           bin_width = 0.1) {
+  function(
+    processed_recon,
+    states_names = c("00", "01", "10", "11"),
+    parameter = "turnover",
+    colors = viridis(n = 4, option = 2, end = 0.7),
+    plot_as_waiting_time = FALSE,
+    bin_width = 0.1
+  ) {
     message(
       "Recoding and renaming character states. The elements 1:4 of the vector `character_states_names` are assumed to match the states 00, 01, 10, 11.\n\n"
     )
@@ -1365,7 +1485,10 @@ m_dotplot <-
     wanted <- as.name(parameter)
 
     ss_var <-
-      ss %>% group_by(.data$four_state) %>% select(.data$four_state, .data$wanted) %>% distinct()
+      ss %>%
+      group_by(.data$four_state) %>%
+      select(.data$four_state, .data$wanted) %>%
+      distinct()
     if (nrow(ss_var) == length(states_names)) {
       print(ss_var)
       stop(
@@ -1375,26 +1498,30 @@ m_dotplot <-
 
     if (plot_as_waiting_time) {
       ss <- mutate(ss, wanted = 1 / !!wanted)
-      ss.sum <- ss %>% group_by(.data$four_state) %>%
-        summ()
+      ss.sum <- ss %>% group_by(.data$four_state) %>% summ()
     } else {
       ss <- mutate(ss, wanted = !!wanted)
-      ss.sum <- ss %>% group_by(.data$four_state) %>%
-        summ()
+      ss.sum <- ss %>% group_by(.data$four_state) %>% summ()
     }
     max_rate <-
-      ss %>% select(.data$wanted) %>% top_n(1, wt = .data$wanted) %>% unlist %>% unname
+      ss %>%
+      select(.data$wanted) %>%
+      top_n(1, wt = .data$wanted) %>%
+      unlist %>%
+      unname
     # print(ss)
-    print(select(ss.sum,-.data$wanted))
+    print(select(ss.sum, -.data$wanted))
 
     message("Plotting")
 
-    pl <- ggplot(data = ss,
-                 aes(
-                   x = .data$four_state,
-                   y = .data$wanted,
-                   fill = .data$four_state
-                 )) +
+    pl <- ggplot(
+      data = ss,
+      aes(
+        x = .data$four_state,
+        y = .data$wanted,
+        fill = .data$four_state
+      )
+    ) +
       geom_dotplot(
         alpha = .75,
         colour = "white",
@@ -1476,17 +1603,21 @@ m_dotplot <-
 #'@export
 
 m_trait_recon_cp <-
-  function(processed_recon,
-           show_tip_labels = FALSE,
-           tree_layout = "rectangular",
-           tree_direction = "right",
-           time_axis_ticks = 10,
-           open_angle = 10,
-           focal_character = c("prob_0x", "prob_x0"),
-           focal_character_label,
-           second_character_label,
-           colors = viridis(9)[c(5, 1, 9)]) {
-    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+  function(
+    processed_recon,
+    show_tip_labels = FALSE,
+    tree_layout = "rectangular",
+    tree_direction = "right",
+    time_axis_ticks = 10,
+    open_angle = 10,
+    focal_character = c("prob_0x", "prob_x0"),
+    focal_character_label,
+    second_character_label,
+    colors = viridis(9)[c(5, 1, 9)]
+  ) {
+    if (
+      !tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')
+    ) {
       stop("The selected tree layout is not supported.")
     }
 
@@ -1646,17 +1777,21 @@ m_trait_recon_cp <-
 #'@export
 
 m_trait_recon <-
-  function(processed_recon,
-           show_tip_labels = FALSE,
-           cutoff = c(.2, .2),
-           states_of_first_character,
-           states_of_second_character,
-           tree_layout = "rectangular",
-           tree_direction = "right",
-           time_axis_ticks = 10,
-           open_angle = 10,
-           colors = viridis(n = 9)) {
-    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+  function(
+    processed_recon,
+    show_tip_labels = FALSE,
+    cutoff = c(.2, .2),
+    states_of_first_character,
+    states_of_second_character,
+    tree_layout = "rectangular",
+    tree_direction = "right",
+    time_axis_ticks = 10,
+    open_angle = 10,
+    colors = viridis(n = 9)
+  ) {
+    if (
+      !tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')
+    ) {
       stop("The selected tree layout is not supported.")
     }
 
@@ -1665,34 +1800,34 @@ m_trait_recon <-
 
     ss <- processed_recon$tree_data@data %>%
       mutate(
-        prob_0x_named =
-          case_when(
-            prob_0x >= 1 - cutoff[1] ~ states_of_first_character[1],
-            prob_0x <= cutoff[1] ~ states_of_first_character[2],
-            TRUE ~ paste(
-              states_of_first_character[1],
-              "/",
-              states_of_first_character[2],
-              " uncertain",
-              sep = ""
-            )
+        prob_0x_named = case_when(
+          prob_0x >= 1 - cutoff[1] ~ states_of_first_character[1],
+          prob_0x <= cutoff[1] ~ states_of_first_character[2],
+          TRUE ~ paste(
+            states_of_first_character[1],
+            "/",
+            states_of_first_character[2],
+            " uncertain",
+            sep = ""
           )
+        )
       ) %>%
       mutate(
-        prob_x0_named =
-          case_when(
-            prob_x0 >= 1 - cutoff[2] ~ states_of_second_character[1],
-            prob_x0 <= cutoff[2] ~ states_of_second_character[2],
-            TRUE ~ paste(
-              states_of_second_character[1],
-              "/",
-              states_of_second_character[2],
-              " uncertain",
-              sep = ""
-            )
+        prob_x0_named = case_when(
+          prob_x0 >= 1 - cutoff[2] ~ states_of_second_character[1],
+          prob_x0 <= cutoff[2] ~ states_of_second_character[2],
+          TRUE ~ paste(
+            states_of_second_character[1],
+            "/",
+            states_of_second_character[2],
+            " uncertain",
+            sep = ""
           )
+        )
       ) %>%
-      mutate(four_state = paste(.data$prob_0x_named, .data$prob_x0_named, sep = "-"))
+      mutate(
+        four_state = paste(.data$prob_0x_named, .data$prob_x0_named, sep = "-")
+      )
 
     message("Categories after discretizing with the provided cutoff:\n")
     ss.cnt <- ss %>%
@@ -1771,18 +1906,22 @@ m_trait_recon <-
 #'@export
 
 m_rate_recon <-
-  function(processed_recon,
-           show_tip_labels = FALSE,
-           parameter = "turnover",
-           discrete = FALSE,
-           breaks = seq(0.3, 0.6, 1),
-           colors = c("red", "blue", "orange", "green"),
-           plot_as_waiting_time = FALSE,
-           tree_layout = "rectangular",
-           tree_direction = "right",
-           time_axis_ticks = 10,
-           open_angle = 10) {
-    if (!tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')) {
+  function(
+    processed_recon,
+    show_tip_labels = FALSE,
+    parameter = "turnover",
+    discrete = FALSE,
+    breaks = seq(0.3, 0.6, 1),
+    colors = c("red", "blue", "orange", "green"),
+    plot_as_waiting_time = FALSE,
+    tree_layout = "rectangular",
+    tree_direction = "right",
+    time_axis_ticks = 10,
+    open_angle = 10
+  ) {
+    if (
+      !tree_layout %in% c('rectangular', 'circular', 'slanted', 'fan', 'radial')
+    ) {
       stop("The selected tree layout is not supported.")
     }
 
@@ -1827,14 +1966,19 @@ m_rate_recon <-
         unname %>%
         cut(breaks = breaks)
       ggg <-
-        ggg + aes(color = param) + scale_color_manual(
+        ggg +
+        aes(color = param) +
+        scale_color_manual(
           values = colors,
           name = parameter
-        ) + guides(color = guide_legend(override.aes = list(size = 4)))
+        ) +
+        guides(color = guide_legend(override.aes = list(size = 4)))
     } else {
       param <- datas %>% select(.data$wanted) %>% unlist %>% unname
       ggg <-
-        ggg + aes(color = param) + scale_color_gradient(
+        ggg +
+        aes(color = param) +
+        scale_color_gradient(
           low = colors[1],
           high = colors[2],
           name = parameter
@@ -1856,13 +2000,14 @@ m_rate_recon <-
 
 ##### --- Utility functions ------------------------- #####
 
-
-tree_flip <- function(ggtree_object,
-                      show_tip_labels,
-                      tree_layout,
-                      tree_direction,
-                      time_axis_ticks,
-                      agemax) {
+tree_flip <- function(
+  ggtree_object,
+  show_tip_labels,
+  tree_layout,
+  tree_direction,
+  time_axis_ticks,
+  agemax
+) {
   if (tree_layout %in% c("rectangular", "slanted")) {
     if (tree_direction == "up") {
       ggtree_object <- ggtree_object +
@@ -1875,7 +2020,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.y = element_line(),
           axis.ticks.y = element_line(),
-          axis.text.y = element_text(size=12)
+          axis.text.y = element_text(size = 12)
         ) +
         labs(x = "Time (Ma)")
 
@@ -1915,7 +2060,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.y = element_line(),
           axis.ticks.y = element_line(),
-          axis.text.y = element_text(size=12)
+          axis.text.y = element_text(size = 12)
         ) +
         labs(x = "Time (Ma)")
 
@@ -1954,7 +2099,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.x = element_line(),
           axis.ticks.x = element_line(),
-          axis.text.x = element_text(size=12)
+          axis.text.x = element_text(size = 12)
         ) +
         labs(x = "Time (Ma)")
 
@@ -1988,7 +2133,7 @@ tree_flip <- function(ggtree_object,
         theme(
           axis.line.x = element_line(),
           axis.ticks.x = element_line(),
-          axis.text.x = element_text(size=12)
+          axis.text.x = element_text(size = 12)
         ) +
         labs(x = "Time (Ma)")
 
@@ -2011,7 +2156,6 @@ tree_flip <- function(ggtree_object,
           )
       }
     }
-
   }
 
   if (tree_layout %in% c("circular", "fan", "radial")) {
@@ -2059,9 +2203,7 @@ tree_flip <- function(ggtree_object,
 }
 
 m_prep_df <-
-  function(processed_recon,
-           states_names,
-           parameter) {
+  function(processed_recon, states_names, parameter) {
     ss <- processed_recon$tip_rates %>%
       mutate(
         what_state = paste(
@@ -2072,15 +2214,17 @@ m_prep_df <-
           sep = ""
         )
       ) %>%
-      mutate(four_state = factor(
-        case_when(
-          what_state == "1000" ~ states_names[1],
-          what_state == "0100" ~ states_names[2],
-          what_state == "0010" ~ states_names[3],
-          what_state == "0001" ~ states_names[4]
-        ),
-        levels = states_names
-      )) %>%
+      mutate(
+        four_state = factor(
+          case_when(
+            what_state == "1000" ~ states_names[1],
+            what_state == "0100" ~ states_names[2],
+            what_state == "0010" ~ states_names[3],
+            what_state == "0001" ~ states_names[4]
+          ),
+          levels = states_names
+        )
+      ) %>%
       mutate(wanted = !!as.name(parameter))
 
     return(ss)
@@ -2088,23 +2232,28 @@ m_prep_df <-
 
 
 summ <- function(x) {
-  y <- x %>% summarise_at(.vars = vars(.data$wanted),
-                          .funs = list(
-                            "Mean" = mean,
-                            "Median" = median,
-                            "SD" = sd
-                          )) %>%
+  y <- x %>%
+    summarise_at(
+      .vars = vars(.data$wanted),
+      .funs = list(
+        "Mean" = mean,
+        "Median" = median,
+        "SD" = sd
+      )
+    ) %>%
     mutate(wanted = .data$Mean) # to bypass warning in geom_errorbar
   return(y)
 }
 
 # not exported from hisse, not exported here
-ParameterTransform <- function (x, y)
-{
+ParameterTransform <- function(x, y) {
   speciation <- x / (1 + y)
   extinction <- (x * y) / (1 + y)
   return(c(speciation, extinction))
 }
 
 
-theme_xy <- theme(axis.text = element_text(size=12), axis.title = element_text(size=14))
+theme_xy <- theme(
+  axis.text = element_text(size = 12),
+  axis.title = element_text(size = 14)
+)

@@ -18,7 +18,7 @@ m_rate_recon_ui <- function(id) {
       status = "primary",
       selected = "Tree plot with ancestral reconstruction for diversification rates"
     ),
-    
+
     conditionalPanel(
       condition = paste0("input['", ns("m_rate"), "'] == 1"),
       wellPanel(fluidRow(
@@ -100,26 +100,26 @@ m_rate_recon_ui <- function(id) {
           actionButton(inputId = ns("plot"), label = "Plot"),
           actionButton(inputId = ns("code"), label = "Code")
         ),
-        column(width = 9, 
-               plotOutput(ns("plt"), height = 1000),
-               tags$hr(),
-               uiOutput(ns("plt_txt"), container = tags$code))
-      )
-      )))
+        column(
+          width = 9,
+          plotOutput(ns("plt"), height = 1000),
+          tags$hr(),
+          uiOutput(ns("plt_txt"), container = tags$code)
+        )
+      ))
+    )
+  )
 }
 
 ##### --- m_rate_recon srv ---------------------- #####
 
 m_rate_recon_srv <-
-  function(input,
-           output,
-           session,
-           h_obj) {
+  function(input, output, session, h_obj) {
     h_proc <- reactive({
-      x <- m_process_recon(h_obj ())
+      x <- m_process_recon(h_obj())
       return(x)
     })
-    
+
     param <- reactive({
       x <- case_when(
         input$parameter == "Net turnover" ~ "turnover",
@@ -130,61 +130,88 @@ m_rate_recon_srv <-
       )
       return(x)
     })
-    
+
     plt <- eventReactive(input$plot, {
       if (!input$discrete) {
         brk <- 1:2
       } else {
         brk <- seq(input$begin, input$end, input$step)
       }
-      
+
       p <- m_rate_recon(
         processed_recon = h_proc(),
         parameter = param(),
         show_tip_labels = input$show_tip_labels,
         discrete = input$discrete,
-        breaks =  seq(input$begin, input$end, input$step),
+        breaks = seq(input$begin, input$end, input$step),
         tree_layout = input$tree_layout,
         tree_direction = input$tree_direction,
         time_axis_ticks = input$time_axis_ticks,
         open_angle = input$open_angle,
-        colors = viridis(n=length(brk))
-      ) + theme(plot.background = element_rect(color="black", size = 1))
+        colors = viridis(n = length(brk))
+      ) +
+        theme(plot.background = element_rect(color = "black", size = 1))
       return(p)
     })
-    
+
     output$plt <- renderPlot({
       plt()
     })
-    
-    
+
     plt_txt <- eventReactive(input$code, {
       if (!input$discrete) {
         brk <- 1:2
       } else {
         brk <- seq(input$begin, input$end, input$step)
       }
-      code_text <- paste("<b>Code to reproduce this figure in an R session: </b><br/>",
-                         "<br/>",
-                         "library(hisse)",
-                         "<br/>library(utilhisse) # will load other dependencies",
-                         "<br/>m_proc <- m_process_recon(your_hisse_recon_object)",
-                         
-                         "<br/>m_rate_recon(",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;processed_recon = h_proc,",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;parameter = '", param(),"',",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;show_tip_labels = ", input$show_tip_labels, ",",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;discrete = ", input$discrete, ",",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;breaks = seq(", input$begin, ",", input$end, ",", input$step, "),",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;plot_as_waiting_time = ", input$plot_as_waiting_time, ",",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;tree_layout = '", input$tree_layout, "',", 
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;tree_direction = '", input$tree_direction, "',",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;time_axis_ticks = ", input$time_axis_ticks, ",",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;open_angle = ", input$open_angle, ",", 
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;colors = viridis(n = ", length(brk), ")",
-                         "<br/>)",
-                         "<br/># Note that `open_angle` and `breaks` are ignored unless `tree_layout = 'fan'` and `discrete=TRUE`, respectively",
-                         "<br/># For more information see ?utilhisse::m_rate_recon", sep="")
+      code_text <- paste(
+        "<b>Code to reproduce this figure in an R session: </b><br/>",
+        "<br/>",
+        "library(hisse)",
+        "<br/>library(utilhisse) # will load other dependencies",
+        "<br/>m_proc <- m_process_recon(your_hisse_recon_object)",
+
+        "<br/>m_rate_recon(",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;processed_recon = h_proc,",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;parameter = '",
+        param(),
+        "',",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;show_tip_labels = ",
+        input$show_tip_labels,
+        ",",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;discrete = ",
+        input$discrete,
+        ",",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;breaks = seq(",
+        input$begin,
+        ",",
+        input$end,
+        ",",
+        input$step,
+        "),",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;plot_as_waiting_time = ",
+        input$plot_as_waiting_time,
+        ",",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;tree_layout = '",
+        input$tree_layout,
+        "',",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;tree_direction = '",
+        input$tree_direction,
+        "',",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;time_axis_ticks = ",
+        input$time_axis_ticks,
+        ",",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;open_angle = ",
+        input$open_angle,
+        ",",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;colors = viridis(n = ",
+        length(brk),
+        ")",
+        "<br/>)",
+        "<br/># Note that `open_angle` and `breaks` are ignored unless `tree_layout = 'fan'` and `discrete=TRUE`, respectively",
+        "<br/># For more information see ?utilhisse::m_rate_recon",
+        sep = ""
+      )
       p <-
         wellPanel(
           class = "code_well",
@@ -193,9 +220,8 @@ m_rate_recon_srv <-
         )
       return(p)
     })
-    
+
     output$plt_txt <- renderUI({
       plt_txt()
     })
-    
   }

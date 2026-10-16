@@ -7,9 +7,11 @@ params <- c(
 )
 
 theme_h_ridge <- theme_classic() +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14),
-        plot.background = element_rect(color="black", size = 1))
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    plot.background = element_rect(color = "black", size = 1)
+  )
 
 ##### --- h_dotplot ui  ---------------------- #####
 
@@ -23,7 +25,7 @@ h_ridgelines_ui <- function(id) {
       status = "primary",
       selected = "Ridgelines of the distribution of model averaged diversification rates"
     ),
-    
+
     conditionalPanel(
       condition = paste0("input['", ns("h_ridge"), "'] == 1"),
       wellPanel(fluidRow(
@@ -57,27 +59,26 @@ h_ridgelines_ui <- function(id) {
           actionButton(inputId = ns("plot"), label = "Plot"),
           actionButton(inputId = ns("code"), label = "Code")
         ),
-        column(width = 9, 
-               plotOutput(ns("plt")),
-               tags$hr(),
-               uiOutput(ns("plt_txt"), container = tags$code)
-               )
-      )
-      )))
+        column(
+          width = 9,
+          plotOutput(ns("plt")),
+          tags$hr(),
+          uiOutput(ns("plt_txt"), container = tags$code)
+        )
+      ))
+    )
+  )
 }
 
 ##### --- h_dotplot srv ---------------------- #####
 
 h_ridgelines_srv <-
-  function(input,
-           output,
-           session,
-           h_obj) {
+  function(input, output, session, h_obj) {
     h_proc <- reactive({
-      x <- h_process_recon(h_obj ())
+      x <- h_process_recon(h_obj())
       return(x)
     })
-    
+
     param <- reactive({
       x <- case_when(
         input$parameter == "Net turnover" ~ "turnover",
@@ -88,7 +89,7 @@ h_ridgelines_srv <-
       )
       return(x)
     })
-    
+
     plt <- eventReactive(input$plot, {
       p <- h_ridgelines(
         processed_recon = h_proc(),
@@ -101,30 +102,40 @@ h_ridgelines_srv <-
         theme_h_ridge
       return(p)
     })
-    
+
     output$plt <- renderPlot({
       plt()
     })
-    
+
     plt_txt <- eventReactive(input$code, {
-      
-      code_text <- paste("<b>Code to reproduce this figure in an R session: </b><br/>",
-                         "<br/>",
-                         "library(hisse)",
-                         "<br/>library(utilhisse) # will load other dependencies",
-                         "<br/>h_proc <- h_process_recon(your_hisse_recon_object)",
-                         "<br/>h_ridgelines(",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;processed_recon = h_proc,",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;parameter = '", c(param()),"',",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;states_names = c(", input$states_names1, ",", input$states_names2, "),",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;plot_as_waiting_time = ", input$plot_as_waiting_time, ",",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;line_colors = c('firebrick', 'steelblue')", ",",
-                         "<br/>&nbsp;&nbsp;&nbsp;&nbsp;fill_colors = c('firebrick', 'steelblue')",
-                         "<br/>) + theme_classic()",
-                         "<br/>",
-                         "<br/>",
-                         "<br/># For more information see ?utilhisse::h_ridgelines", 
-                         sep="")
+      code_text <- paste(
+        "<b>Code to reproduce this figure in an R session: </b><br/>",
+        "<br/>",
+        "library(hisse)",
+        "<br/>library(utilhisse) # will load other dependencies",
+        "<br/>h_proc <- h_process_recon(your_hisse_recon_object)",
+        "<br/>h_ridgelines(",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;processed_recon = h_proc,",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;parameter = '",
+        c(param()),
+        "',",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;states_names = c(",
+        input$states_names1,
+        ",",
+        input$states_names2,
+        "),",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;plot_as_waiting_time = ",
+        input$plot_as_waiting_time,
+        ",",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;line_colors = c('firebrick', 'steelblue')",
+        ",",
+        "<br/>&nbsp;&nbsp;&nbsp;&nbsp;fill_colors = c('firebrick', 'steelblue')",
+        "<br/>) + theme_classic()",
+        "<br/>",
+        "<br/>",
+        "<br/># For more information see ?utilhisse::h_ridgelines",
+        sep = ""
+      )
       p <-
         wellPanel(
           class = "code_well",
@@ -133,7 +144,7 @@ h_ridgelines_srv <-
         )
       return(p)
     })
-    
+
     output$plt_txt <- renderUI({
       plt_txt()
     })
