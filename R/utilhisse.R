@@ -64,11 +64,11 @@ h_process_recon <- function(hisse_recon) {
   tip.rates$id <- as.character(tip.rates$id)
   both.rates <- bind_rows(tip.rates, nod.rates)
 
-  if (class(hisse_recon) == "list") {
+  if (inherits(hisse_recon, "list")) {
     tree <- as.treedata(hisse_recon[[1]]$phy)
   }
 
-  if (class(hisse_recon) == "hisse.states") {
+  if (inherits(hisse_recon, "hisse.states")) {
     tree <- as.treedata(hisse_recon$phy)
   }
 
@@ -165,14 +165,14 @@ h_scatterplot <-
         )
       ) +
       geom_point(
-        alpha = .7,
+        alpha = 0.7,
         size = 2,
-        position = position_jitter(width = .15, height = 0),
+        position = position_jitter(width = 0.15, height = 0),
         pch = 21
       ) +
       geom_errorbar(
         data = tip.rates.sum,
-        width = .05,
+        width = 0.05,
         aes(
           x = .data$f_state,
           ymax = .data$Mean + .data$SD,
@@ -203,7 +203,7 @@ h_scatterplot <-
       theme_classic() +
       theme(
         legend.position = "right",
-        legend.key.size = unit(x = .6, units = "cm")
+        legend.key.size = unit(x = 0.6, units = "cm")
       ) +
       labs(x = "", y = parameter) +
       theme_xy
@@ -286,7 +286,7 @@ h_dotplot <-
         )
       ) +
       geom_dotplot(
-        alpha = .75,
+        alpha = 0.75,
         colour = "white",
         binwidth = bin_width,
         dotsize = 1.2,
@@ -297,7 +297,7 @@ h_dotplot <-
       ) +
       geom_errorbar(
         data = tip.rates.sum,
-        width = .05,
+        width = 0.05,
         aes(
           x = .data$f_state,
           ymax = .data$Mean + .data$SD,
@@ -329,7 +329,7 @@ h_dotplot <-
       theme(
         legend.position = "none",
         legend.background = element_blank(),
-        legend.key.size = unit(x = .6, units = "cm")
+        legend.key.size = unit(x = 0.6, units = "cm")
       ) +
       labs(x = "", y = parameter) +
       theme_xy
@@ -414,11 +414,11 @@ h_ridgelines <- function(
       alpha = 0.75,
       size = 0.75,
       jittered_points = TRUE,
-      scale = .95,
-      rel_min_height = .01,
+      scale = 0.95,
+      rel_min_height = 0.01,
       point_shape = "|",
       point_size = 1,
-      position = position_nudge(y = rep(-.2, 2))
+      position = position_nudge(y = rep(-0.2, 2))
     ) +
     geom_errorbarh(
       data = tip.rates.sum,
@@ -489,7 +489,7 @@ h_ridgelines <- function(
 #'map_continuous <-
 #'  h_trait_recon(
 #'    processed_recon = processed_hisse,
-#'    trait_name = "", discrete=FALSE, cutoff=.5)
+#'    trait_name = "", discrete=FALSE, cutoff=0.5)
 #'
 #'# change colors, your can pass the trait name to `name=` to title the colorbar
 #'map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
@@ -497,7 +497,7 @@ h_ridgelines <- function(
 #'map_discrete <-
 #'  h_trait_recon(
 #'    processed_recon = processed_hisse,
-#'    trait_name = "", discrete=TRUE, cutoff=.5)
+#'    trait_name = "", discrete=TRUE, cutoff=0.5)
 #'
 #'# change colors
 #'map_discrete + scale_color_manual(name="", values = c("red", "blue"))
@@ -538,7 +538,7 @@ h_trait_recon <-
       theme(
         # legend.direction = "horizontal",
         legend.position = "right",
-        legend.key.size = unit(x = .5, units = "cm"),
+        legend.key.size = unit(x = 0.5, units = "cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank(),
         plot.background = element_blank()
@@ -573,7 +573,7 @@ h_trait_recon <-
         agemax = agemax
       )
 
-    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+    return(ggg + theme(plot.margin = unit(rep(0.1, 4), "in")))
   }
 
 #' Plot HiSSE model-averaged marginal ancestral state reconstruction for diversification rates
@@ -705,7 +705,7 @@ h_rate_recon <-
         agemax = agemax
       )
 
-    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+    return(ggg + theme(plot.margin = unit(rep(0.1, 4), "in")))
   }
 
 ##### --- MuHiSSE functions ------------------------- #####
@@ -807,7 +807,7 @@ m_transition_matrix <-
 
     # map(1:length(Rates), function(x) print(names(Rates)[x]))
     Rate_matrix <-
-      map(1:length(Rates), function(x) {
+      map(seq_along(Rates), function(x) {
         get_rate(name = names(Rates)[x], named_rates = model_fit$solution)
       }) %>%
       unlist %>%
@@ -1016,11 +1016,11 @@ m_process_recon <- function(muhisse_recon) {
   tip.rates$id <- as.character(tip.rates$id)
   both.rates <- bind_rows(tip.rates, nod.rates)
 
-  if (class(muhisse_recon) == "list") {
+  if (inherits(muhisse_recon, "list")) {
     tree <- as.treedata(muhisse_recon[[1]]$phy)
   }
 
-  if (class(muhisse_recon) == "muhisse.states") {
+  if (inherits(muhisse_recon, "muhisse.states")) {
     tree <- as.treedata(muhisse_recon$phy)
   }
 
@@ -1139,14 +1139,14 @@ m_scatterplot_cp <-
     }
 
     if (nrow(sum_tip_rates) == 3) {
-      nudgex <- rep(.3, 3)
+      nudgex <- rep(0.3, 3)
     }
 
     sss <- sss +
       geom_point(
-        alpha = .7,
+        alpha = 0.7,
         size = 2,
-        position = position_jitter(width = .15, height = 0)
+        position = position_jitter(width = 0.15, height = 0)
       ) +
       geom_errorbar(
         data = sum_tip_rates,
@@ -1157,7 +1157,7 @@ m_scatterplot_cp <-
         ),
         position = position_nudge(x = nudgex, y = 0),
         inherit.aes = TRUE,
-        width = .04
+        width = 0.04
       ) +
       geom_point(
         data = sum_tip_rates,
@@ -1184,7 +1184,7 @@ m_scatterplot_cp <-
       theme_classic() +
       theme(
         legend.position = "right",
-        legend.key.size = unit(x = .6, units = "cm")
+        legend.key.size = unit(x = 0.6, units = "cm")
       ) +
       labs(x = focal_character_label, y = parameter) +
       theme_xy
@@ -1283,11 +1283,11 @@ m_ridgelines <- function(
       alpha = 0.75,
       size = 0.75,
       jittered_points = TRUE,
-      scale = .95,
-      rel_min_height = .01,
+      scale = 0.95,
+      rel_min_height = 0.01,
       point_shape = "|",
       point_size = 1,
-      position = position_nudge(y = rep(-.2, 4))
+      position = position_nudge(y = rep(-0.2, 4))
     ) +
     geom_errorbarh(
       data = ss.sum,
@@ -1398,7 +1398,7 @@ m_scatterplot <-
         pch = 21,
         position = position_jitter(width = 0.2, height = 0),
         size = 2,
-        stroke = .3
+        stroke = 0.3
       ) +
       geom_errorbar(
         inherit.aes = FALSE,
@@ -1409,8 +1409,8 @@ m_scatterplot <-
           ymin = .data$Mean - .data$SD,
           ymax = .data$Mean + .data$SD
         ),
-        width = .05,
-        position = position_nudge(x = .35)
+        width = 0.05,
+        position = position_nudge(x = 0.35)
       ) +
       geom_point(
         inherit.aes = FALSE,
@@ -1424,7 +1424,7 @@ m_scatterplot <-
         fill = "white",
         size = 3,
         stroke = 2,
-        position = position_nudge(x = .35)
+        position = position_nudge(x = 0.35)
       ) +
       scale_fill_manual(name = "", values = colors) +
       scale_colour_manual(name = "", values = colors) +
@@ -1523,7 +1523,7 @@ m_dotplot <-
       )
     ) +
       geom_dotplot(
-        alpha = .75,
+        alpha = 0.75,
         colour = "white",
         binwidth = bin_width,
         dotsize = 1.2,
@@ -1541,8 +1541,8 @@ m_dotplot <-
           ymin = .data$Mean - .data$SD,
           ymax = .data$Mean + .data$SD
         ),
-        width = .05,
-        position = position_nudge(x = -.1)
+        width = 0.05,
+        position = position_nudge(x = -0.1)
       ) +
       geom_point(
         inherit.aes = FALSE,
@@ -1556,7 +1556,7 @@ m_dotplot <-
         fill = "white",
         size = 3,
         stroke = 2,
-        position = position_nudge(x = -.1)
+        position = position_nudge(x = -0.1)
       ) +
       scale_fill_manual(name = "", values = colors) +
       scale_colour_manual(name = "", values = colors) +
@@ -1629,13 +1629,13 @@ m_trait_recon_cp <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .45,
+        size = 0.45,
         open.angle = open_angle
       ) +
       theme(
         legend.direction = "horizontal",
         legend.position = "right",
-        legend.key.size = unit(x = .5, units = "cm"),
+        legend.key.size = unit(x = 0.5, units = "cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank(),
         plot.background = element_blank()
@@ -1671,7 +1671,7 @@ m_trait_recon_cp <-
         agemax = agemax
       )
 
-    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+    return(ggg + theme(plot.margin = unit(rep(0.1, 4), "in")))
   }
 
 
@@ -1700,7 +1700,7 @@ m_trait_recon_cp <-
 #'# eight categories after binning with a cutoff of 0.2
 #'m_trait_recon(
 #'  processed_recon = processed_muhisse,
-#'  cutoff = c(.2, .2),
+#'  cutoff = c(0.2, 0.2),
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
@@ -1711,7 +1711,7 @@ m_trait_recon_cp <-
 #'
 #'m_trait_recon(
 #'  processed_recon = processed_muhisse,
-#'  cutoff = c(.2, .3),
+#'  cutoff = c(0.2, 0.3),
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
@@ -1720,7 +1720,7 @@ m_trait_recon_cp <-
 #'# ignoring uncertainty
 #'m_trait_recon(
 #'  processed_recon = processed_muhisse,
-#'  cutoff = c(.5, .5),
+#'  cutoff = c(0.5, 0.5),
 #'  states_of_first_character = c("marine", "freshwater"),
 #'  states_of_second_character = c("plankton", "benthos"),
 #'  tree_layout = "radial",
@@ -1757,7 +1757,7 @@ m_trait_recon_cp <-
 #'# extract the data component from the ggplot object
 #'# we'll need it to order the tip labels
 #'plot_data <- basic_plot$data %>%
-#'  filter(isTip == TRUE) %>% # we need the tips only, no nodes
+#'  filter(isTip) %>% # we need the tips only, no nodes
 #'  arrange(y) # sort numerically
 #'
 #'basic_plot +
@@ -1780,7 +1780,7 @@ m_trait_recon <-
   function(
     processed_recon,
     show_tip_labels = FALSE,
-    cutoff = c(.2, .2),
+    cutoff = c(0.2, 0.2),
     states_of_first_character,
     states_of_second_character,
     tree_layout = "rectangular",
@@ -1845,14 +1845,14 @@ m_trait_recon <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .45,
+        size = 0.45,
         open.angle = open_angle,
         aes(color = ss$four_state)
       ) +
       scale_color_manual(name = "", values = colors[1:nstat]) +
       theme(
         legend.position = "right",
-        legend.key.size = unit(x = .5, units = "cm"),
+        legend.key.size = unit(x = 0.5, units = "cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank(),
         plot.background = element_blank()
@@ -1869,7 +1869,7 @@ m_trait_recon <-
         agemax = agemax
       )
 
-    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+    return(ggg + theme(plot.margin = unit(rep(0.1, 4), "in")))
   }
 
 #' Plot MuHiSSE model-averaged marginal ancestral state reconstruction for diversification rates
@@ -1939,12 +1939,12 @@ m_rate_recon <-
       ggtree(
         tr = tree,
         layout = tree_layout,
-        size = .45,
+        size = 0.45,
         open.angle = 10
       ) +
       theme(
         legend.position = "right",
-        legend.key.size = unit(x = .5, units = "cm"),
+        legend.key.size = unit(x = 0.5, units = "cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.background = element_blank()
       )
@@ -1994,7 +1994,7 @@ m_rate_recon <-
         agemax = agemax
       )
 
-    return(ggg + theme(plot.margin = unit(rep(.1, 4), "in")))
+    return(ggg + theme(plot.margin = unit(rep(0.1, 4), "in")))
   }
 
 
@@ -2013,7 +2013,7 @@ tree_flip <- function(
       ggtree_object <- ggtree_object +
         coord_flip() +
         scale_x_continuous(
-          expand = c(add = c(.0, .01)),
+          expand = c(add = c(0.0, 0.01)),
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
@@ -2026,11 +2026,11 @@ tree_flip <- function(
 
       if (show_tip_labels) {
         plot_data <- ggtree_object$data %>%
-          filter(.data$isTip == TRUE)
+          filter(.data$isTip)
         ggtree_object <-
           ggtree_object +
           scale_y_continuous(
-            expand = c(add = c(.02, .02)),
+            expand = c(add = c(0.02, 0.02)),
             position = "right",
             breaks = plot_data$y,
             labels = plot_data$label
@@ -2053,7 +2053,7 @@ tree_flip <- function(
         coord_flip() +
         scale_x_continuous(
           trans = "reverse",
-          expand = c(add = c(.0, .01)),
+          expand = c(add = c(0.0, 0.01)),
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
@@ -2066,11 +2066,11 @@ tree_flip <- function(
 
       if (show_tip_labels) {
         plot_data <- ggtree_object$data %>%
-          filter(.data$isTip == TRUE)
+          filter(.data$isTip)
         ggtree_object <-
           ggtree_object +
           scale_y_continuous(
-            expand = c(add = c(.02, .02)),
+            expand = c(add = c(0.02, 0.02)),
             position = "left",
             breaks = plot_data$y,
             labels = plot_data$label
@@ -2092,7 +2092,7 @@ tree_flip <- function(
       ggtree_object <- ggtree_object +
         scale_x_continuous(
           trans = "reverse",
-          expand = c(add = c(.0, .01)),
+          expand = c(add = c(0.0, 0.01)),
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
@@ -2105,11 +2105,11 @@ tree_flip <- function(
 
       if (show_tip_labels) {
         plot_data <- ggtree_object$data %>%
-          filter(.data$isTip == TRUE)
+          filter(.data$isTip)
         ggtree_object <-
           ggtree_object +
           scale_y_continuous(
-            expand = c(add = c(.02, .02)),
+            expand = c(add = c(0.02, 0.02)),
             position = "left",
             breaks = plot_data$y,
             labels = plot_data$label
@@ -2126,7 +2126,7 @@ tree_flip <- function(
     if (tree_direction == "right") {
       ggtree_object <- ggtree_object +
         scale_x_continuous(
-          expand = c(add = c(.0, .01)),
+          expand = c(add = c(0.0, 0.01)),
           breaks = pretty(c(0, agemax), n = time_axis_ticks),
           labels = rev(pretty(c(0, agemax), n = time_axis_ticks))
         ) +
@@ -2139,11 +2139,11 @@ tree_flip <- function(
 
       if (show_tip_labels) {
         plot_data <- ggtree_object$data %>%
-          filter(.data$isTip == TRUE)
+          filter(.data$isTip)
         ggtree_object <-
           ggtree_object +
           scale_y_continuous(
-            expand = c(add = c(.02, .02)),
+            expand = c(add = c(0.02, 0.02)),
             position = "right",
             breaks = plot_data$y,
             labels = plot_data$label
@@ -2167,7 +2167,7 @@ tree_flip <- function(
       unique
     maxx <- round(maxx, 1)
     ntip <-
-      ggtree_object$data %>% filter(.data$isTip == TRUE) %>% nrow()
+      ggtree_object$data %>% filter(.data$isTip) %>% nrow()
     ntip <- ntip + 10
     pretty_points <-
       maxx - c(maxx, pretty(c(maxx:0), n = time_axis_ticks))
@@ -2180,7 +2180,7 @@ tree_flip <- function(
       geom_vline(
         data = pp,
         aes(xintercept = .data$x),
-        size = .2,
+        size = 0.2,
         color = "darkgrey"
       ) +
       geom_text(
@@ -2195,7 +2195,7 @@ tree_flip <- function(
       )
     if (show_tip_labels) {
       ggtree_object <-
-        ggtree_object + geom_tiplab2(inherit.aes = FALSE, size = .4)
+        ggtree_object + geom_tiplab2(inherit.aes = FALSE, size = 0.4)
     }
   }
 

@@ -82,7 +82,7 @@ h_trait_recon_ui <- function(id) {
               label = "Cut point in the range 0-1",
               min = 0,
               max = 1,
-              value = .5,
+              value = 0.5,
               step = 0.1
             )
           ),
