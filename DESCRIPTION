@@ -33,13 +33,9 @@ Imports:
     rlang,
     shiny
 Suggests: 
-    knitr,
-    rmarkdown,
     testthat
 Remotes: 
     github::wmurphyrd/colorplaner
-VignetteBuilder: 
-    knitr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
