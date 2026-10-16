@@ -1,5 +1,3 @@
-#' @name gghisse
-#' @docType package
 #' @keywords package
 #'
 #' @import hisse dplyr ggplot2
@@ -15,8 +13,7 @@
 #' @importFrom purrr map
 #' @importFrom rlang .data
 #' @importFrom shiny tags
-#'
-NULL
+"_PACKAGE"
 
 
 ##### --- TO DO ----------------------------------- #####

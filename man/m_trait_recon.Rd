@@ -52,7 +52,7 @@ cols = c("#00204DFF", "#1B3B6DFF", "#4E576CFF", "#727274FF", "#958F78FF", "#BCAF
 # eight categories after binning with a cutoff of 0.2
 m_trait_recon(
  processed_recon = processed_muhisse,
- cutoff = c(.2, .2),
+ cutoff = c(0.2, 0.2),
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
@@ -63,7 +63,7 @@ m_trait_recon(
 
 m_trait_recon(
  processed_recon = processed_muhisse,
- cutoff = c(.2, .3),
+ cutoff = c(0.2, 0.3),
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
@@ -72,7 +72,7 @@ m_trait_recon(
 # ignoring uncertainty
 m_trait_recon(
  processed_recon = processed_muhisse,
- cutoff = c(.5, .5),
+ cutoff = c(0.5, 0.5),
  states_of_first_character = c("marine", "freshwater"),
  states_of_second_character = c("plankton", "benthos"),
  tree_layout = "radial",
@@ -109,7 +109,7 @@ basic_plot <-
 # extract the data component from the ggplot object
 # we'll need it to order the tip labels
 plot_data <- basic_plot$data \%>\%
- filter(isTip == TRUE) \%>\% # we need the tips only, no nodes
+ filter(isTip) \%>\% # we need the tips only, no nodes
  arrange(y) # sort numerically
 
 basic_plot +

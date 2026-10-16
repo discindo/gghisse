@@ -55,7 +55,7 @@ processed_hisse <- h_process_recon(hisse_recon=diatoms$cid4_recon)
 map_continuous <-
  h_trait_recon(
    processed_recon = processed_hisse,
-   trait_name = "", discrete=FALSE, cutoff=.5)
+   trait_name = "", discrete=FALSE, cutoff=0.5)
 
 # change colors, your can pass the trait name to `name=` to title the colorbar
 map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7")
@@ -63,7 +63,7 @@ map_continuous + scale_color_gradient(name="", low = "#132B43", high = "#56B1F7"
 map_discrete <-
  h_trait_recon(
    processed_recon = processed_hisse,
-   trait_name = "", discrete=TRUE, cutoff=.5)
+   trait_name = "", discrete=TRUE, cutoff=0.5)
 
 # change colors
 map_discrete + scale_color_manual(name="", values = c("red", "blue"))
