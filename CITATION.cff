@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "gghisse: A Collection of Functions for Summarising and Visualizing hisse Results"
+abstract: >-
+  gghisse is a collection of helper functions for summarising and plotting
+  objects from the hisse package.
+authors:
+  - family-names: "Nakov"
+    given-names: "Teofil"
+    email: teofiln@gmail.com
+version: 0.1.1 # x-release-please-version
+date-released: 2026-10-16
+license: GPL-2.0-or-later
+url: "https://discindo.github.io/gghisse/"
+repository-code: "https://github.com/discindo/gghisse"

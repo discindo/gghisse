@@ -1,4 +1,7 @@
-destination: docs
+url: https://discindo.github.io/gghisse/
 template:
-  params:
-    bootswatch: paper
+  bootstrap: 5
+# release-please versions never carry a .9000 suffix, so build only the
+# release site.
+development:
+  mode: release

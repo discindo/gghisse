@@ -9,3 +9,12 @@
 ^pkgdown$
 ^\.github$
 ^codecov\.yml$
+^.*\.Rproj$
+^air\.toml$
+^jarl\.toml$
+^\.release-please-manifest\.json$
+^release-please-config\.json$
+^CHANGELOG\.md$
+^CITATION\.cff$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
