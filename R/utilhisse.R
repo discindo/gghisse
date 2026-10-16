@@ -664,7 +664,7 @@ h_rate_recon <-
       }
       message("Cutting distribution of rate with these breaks:\n")
       print(breaks)
-      if (length(breaks != length(colors))) {
+      if (length(breaks) != length(colors)) {
         message(
           "The number of supplied colors does not match the number of breaks. Choosing different colors."
         )
