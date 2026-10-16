@@ -15,7 +15,7 @@ Authors@R:
 Description: gghisse is a collection of helper functions for summarising and plotting objects from the 'hisse' package. 
 URL: https://github.com/discindo/gghisse, https://discindo.github.io/gghisse/
 BugReports: https://github.com/discindo/gghisse/issues
-License: GPL(>= 2)
+License: GPL (>= 2)
 Depends: 
     R (>= 2.10), 
     hisse, 
