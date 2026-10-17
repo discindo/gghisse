@@ -1,5 +1,5 @@
 Package: gghisse
-Title: A Collection of Functions for Summarising and Visualizing 'hisse' Results
+Title: Summarise and Visualise 'hisse' Model Results
 Version: 0.1.1
 Authors@R: 
     c(person(given = "Teofil",
@@ -12,7 +12,14 @@ Authors@R:
              email = "nnovica@gmail.com"),
       person(given = "Discindo",
              role = "cph"))
-Description: gghisse is a collection of helper functions for summarising and plotting objects from the 'hisse' package. 
+Description: Summarise and plot results from Hidden State Speciation and
+    Extinction (HiSSE) and Multicharacter Hidden State Speciation and
+    Extinction (MuHiSSE) models fit with the 'hisse' package. Processes
+    marginal ancestral state reconstructions into tidy tables of
+    model-averaged tip and node rates and states. Plots diversification
+    rates, trait and rate reconstructions on phylogenies, and transition
+    rates with 'ggplot2' and 'ggtree'. Includes a 'Shiny' application for
+    exploring results interactively.
 URL: https://github.com/discindo/gghisse, https://discindo.github.io/gghisse/
 BugReports: https://github.com/discindo/gghisse/issues
 License: GPL (>= 2)
